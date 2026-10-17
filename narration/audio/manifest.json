@@ -182,5 +182,381 @@
     "seconds": 4.21,
     "chars": 50,
     "text": "There were more trials. There was always one more."
+  },
+  "cs_intro_01": {
+    "role": "Narrator",
+    "voice": "hnFidmF05jrIKH0LAjEc",
+    "model": "eleven_multilingual_v2",
+    "seconds": 6.98,
+    "chars": 101,
+    "text": "In a vast universe, one civilization rose so far above the rest that nothing could ever challenge it."
+  },
+  "cs_intro_02": {
+    "role": "Narrator",
+    "voice": "hnFidmF05jrIKH0LAjEc",
+    "model": "eleven_multilingual_v2",
+    "seconds": 4.58,
+    "chars": 69,
+    "text": "With unlimited power and nothing left to want, its people grew bored."
+  },
+  "cs_intro_03": {
+    "role": "Narrator",
+    "voice": "hnFidmF05jrIKH0LAjEc",
+    "model": "eleven_multilingual_v2",
+    "seconds": 2.43,
+    "chars": 41,
+    "text": "So they made a game out of everyone else."
+  },
+  "cs_intro_04": {
+    "role": "Narrator",
+    "voice": "hnFidmF05jrIKH0LAjEc",
+    "model": "eleven_multilingual_v2",
+    "seconds": 8.7,
+    "chars": 117,
+    "text": "They staged trials. Rigged wars. Promised salvation to worlds that played along \u2014 and harvested the ones that failed."
+  },
+  "cs_intro_05": {
+    "role": "Narrator",
+    "voice": "hnFidmF05jrIKH0LAjEc",
+    "model": "eleven_multilingual_v2",
+    "seconds": 5.36,
+    "chars": 69,
+    "text": "We call them the Overseers. To them, a dying planet is entertainment."
+  },
+  "cs_intro_06": {
+    "role": "Narrator",
+    "voice": "hnFidmF05jrIKH0LAjEc",
+    "model": "eleven_multilingual_v2",
+    "seconds": 6.14,
+    "chars": 96,
+    "text": "Her world was one of their pieces. Its people lived under the boots of the Overseers' enforcers."
+  },
+  "cs_intro_07": {
+    "role": "Narrator",
+    "voice": "hnFidmF05jrIKH0LAjEc",
+    "model": "eleven_multilingual_v2",
+    "seconds": 5.36,
+    "chars": 84,
+    "text": "She kept her head down, like everyone else. Her best friend stayed close beside her."
+  },
+  "cs_intro_08": {
+    "role": "Narrator",
+    "voice": "hnFidmF05jrIKH0LAjEc",
+    "model": "eleven_multilingual_v2",
+    "seconds": 3.61,
+    "chars": 61,
+    "text": "Until the day two guards cornered an old woman in the street."
+  },
+  "cs_intro_09": {
+    "role": "Blue Arrow",
+    "voice": "GV0xwb2daa6wTpBCpuhM",
+    "model": "eleven_multilingual_v2",
+    "seconds": 1.18,
+    "chars": 16,
+    "text": "Leave her alone."
+  },
+  "cs_intro_10": {
+    "role": "Narrator",
+    "voice": "hnFidmF05jrIKH0LAjEc",
+    "model": "eleven_multilingual_v2",
+    "seconds": 2.49,
+    "chars": 42,
+    "text": "Nobody had ever said that out loud before."
+  },
+  "cs_intro_11": {
+    "role": "Narrator",
+    "voice": "hnFidmF05jrIKH0LAjEc",
+    "model": "eleven_multilingual_v2",
+    "seconds": 2.12,
+    "chars": 31,
+    "text": "The regime answered that night."
+  },
+  "cs_intro_12": {
+    "role": "Narrator",
+    "voice": "hnFidmF05jrIKH0LAjEc",
+    "model": "eleven_multilingual_v2",
+    "seconds": 4.39,
+    "chars": 70,
+    "text": "They burned her home to the ground. They dragged her best friend away."
+  },
+  "cs_intro_13": {
+    "role": "Narrator",
+    "voice": "hnFidmF05jrIKH0LAjEc",
+    "model": "eleven_multilingual_v2",
+    "seconds": 1.47,
+    "chars": 23,
+    "text": "And they took her, too."
+  },
+  "cs_intro_14": {
+    "role": "Narrator",
+    "voice": "hnFidmF05jrIKH0LAjEc",
+    "model": "eleven_multilingual_v2",
+    "seconds": 5.05,
+    "chars": 62,
+    "text": "No windows. No names. Test after test, in the dark, for years."
+  },
+  "cs_intro_15": {
+    "role": "Narrator",
+    "voice": "hnFidmF05jrIKH0LAjEc",
+    "model": "eleven_multilingual_v2",
+    "seconds": 3.64,
+    "chars": 59,
+    "text": "She stopped counting the days. She never stopped listening."
+  },
+  "cs_intro_16": {
+    "role": "Narrator",
+    "voice": "hnFidmF05jrIKH0LAjEc",
+    "model": "eleven_multilingual_v2",
+    "seconds": 2.72,
+    "chars": 37,
+    "text": "The lights died. The doors slid open."
+  },
+  "cs_intro_17": {
+    "role": "Narrator",
+    "voice": "hnFidmF05jrIKH0LAjEc",
+    "model": "eleven_multilingual_v2",
+    "seconds": 6.61,
+    "chars": 88,
+    "text": "She couldn't see a thing. But every sound came back to her \u2014 a wall, a ledge, a way out."
+  },
+  "cs_echo_complete_01": {
+    "role": "Narrator",
+    "voice": "hnFidmF05jrIKH0LAjEc",
+    "model": "eleven_multilingual_v2",
+    "seconds": 5.31,
+    "chars": 88,
+    "text": "Like a lost fish finding its school, she followed the echoes all the way to the surface."
+  },
+  "cs_echo_complete_02": {
+    "role": "Narrator",
+    "voice": "hnFidmF05jrIKH0LAjEc",
+    "model": "eleven_multilingual_v2",
+    "seconds": 2.57,
+    "chars": 38,
+    "text": "For the first time in years: open air."
+  },
+  "cs_echo_complete_03": {
+    "role": "Narrator",
+    "voice": "hnFidmF05jrIKH0LAjEc",
+    "model": "eleven_multilingual_v2",
+    "seconds": 5.46,
+    "chars": 69,
+    "text": "She stole a ship and ran \u2014 past her burning home, out into the stars."
+  },
+  "cs_echo_complete_04": {
+    "role": "Narrator",
+    "voice": "hnFidmF05jrIKH0LAjEc",
+    "model": "eleven_multilingual_v2",
+    "seconds": 4.63,
+    "chars": 66,
+    "text": "She took refuge on a distant world, far from the Overseers' reach."
+  },
+  "cs_echo_complete_05": {
+    "role": "Narrator",
+    "voice": "hnFidmF05jrIKH0LAjEc",
+    "model": "eleven_multilingual_v2",
+    "seconds": 2.38,
+    "chars": 40,
+    "text": "Someone had been listening for her, too."
+  },
+  "cs_echo_complete_06": {
+    "role": "Commander Kade",
+    "voice": "Xb7hH8MSUJpSbSDYk0k2",
+    "model": "eleven_multilingual_v2",
+    "seconds": 4.45,
+    "chars": 77,
+    "text": "We protect the worlds the Overseers play with. You already know what they do."
+  },
+  "cs_echo_complete_07": {
+    "role": "Commander Kade",
+    "voice": "Xb7hH8MSUJpSbSDYk0k2",
+    "model": "eleven_multilingual_v2",
+    "seconds": 1.6,
+    "chars": 21,
+    "text": "Want to make it stop?"
+  },
+  "cs_echo_complete_08": {
+    "role": "Narrator",
+    "voice": "hnFidmF05jrIKH0LAjEc",
+    "model": "eleven_multilingual_v2",
+    "seconds": 3.61,
+    "chars": 48,
+    "text": "In hiding, she trained. Every day. Every target."
+  },
+  "cs_echo_complete_09": {
+    "role": "Narrator",
+    "voice": "hnFidmF05jrIKH0LAjEc",
+    "model": "eleven_multilingual_v2",
+    "seconds": 4.71,
+    "chars": 61,
+    "text": "The escaped experiment became a pilot. Call sign: Blue Arrow."
+  },
+  "cs_puff_intro_01": {
+    "role": "Commander Kade",
+    "voice": "Xb7hH8MSUJpSbSDYk0k2",
+    "model": "eleven_multilingual_v2",
+    "seconds": 2.36,
+    "chars": 35,
+    "text": "Blue Arrow, meet your new wingmate."
+  },
+  "cs_puff_intro_02": {
+    "role": "Puff",
+    "voice": "IKne3meq5aSn9XLyUdCD",
+    "model": "eleven_multilingual_v2",
+    "seconds": 1.13,
+    "chars": 4,
+    "text": "\u2026Hi."
+  },
+  "cs_puff_intro_03": {
+    "role": "Narrator",
+    "voice": "hnFidmF05jrIKH0LAjEc",
+    "model": "eleven_multilingual_v2",
+    "seconds": 6.67,
+    "chars": 103,
+    "text": "A pufferfish from an ocean world. He flies like he has nothing left to lose. He never talks about home."
+  },
+  "cs_puff_intro_04": {
+    "role": "Puff",
+    "voice": "IKne3meq5aSn9XLyUdCD",
+    "model": "eleven_multilingual_v2",
+    "seconds": 2.36,
+    "chars": 36,
+    "text": "Far away. \u2026It doesn't exist anymore."
+  },
+  "cs_puff_intro_05": {
+    "role": "Puff",
+    "voice": "IKne3meq5aSn9XLyUdCD",
+    "model": "eleven_multilingual_v2",
+    "seconds": 1.29,
+    "chars": 14,
+    "text": "\u2026Yeah. Me too."
+  },
+  "cs_puff_complete_01": {
+    "role": "Puff",
+    "voice": "IKne3meq5aSn9XLyUdCD",
+    "model": "eleven_multilingual_v2",
+    "seconds": 3.09,
+    "chars": 50,
+    "text": "I passed every trial. I did everything they asked."
+  },
+  "cs_puff_complete_02": {
+    "role": "Narrator",
+    "voice": "hnFidmF05jrIKH0LAjEc",
+    "model": "eleven_multilingual_v2",
+    "seconds": 1.29,
+    "chars": 17,
+    "text": "It didn't matter."
+  },
+  "cs_puff_complete_03": {
+    "role": "Narrator",
+    "voice": "hnFidmF05jrIKH0LAjEc",
+    "model": "eleven_multilingual_v2",
+    "seconds": 2.2,
+    "chars": 33,
+    "text": "They destroyed his planet anyway."
+  },
+  "cs_puff_complete_04": {
+    "role": "Narrator",
+    "voice": "hnFidmF05jrIKH0LAjEc",
+    "model": "eleven_multilingual_v2",
+    "seconds": 3.98,
+    "chars": 61,
+    "text": "Puff survived. His home, and everyone he fought for, did not."
+  },
+  "cs_puff_complete_05": {
+    "role": "Puff",
+    "voice": "IKne3meq5aSn9XLyUdCD",
+    "model": "eleven_multilingual_v2",
+    "seconds": 3.19,
+    "chars": 58,
+    "text": "They were never going to keep that promise. They never do."
+  },
+  "cs_puff_complete_06": {
+    "role": "Puff",
+    "voice": "IKne3meq5aSn9XLyUdCD",
+    "model": "eleven_multilingual_v2",
+    "seconds": 2.38,
+    "chars": 41,
+    "text": "Thanks for not pushing. Back when we met."
+  },
+  "cs_puff_complete_07": {
+    "role": "Blue Arrow",
+    "voice": "GV0xwb2daa6wTpBCpuhM",
+    "model": "eleven_multilingual_v2",
+    "seconds": 5.41,
+    "chars": 50,
+    "text": "Then we make sure it never happens to anyone else."
+  },
+  "cs_puff_complete_08": {
+    "role": "Narrator",
+    "voice": "hnFidmF05jrIKH0LAjEc",
+    "model": "eleven_multilingual_v2",
+    "seconds": 2.49,
+    "chars": 30,
+    "text": "Two survivors. The same enemy."
+  },
+  "cs_vanguard_intro_01": {
+    "role": "Narrator",
+    "voice": "hnFidmF05jrIKH0LAjEc",
+    "model": "eleven_multilingual_v2",
+    "seconds": 2.2,
+    "chars": 36,
+    "text": "Coordinates she would know anywhere."
+  },
+  "cs_vanguard_intro_02": {
+    "role": "Narrator",
+    "voice": "hnFidmF05jrIKH0LAjEc",
+    "model": "eleven_multilingual_v2",
+    "seconds": 1.6,
+    "chars": 23,
+    "text": "She decides to go back."
+  },
+  "cs_vanguard_intro_03": {
+    "role": "Narrator",
+    "voice": "hnFidmF05jrIKH0LAjEc",
+    "model": "eleven_multilingual_v2",
+    "seconds": 3.4,
+    "chars": 50,
+    "text": "To rescue her best friend. To set her planet free."
+  },
+  "cs_vanguard_intro_04": {
+    "role": "Puff",
+    "voice": "IKne3meq5aSn9XLyUdCD",
+    "model": "eleven_multilingual_v2",
+    "seconds": 1.29,
+    "chars": 20,
+    "text": "You sure about this?"
+  },
+  "cs_vanguard_intro_05": {
+    "role": "Blue Arrow",
+    "voice": "GV0xwb2daa6wTpBCpuhM",
+    "model": "eleven_multilingual_v2",
+    "seconds": 3.56,
+    "chars": 45,
+    "text": "They took everything from me once. Not again."
+  },
+  "cs_vanguard_complete_01": {
+    "role": "Narrator",
+    "voice": "hnFidmF05jrIKH0LAjEc",
+    "model": "eleven_multilingual_v2",
+    "seconds": 5.23,
+    "chars": 79,
+    "text": "The enforcers retreat. For the first time in years, her world sees an open sky."
+  },
+  "cs_vanguard_complete_02": {
+    "role": "Narrator",
+    "voice": "hnFidmF05jrIKH0LAjEc",
+    "model": "eleven_multilingual_v2",
+    "seconds": 2.25,
+    "chars": 37,
+    "text": "But the Overseers are still watching."
+  },
+  "cs_vanguard_complete_03": {
+    "role": "Narrator",
+    "voice": "hnFidmF05jrIKH0LAjEc",
+    "model": "eleven_multilingual_v2",
+    "seconds": 2.43,
+    "chars": 30,
+    "text": "And now, so is Earth Vanguard."
   }
 }

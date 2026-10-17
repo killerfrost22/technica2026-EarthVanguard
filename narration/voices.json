@@ -26,7 +26,7 @@
     "speed": 1.0
   },
   "Puff": {
-    "voice": "Charlie",
+    "voice": "IKne3meq5aSn9XLyUdCD",
     "stability": 0.4,
     "similarity_boost": 0.7,
     "style": 0.35,
@@ -42,7 +42,7 @@
     "speed": 0.9
   },
   "Commander Kade": {
-    "voice": "Alice",
+    "voice": "Xb7hH8MSUJpSbSDYk0k2",
     "stability": 0.7,
     "similarity_boost": 0.75,
     "style": 0.15,
