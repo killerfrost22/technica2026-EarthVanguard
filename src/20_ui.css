@@ -1,0 +1,121 @@
+/* STUB: replaced by ui
+   20_ui.css provides: layout for the stub screens (.sl-ui-screen, .sl-ui-title, .sl-ui-panel, .sl-ui-stats,
+   .sl-ui-rank), the toast (.sl-toast) and the touch buttons (.sl-touch, .sl-touch-btn). Uses the tokens and
+   primitives from 01_base.css; sizes in cqw. */
+
+.sl-ui-screen { animation: sl-ui-in var(--sl-med) var(--sl-ease) both; }
+@keyframes sl-ui-in { from { opacity: 0; transform: translateY(1.5cqw); } }
+
+.sl-ui-title {
+  justify-content: flex-start;
+  padding-top: 22cqw;
+  padding-bottom: 9cqw;
+}
+.sl-ui-title__head { display: flex; flex-direction: column; align-items: center; gap: 2.4cqw; }
+.sl-ui-title .sl-title { font-size: 15cqw; }
+.sl-ui-title__tag { margin: 0; max-width: 70cqw; font-size: 3.9cqw; line-height: 1.35; color: var(--sl-text-dim); text-wrap: balance; }
+.sl-ui-title__btns { width: 62cqw; margin-top: auto; }
+.sl-ui-title__hint { margin: 0; font-size: 3cqw; color: var(--sl-text-faint); letter-spacing: 0.02em; }
+
+.sl-ui-panel {
+  width: 100%;
+  max-width: 84cqw;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 3.4cqw;
+  text-align: left;
+}
+.sl-ui-panel .sl-title { text-align: left; }
+.sl-ui-panel > .sl-stack, .sl-ui-panel > .sl-row { margin-top: 1cqw; }
+.sl-ui-panel > .sl-row { justify-content: stretch; }
+.sl-ui-panel > .sl-row .sl-btn { flex: 1; min-width: 0; }
+
+.sl-ui-results__top { display: flex; align-items: center; justify-content: space-between; gap: 3cqw; }
+.sl-ui-results__name { display: flex; flex-direction: column; gap: 1.4cqw; min-width: 0; }
+
+.sl-ui-rank {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 20cqw;
+  height: 20cqw;
+  border-radius: 50%;
+  border: 0.5cqw solid var(--sl-cyan-hi);
+  font: 800 12cqw/1 var(--sl-display);
+  color: var(--sl-cyan-hi);
+  box-shadow: 0 0 6cqw var(--sl-cyan-glow), inset 0 0 4cqw var(--sl-cyan-glow);
+}
+.sl-ui-rank--S { color: var(--sl-gold); border-color: var(--sl-gold); box-shadow: 0 0 6cqw rgba(255, 211, 77, 0.45), inset 0 0 4cqw rgba(255, 211, 77, 0.3); }
+
+.sl-ui-stats {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 1.4cqw 4cqw;
+  margin: 0;
+  padding: 3cqw 0;
+  border-block: 0.2cqw solid var(--sl-line);
+  font-size: 3.8cqw;
+}
+.sl-ui-stats dt { color: var(--sl-text-dim); }
+.sl-ui-stats dd { margin: 0; text-align: right; font-family: var(--sl-display); font-weight: 700; }
+
+.sl-ui-best { font: 700 3.4cqw/1 var(--sl-display); letter-spacing: 0.16em; text-transform: uppercase; color: var(--sl-gold); }
+
+.sl-toast {
+  position: absolute;
+  left: 50%;
+  top: 30cqw;
+  max-width: 80cqw;
+  padding: 1.8cqw 4cqw;
+  border-radius: 6cqw;
+  border: 0.2cqw solid var(--sl-line-strong);
+  background: var(--sl-glass-strong);
+  font: 600 3.4cqw/1.2 var(--sl-body);
+  opacity: 0;
+  transform: translate(-50%, -1cqw);
+  transition: opacity var(--sl-med) var(--sl-ease), transform var(--sl-med) var(--sl-ease);
+  pointer-events: none;
+}
+.sl-toast.is-on { opacity: 1; transform: translate(-50%, 0); }
+
+.sl-touch {
+  position: absolute;
+  right: 4cqw;
+  bottom: 6cqw;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3cqw;
+}
+.sl-touch-btn {
+  -webkit-appearance: none;
+  appearance: none;
+  position: relative;
+  display: grid;
+  place-items: center;
+  align-content: center;
+  width: 17cqw;
+  height: 17cqw;
+  border-radius: 50%;
+  border: 0.3cqw solid rgba(255, 170, 120, 0.7);
+  background: radial-gradient(circle at 35% 30%, rgba(255, 220, 190, 0.35), rgba(255, 120, 60, 0.18) 45%, rgba(20, 8, 6, 0.6));
+  color: #fff3e6;
+  font: 800 3cqw/1 var(--sl-display);
+  letter-spacing: 0.1em;
+  touch-action: none;
+  pointer-events: auto;
+  box-shadow: 0 0 4cqw rgba(255, 122, 61, 0.3), inset 0 0.3cqw 0 rgba(255, 255, 255, 0.3);
+}
+.sl-touch-btn span { font-size: 2.6cqw; opacity: 0.85; margin-top: 0.6cqw; }
+.sl-touch-btn--skill {
+  width: 13cqw;
+  height: 13cqw;
+  border-color: rgba(127, 227, 255, 0.7);
+  background: radial-gradient(circle at 35% 30%, rgba(200, 245, 255, 0.35), rgba(63, 200, 255, 0.18) 45%, rgba(4, 12, 24, 0.6));
+  box-shadow: 0 0 4cqw var(--sl-cyan-glow), inset 0 0.3cqw 0 rgba(255, 255, 255, 0.3);
+  color: var(--sl-text);
+  font-size: 2.4cqw;
+}
+.sl-touch-btn.is-down { transform: scale(0.94); filter: brightness(1.3); }
+.sl-touch-btn:focus-visible { outline: 0.55cqw solid var(--sl-amber-hi); outline-offset: 0.6cqw; }

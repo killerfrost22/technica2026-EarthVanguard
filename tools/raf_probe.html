@@ -1,0 +1,6 @@
+<!doctype html><html><head><meta charset="utf-8"><title>rAF probe</title></head><body style="margin:0;background:#000"><script>
+// Measures the bare requestAnimationFrame clock of the harness (no game). Usage:
+//   bash tools/run.sh --page tools/raf_probe.html --steps '[{"wait":7000},{"eval":"JSON.stringify(stats())"}]'
+window.T=[];function f(t){T.push(t);if(T.length<400)requestAnimationFrame(f);}requestAnimationFrame(f);
+window.stats=function(){const d=[];for(let i=1;i<T.length;i++)d.push(T[i]-T[i-1]);d.sort((a,b)=>a-b);const span=T[T.length-1]-T[0];return {n:T.length,fps:(T.length-1)*1000/span,med:d[d.length>>1],p95:d[Math.floor(d.length*0.95)],max:d[d.length-1]};};
+</script></body></html>

@@ -1,0 +1,20 @@
+<!-- shell.html (core): page skeleton. tools/build.py takes the HEAD region first (so <title> sits in the
+     first 8 KB), then inlines src/*.css and src/*.js, then the BODY region. -->
+<!--HEAD-->
+<title>Starlance</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="description" content="Starlance: fly the XF-9 jet fighter through five missions of laser dogfights, giant bosses, black holes and rescues. A vertical space shooter with a story mode and local co-op.">
+<meta name="theme-color" content="#04050b">
+<meta name="color-scheme" content="dark">
+<!--/HEAD-->
+<!--BODY-->
+<div id="app">
+  <canvas id="ambient" aria-hidden="true"></canvas>
+  <div id="game" role="application" aria-label="Starlance game">
+    <canvas id="screen"></canvas>
+    <canvas id="hud" aria-hidden="true"></canvas>
+    <div id="ui"></div>
+  </div>
+</div>
+<noscript><div class="sl-noscript">Starlance needs JavaScript to run. Turn it on and reload the page to fly.</div></noscript>
+<!--/BODY-->

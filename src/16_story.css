@@ -1,0 +1,62 @@
+/* STUB: replaced by story
+   16_story.css provides: the radio box (.sl-radio, __face, __body, __who, __text; .is-on shows it) and the
+   choice dialog (.sl-choice, __panel, __prompt). Sized in cqw like everything inside #game. */
+
+.sl-radio {
+  --radio-color: var(--sl-cyan);
+  position: absolute;
+  left: 3.4cqw;
+  right: 3.4cqw;
+  top: 25cqw;
+  display: flex;
+  align-items: center;
+  gap: 2.6cqw;
+  padding: 2cqw 2.8cqw;
+  border-radius: 2cqw;
+  border: 0.22cqw solid color-mix(in srgb, var(--radio-color) 45%, transparent);
+  background:
+    linear-gradient(180deg, rgba(190, 235, 255, 0.10) 0%, rgba(255, 255, 255, 0.02) 40%, transparent 41%),
+    var(--sl-glass-strong);
+  box-shadow: inset 0 0.2cqw 0 rgba(255, 255, 255, 0.08), 0 2cqw 6cqw rgba(0, 0, 0, 0.55);
+  opacity: 0;
+  transform: translateY(-2cqw);
+  transition: opacity var(--sl-med) var(--sl-ease), transform var(--sl-med) var(--sl-ease);
+  pointer-events: none;
+}
+.sl-radio.is-on { opacity: 1; transform: none; }
+
+.sl-radio__face {
+  flex: none;
+  width: 13cqw;
+  height: 13cqw;
+  border-radius: 1.4cqw;
+  border: 0.22cqw solid color-mix(in srgb, var(--radio-color) 60%, transparent);
+  background: #04050b;
+}
+.sl-radio__body { min-width: 0; flex: 1; }
+.sl-radio__who {
+  font-family: var(--sl-display);
+  font-weight: 700;
+  font-size: 2.7cqw;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+.sl-radio__text {
+  margin-top: 0.6cqw;
+  min-height: 2.6em;
+  font-size: 3.7cqw;
+  line-height: 1.3;
+  color: var(--sl-text);
+}
+
+.sl-choice {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 6cqw;
+  background: rgba(2, 4, 10, 0.55);
+  pointer-events: auto;
+}
+.sl-choice__panel { width: 100%; max-width: 86cqw; text-align: center; }
+.sl-choice__prompt { margin: 2cqw 0 4cqw; font-size: 4.2cqw; line-height: 1.35; text-wrap: pretty; }
