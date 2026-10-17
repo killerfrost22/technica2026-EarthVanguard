@@ -1,0 +1,250 @@
+{
+  "opening_01": {
+    "role": "Narrator",
+    "voice": "hnFidmF05jrIKH0LAjEc",
+    "model": "eleven_multilingual_v2",
+    "seconds": 7.26,
+    "chars": 117,
+    "text": "Out past the edge of every map, there is a civilization so old and so powerful that it has run out of things to want."
+  },
+  "opening_02": {
+    "role": "Narrator",
+    "voice": "hnFidmF05jrIKH0LAjEc",
+    "model": "eleven_multilingual_v2",
+    "seconds": 7.58,
+    "chars": 105,
+    "text": "So it plays games. It chooses a world, invents a trial, and promises salvation to anyone who survives it."
+  },
+  "opening_03": {
+    "role": "Narrator",
+    "voice": "hnFidmF05jrIKH0LAjEc",
+    "model": "eleven_multilingual_v2",
+    "seconds": 8.83,
+    "chars": 123,
+    "text": "The ones who fail lose everything. Their planets are destroyed, or stripped for parts. To the players, it is entertainment."
+  },
+  "opening_04": {
+    "role": "Narrator",
+    "voice": "hnFidmF05jrIKH0LAjEc",
+    "model": "eleven_multilingual_v2",
+    "seconds": 9.67,
+    "chars": 159,
+    "text": "Not everyone is willing to watch. A small band of pilots and rescuers has formed to protect the worlds caught in the game. They call themselves Earth Vanguard."
+  },
+  "opening_05": {
+    "role": "Narrator",
+    "voice": "hnFidmF05jrIKH0LAjEc",
+    "model": "eleven_multilingual_v2",
+    "seconds": 5.59,
+    "chars": 96,
+    "text": "Its newest pilot is a young woman called Blue Arrow. She doesn't talk about where she came from."
+  },
+  "opening_06": {
+    "role": "Narrator",
+    "voice": "hnFidmF05jrIKH0LAjEc",
+    "model": "eleven_multilingual_v2",
+    "seconds": 7.21,
+    "chars": 123,
+    "text": "She flies with her best friend, Puff, a pufferfish from an ocean world very far from here. He doesn't talk about it either."
+  },
+  "opening_07": {
+    "role": "Narrator",
+    "voice": "hnFidmF05jrIKH0LAjEc",
+    "model": "eleven_multilingual_v2",
+    "seconds": 4.05,
+    "chars": 64,
+    "text": "Tonight a distress call comes in, and the two of them fly first."
+  },
+  "echo_intro": {
+    "role": "Narrator",
+    "voice": "n1PvBOwxb8X6m7tahp2h",
+    "model": "eleven_multilingual_v2",
+    "seconds": 25.6,
+    "chars": 315,
+    "text": "Blue Arrow has never seen the sky. All she remembers is Cell 7, deep inside a facility run by the Directorate, an arm of a civilization far older than ours, and the experiments. They left her one gift: she can see with sound. Tonight the power failed. The doors are dead, the halls are dark, and this is her chance."
+  },
+  "echo_free": {
+    "role": "Narrator",
+    "voice": "n1PvBOwxb8X6m7tahp2h",
+    "model": "eleven_multilingual_v2",
+    "seconds": 17.3,
+    "chars": 189,
+    "text": "The hatch gives way to cold air and more sky than she has words for. Behind her the alarms fade into the hum of the facility. She doesn't look back. Her name is Blue Arrow, and she is free."
+  },
+  "echo_caught_1": {
+    "role": "Narrator",
+    "voice": "n1PvBOwxb8X6m7tahp2h",
+    "model": "eleven_multilingual_v2",
+    "seconds": 8.0,
+    "chars": 86,
+    "text": "Lights. Hands on her shoulders. A voice says \"Back to Cell 7.\" Not tonight. Try again."
+  },
+  "echo_caught_2": {
+    "role": "Narrator",
+    "voice": "n1PvBOwxb8X6m7tahp2h",
+    "model": "eleven_multilingual_v2",
+    "seconds": 6.48,
+    "chars": 79,
+    "text": "The drone's light pins her to the wall. She hears the guards coming. Try again."
+  },
+  "echo_caught_3": {
+    "role": "Narrator",
+    "voice": "n1PvBOwxb8X6m7tahp2h",
+    "model": "eleven_multilingual_v2",
+    "seconds": 6.12,
+    "chars": 70,
+    "text": "The alarm screams through the floor. She is not going back. Try again."
+  },
+  "echo_memory_1": {
+    "role": "Blue Arrow",
+    "voice": "GV0xwb2daa6wTpBCpuhM",
+    "model": "eleven_multilingual_v2",
+    "seconds": 6.43,
+    "chars": 83,
+    "text": "Subject 7. That is what the clipboard said. Someone called me something else, once."
+  },
+  "echo_memory_2": {
+    "role": "Blue Arrow",
+    "voice": "GV0xwb2daa6wTpBCpuhM",
+    "model": "eleven_multilingual_v2",
+    "seconds": 9.72,
+    "chars": 94,
+    "text": "The tests were always the same: a dark room, a tone, a wall I had to find without touching it."
+  },
+  "echo_memory_3": {
+    "role": "Blue Arrow",
+    "voice": "GV0xwb2daa6wTpBCpuhM",
+    "model": "eleven_multilingual_v2",
+    "seconds": 4.7,
+    "chars": 61,
+    "text": "They never told me what I was for. Only that I was improving."
+  },
+  "echo_memory_4": {
+    "role": "Blue Arrow",
+    "voice": "GV0xwb2daa6wTpBCpuhM",
+    "model": "eleven_multilingual_v2",
+    "seconds": 11.08,
+    "chars": 105,
+    "text": "A screen was left on in the lab once. Blue, with white shapes drifting across it. I think it was the sky."
+  },
+  "echo_memory_5": {
+    "role": "Blue Arrow",
+    "voice": "GV0xwb2daa6wTpBCpuhM",
+    "model": "eleven_multilingual_v2",
+    "seconds": 6.48,
+    "chars": 82,
+    "text": "The reactor floors hum all night. I learned the shape of every hall from that hum."
+  },
+  "echo_memory_6": {
+    "role": "Blue Arrow",
+    "voice": "GV0xwb2daa6wTpBCpuhM",
+    "model": "eleven_multilingual_v2",
+    "seconds": 7.08,
+    "chars": 84,
+    "text": "They gave me a number so I would forget my name. I never did. My name is Blue Arrow."
+  },
+  "puff_intro": {
+    "role": "Narrator",
+    "voice": "eCGXfCpGinKGrwYNoBuo",
+    "model": "eleven_multilingual_v2",
+    "seconds": 22.49,
+    "chars": 316,
+    "text": "Puff flies beside the jet in a water bubble, but he is not from Earth. His home was an ocean world, coral and light, until the corporations bled it dark. Then the Directorate chose it for one of their games: survive the trials, and win the power to heal your world. These are the trials, the way Puff remembers them."
+  },
+  "memory1_intro_1": {
+    "role": "Narrator",
+    "voice": "GsjQ0ydx7QzhDLqInGtT",
+    "model": "eleven_multilingual_v2",
+    "seconds": 4.7,
+    "chars": 60,
+    "text": "Past the horizon the stars go quiet, and Puff is home again."
+  },
+  "memory1_intro_2": {
+    "role": "Narrator",
+    "voice": "GsjQ0ydx7QzhDLqInGtT",
+    "model": "eleven_multilingual_v2",
+    "seconds": 18.13,
+    "chars": 203,
+    "text": "His ocean world was coral and light once, until the corporations bled it dark. Then the Directorate came, and they called it a game: survive our trials, and we will give you the power to heal your world."
+  },
+  "memory1_intro_3": {
+    "role": "Narrator",
+    "voice": "GsjQ0ydx7QzhDLqInGtT",
+    "model": "eleven_multilingual_v2",
+    "seconds": 7.32,
+    "chars": 100,
+    "text": "He was the only one who could breathe that water long enough. Nobody asked him if he wanted to play."
+  },
+  "memory1_voice_1": {
+    "role": "The Directorate",
+    "voice": "GsjQ0ydx7QzhDLqInGtT",
+    "model": "eleven_multilingual_v2",
+    "seconds": 3.74,
+    "chars": 41,
+    "text": "Subject accepted. The first trial begins."
+  },
+  "memory1_puff_1": {
+    "role": "Puff",
+    "voice": "GsjQ0ydx7QzhDLqInGtT",
+    "model": "eleven_multilingual_v2",
+    "seconds": 2.38,
+    "chars": 31,
+    "text": "I never said yes. Nobody asked."
+  },
+  "memory1_voice_2": {
+    "role": "The Directorate",
+    "voice": "GsjQ0ydx7QzhDLqInGtT",
+    "model": "eleven_multilingual_v2",
+    "seconds": 2.56,
+    "chars": 36,
+    "text": "Your world is watching, little fish."
+  },
+  "memory1_voice_3": {
+    "role": "The Directorate",
+    "voice": "GsjQ0ydx7QzhDLqInGtT",
+    "model": "eleven_multilingual_v2",
+    "seconds": 5.54,
+    "chars": 68,
+    "text": "Survive our trials and your sea will be healed. That is our promise."
+  },
+  "memory1_puff_2": {
+    "role": "Puff",
+    "voice": "GsjQ0ydx7QzhDLqInGtT",
+    "model": "eleven_multilingual_v2",
+    "seconds": 3.19,
+    "chars": 42,
+    "text": "Keep swimming. For the reef. For everyone."
+  },
+  "memory1_voice_4": {
+    "role": "The Directorate",
+    "voice": "GsjQ0ydx7QzhDLqInGtT",
+    "model": "eleven_multilingual_v2",
+    "seconds": 1.1,
+    "chars": 7,
+    "text": "Faster."
+  },
+  "memory1_end_1": {
+    "role": "The Directorate",
+    "voice": "GsjQ0ydx7QzhDLqInGtT",
+    "model": "eleven_multilingual_v2",
+    "seconds": 3.37,
+    "chars": 39,
+    "text": "Subject survives. Proceed to trial two."
+  },
+  "memory1_end_2": {
+    "role": "Narrator",
+    "voice": "GsjQ0ydx7QzhDLqInGtT",
+    "model": "eleven_multilingual_v2",
+    "seconds": 4.21,
+    "chars": 50,
+    "text": "There were more trials. There was always one more."
+  },
+  "ending_01": {
+    "role": "Narrator",
+    "voice": "eJYPLhqh88tqzFmJMbNX",
+    "model": "eleven_multilingual_v2",
+    "seconds": 5.54,
+    "chars": 77,
+    "text": "Two survivors who once struggled to save themselves now fight to save others."
+  }
+}
