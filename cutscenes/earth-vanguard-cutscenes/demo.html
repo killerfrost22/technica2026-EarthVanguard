@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Earth Vanguard Cutscenes</title>
+<style>
+ body{margin:0;min-height:100vh;background:#070a18;color:#dfe7ff;font-family:system-ui,sans-serif;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;padding:16px;box-sizing:border-box}
+ h1{letter-spacing:.25em;font-size:22px;margin:0}
+ .row{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;max-width:720px}
+ button{padding:10px 14px;border-radius:8px;border:1px solid #3a4f8f;background:#111a3a;color:#dfe7ff;font-size:15px;cursor:pointer}
+ button:hover{background:#1b2860}
+ #log{font:13px ui-monospace,monospace;color:#8fa3d6;max-width:720px;text-align:center}
+</style></head>
+<body>
+<h1>EARTH VANGUARD · CUTSCENES</h1>
+<div class="row">
+  <button data-id="intro">1 · Prologue → Echo</button>
+  <button data-id="echo_complete">2 · After Echo</button>
+  <button data-id="puff_intro">3 · Level 1 intro (Puff)</button>
+  <button data-id="puff_complete">4 · After Puff</button>
+  <button data-id="vanguard_intro">5 · Level 2 intro (Vanguard)</button>
+  <button data-id="vanguard_complete">6 · Ending</button>
+  <button data-id="__all">▶ Play all in order</button>
+</div>
+<div id="log">Click / Space / Enter to advance · Esc to skip</div>
+<script src="cutscenes/cutscenes.js"></script>
+<script src="cutscenes/art.js"></script>
+<script src="cutscenes/scenes.js"></script>
+<script>
+  const state = { trust: 0 };
+  const log = m => document.getElementById('log').textContent = m;
+  const order = ['intro','echo_complete','puff_intro','puff_complete','vanguard_intro','vanguard_complete'];
+  document.querySelectorAll('button[data-id]').forEach(b => b.onclick = async () => {
+    const ids = b.dataset.id === '__all' ? order : [b.dataset.id];
+    for (const id of ids) {
+      const r = await Cutscene.play(id, { state, onSfx: n => console.log('sfx', n), onMusic: n => console.log('music', n) });
+      log(`${id} finished — skipped:${r.skipped} choices:${JSON.stringify(r.choices)} state:${JSON.stringify(state)}`);
+      if (r.skipped && ids.length > 1) break;
+    }
+  });
+</script>
+</body></html>

@@ -134,7 +134,7 @@
         el('p', 'sl-ui-title__tag', 'Laser dogfights, giant dreadnoughts, black holes and the crews you pull out of them.'));
       const btns = el('div', 'sl-stack sl-ui-title__btns');
       btns.append(
-        button('Start', 'sl-btn--primary', () => SL.game.startMission(firstMission(), { coop: false })),
+        button('Start', 'sl-btn--primary', () => (SL.cutscenes ? SL.cutscenes.start() : SL.game.startMission(firstMission(), { coop: false }))),
         button('2 Players', '', () => SL.game.startMission(firstMission(), { coop: true })));
       if (SL.puff && SL.puff.titleButton) btns.appendChild(SL.puff.titleButton());
       if (SL.echo && SL.echo.titleButton) btns.appendChild(SL.echo.titleButton());

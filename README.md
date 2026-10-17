@@ -134,6 +134,7 @@ Handy URL parameters for testing (add them to the end of the file URL):
 - `?mission=m1`: jump straight into a mission
 - `?sandbox=<id>`: open a test sandbox (for example `boss:boss_suneater`, `hazard:black_hole`, `weapons`)
 - `?save=mid&screen=puff`: open Puff's Ocean with a save that has Mission 1 cleared
+- `?cutscene=intro`: play a story cutscene over the title screen (ids in `cutscenes/earth-vanguard-cutscenes/README.md`)
 - `?save=mid&screen=puff&puff=bot`: watch a bot play Puff's Ocean
 - `?mission=m1`: the black hole and Puff's memory arrive about 35 s in (autopilot and `t=` fast-forward skip the
   memory)

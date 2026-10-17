@@ -1529,7 +1529,12 @@
     add('Best', U.fmtTime ? U.fmtTime(st.best) : st.best + ' s');
     b.appendChild(dl);
     const bs = el('div', 'sl-stack');
-    bs.append(btn('Escape again', 'sl-btn--primary', () => startRun(0)), btn('Back to title', 'sl-btn--ghost', () => leave()));
+    // In the story (after the prologue, before Mission 1), Continue carries on to Earth Vanguard (26_cutscenes.js).
+    if (SL.cutscenes && SL.cutscenes.inStory()) {
+      bs.append(btn('Continue', 'sl-btn--primary', () => SL.cutscenes.afterEcho()), btn('Escape again', '', () => startRun(0)));
+    } else {
+      bs.append(btn('Escape again', 'sl-btn--primary', () => startRun(0)), btn('Back to title', 'sl-btn--ghost', () => leave()));
+    }
     b.appendChild(bs);
     focusFirst();
   }
