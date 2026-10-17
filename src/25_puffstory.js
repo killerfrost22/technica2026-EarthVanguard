@@ -35,7 +35,7 @@
   }
   function skipMemory() {
     const D = SL.debug;
-    return !!(D && (D.autopilotMode || D.simulating || (D.params && D.params.test)));
+    return !!(D && (D.autopilotMode || D.simulating || D.skipMinigames || (D.params && D.params.test)));
   }
   function liveHole() {
     const list = SL.world.hazards;
@@ -226,6 +226,13 @@
     if (SL.hud && SL.hud.touchButtons) SL.hud.touchButtons(false);
     SL.puff.openScenario(PS.memoryScenario(endMemory));
   }
+
+  /** Developer skip (27_devtools.js): ends the memory now, as if the player had finished it. */
+  PS.skipMemory = function () {
+    if (PS.state !== 'inside' || PS.memoryDone) return false;
+    endMemory();
+    return true;
+  };
 
   function endMemory() {
     // lines queued before the memory (the tether snapping) are stale now

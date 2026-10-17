@@ -361,17 +361,17 @@
   },
   "cs_echo_complete_06": {
     "role": "Commander Kade",
-    "voice": "Xb7hH8MSUJpSbSDYk0k2",
+    "voice": "JBFqnCBsd6RMkjVDRZzb",
     "model": "eleven_multilingual_v2",
-    "seconds": 4.45,
+    "seconds": 4.76,
     "chars": 77,
     "text": "We protect the worlds the Overseers play with. You already know what they do."
   },
   "cs_echo_complete_07": {
     "role": "Commander Kade",
-    "voice": "Xb7hH8MSUJpSbSDYk0k2",
+    "voice": "JBFqnCBsd6RMkjVDRZzb",
     "model": "eleven_multilingual_v2",
-    "seconds": 1.6,
+    "seconds": 1.47,
     "chars": 21,
     "text": "Want to make it stop?"
   },
@@ -393,9 +393,9 @@
   },
   "cs_puff_intro_01": {
     "role": "Commander Kade",
-    "voice": "Xb7hH8MSUJpSbSDYk0k2",
+    "voice": "JBFqnCBsd6RMkjVDRZzb",
     "model": "eleven_multilingual_v2",
-    "seconds": 2.36,
+    "seconds": 2.3,
     "chars": 35,
     "text": "Blue Arrow, meet your new wingmate."
   },
@@ -558,5 +558,53 @@
     "seconds": 2.43,
     "chars": 30,
     "text": "And now, so is Earth Vanguard."
+  },
+  "radio_anvil_starlance_weapons_free_clear": {
+    "role": "Anvil",
+    "voice": "507tTFX0IPtqFzGd1CAL",
+    "model": "eleven_multilingual_v2",
+    "seconds": 4.16,
+    "chars": 48,
+    "text": "Starlance, LANCE: weapons free. Clear the range."
+  },
+  "radio_anvil_big_contact_inbound_hit": {
+    "role": "Anvil",
+    "voice": "507tTFX0IPtqFzGd1CAL",
+    "model": "eleven_multilingual_v2",
+    "seconds": 4.24,
+    "chars": 54,
+    "text": "Big contact inbound. Hit the core between its volleys."
+  },
+  "radio_anvil_target_down_good_flying": {
+    "role": "Anvil",
+    "voice": "507tTFX0IPtqFzGd1CAL",
+    "model": "eleven_multilingual_v2",
+    "seconds": 3.69,
+    "chars": 47,
+    "text": "Target down. Good flying, LANCE. Bring it home."
+  },
+  "radio_anvil_vip_aboard_that_changes": {
+    "role": "Anvil",
+    "voice": "507tTFX0IPtqFzGd1CAL",
+    "model": "eleven_multilingual_v2",
+    "seconds": 3.51,
+    "chars": 39,
+    "text": "VIP aboard! That changes things, LANCE."
+  },
+  "radio_anvil_puff_s_tether_is": {
+    "role": "Anvil",
+    "voice": "507tTFX0IPtqFzGd1CAL",
+    "model": "eleven_multilingual_v2",
+    "seconds": 5.23,
+    "chars": 72,
+    "text": "Puff's tether is gone! Hold your course, LANCE. You can't follow him in."
+  },
+  "radio_anvil_got_him_reel_him": {
+    "role": "Anvil",
+    "voice": "507tTFX0IPtqFzGd1CAL",
+    "model": "eleven_multilingual_v2",
+    "seconds": 2.49,
+    "chars": 28,
+    "text": "Got him! Reel him in, LANCE."
   }
 }

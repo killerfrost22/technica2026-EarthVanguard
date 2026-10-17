@@ -10,6 +10,9 @@ words on screen.
 The cutscene lines (ids cs_<cutscene>_<nn>) come from cutscenes/earth-vanguard-cutscenes/cutscenes/scenes.js through
 tools/cutscene_lines.js (needs Node), use the role voices, and are written at 64 kbps because tools/build.py inlines
 them into the game file. --prune deletes cs_ clips whose line is no longer in the script.
+Radio lines (ids radio_<who>_<first words>) are read straight from the game source (src/*.js: lines written as
+{ who: 'anvil', text: '...' } or say('anvil', '...')) for the speakers in RADIO_ROLES. {callsign} is spoken as the
+default callsign (Lance) and the clip is keyed to the on-screen text with LANCE, so a renamed callsign plays silent.
 Clips with a time limit (the script's "keep each under N seconds" notes and "(hard limit)" lengths) are checked
 after generation and reported if they run long.
 
@@ -40,13 +43,41 @@ SCRIPT = ROOT / 'narration' / 'SCRIPT.md'
 VOICES = ROOT / 'narration' / 'voices.json'
 OUT = ROOT / 'narration' / 'audio'
 API = 'https://api.elevenlabs.io/v1'
-ROLES = ['Narrator', 'Blue Arrow', 'Puff', 'The Directorate', 'Commander Kade']
+ROLES = ['Narrator', 'Blue Arrow', 'Puff', 'The Directorate', 'Commander Kade', 'Anvil']
+RADIO_ROLES = {'anvil': 'Anvil'}        # radio speaker id in the game -> voice role in voices.json
+RADIO_SKIP = {'22_debug.js'}            # test-only lines
+DEFAULT_CALLSIGN = 'LANCE'              # src/01_save.js
 OUTPUT_FORMAT = 'mp3_44100_128'     # constant 128 kbps, so duration = bytes * 8 / 128000
 CUTSCENE_FORMAT = 'mp3_44100_64'    # inlined into the game, so half the size
 
 
 def kbps(fmt):
     return int(fmt.rsplit('_', 1)[1])
+
+
+def radio_clips():
+    """Radio lines for the speakers in RADIO_ROLES, read from the game source in file order."""
+    q = r"'((?:[^'\\]|\\.)*)'"
+    pats = [re.compile(r"who:\s*'([a-z_]+)',\s*text:\s*" + q), re.compile(r"say\('([a-z_]+)',\s*" + q)]
+    clips, seen = [], set()
+    for p in sorted((ROOT / 'src').glob('*.js')):
+        if p.name in RADIO_SKIP:
+            continue
+        code = p.read_text(encoding='utf-8')
+        hits = sorted((m.start(), m.group(1), m.group(2)) for pat in pats for m in pat.finditer(code))
+        for _, who, raw in hits:
+            if who not in RADIO_ROLES:
+                continue
+            raw = re.sub(r"\\(.)", r"\1", raw)
+            text = raw.replace('{callsign}', DEFAULT_CALLSIGN)
+            if text in seen:
+                continue
+            seen.add(text)
+            slug = '_'.join(re.findall(r'[a-z0-9]+', raw.replace('{callsign}', '').lower())[:4])
+            clips.append({'id': 'radio_%s_%s' % (who, slug), 'text': text, 'role': RADIO_ROLES[who], 'limit': None,
+                          'format': CUTSCENE_FORMAT,
+                          'speak': raw.replace('{callsign}', DEFAULT_CALLSIGN.title())})
+    return clips
 
 
 def cutscene_clips():
@@ -168,12 +199,12 @@ def main():
         return
 
     config = json.loads(VOICES.read_text(encoding='utf-8'))
-    clips = parse_script(SCRIPT.read_text(encoding='utf-8')) + cutscene_clips()
+    clips = parse_script(SCRIPT.read_text(encoding='utf-8')) + cutscene_clips() + radio_clips()
     mpath = OUT / 'manifest.json'
     manifest = json.loads(mpath.read_text(encoding='utf-8')) if mpath.exists() else {}
     if a.prune:
         live = {c['id'] for c in clips}
-        for k in [k for k in manifest if k.startswith('cs_') and k not in live]:
+        for k in [k for k in manifest if k.startswith(('cs_', 'radio_')) and k not in live]:
             (OUT / (k + '.mp3')).unlink(missing_ok=True)
             del manifest[k]
             print('pruned', k)
@@ -206,7 +237,7 @@ def main():
     for i, c in enumerate(todo, 1):
         role = config[c['role']]
         body = {
-            'text': c['text'],
+            'text': c.get('speak', c['text']),
             'model_id': model,
             'voice_settings': {k: role[k] for k in ('stability', 'similarity_boost', 'style', 'use_speaker_boost', 'speed') if k in role},
         }

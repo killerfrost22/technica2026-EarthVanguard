@@ -239,6 +239,51 @@
     s.start(t, Math.random() * 0.5);
     s.stop(t + dur + 0.02);
   }
+  // her voice: a buzzy pitch glide shaped by two vowel formants
+  function voice(f0, f1, dur, gain, fa, fb, delay) {
+    const ac = snd.ac;
+    if (!ac || ac.state !== 'running') return;
+    const t = ac.currentTime + (delay || 0);
+    const o = ac.createOscillator();
+    o.type = 'sawtooth';
+    o.frequency.setValueAtTime(f0, t);
+    o.frequency.exponentialRampToValueAtTime(f1, t + dur);
+    const g = ac.createGain();
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(gain, t + 0.025);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    [[fa, 6], [fb, 8]].forEach(([f, q]) => {
+      const bp = ac.createBiquadFilter();
+      bp.type = 'bandpass';
+      bp.frequency.value = f;
+      bp.Q.value = q;
+      o.connect(bp);
+      bp.connect(g);
+    });
+    g.connect(snd.out);
+    o.start(t);
+    o.stop(t + dur + 0.03);
+  }
+  // a soft footfall: low thump plus a little grit
+  function thud(gain, freq) {
+    const ac = snd.ac;
+    if (!ac || ac.state !== 'running' || !noiseBuf()) return;
+    const t = ac.currentTime;
+    const s = ac.createBufferSource();
+    s.buffer = snd.noise;
+    const f = ac.createBiquadFilter();
+    f.type = 'lowpass';
+    f.frequency.value = freq;
+    const g = ac.createGain();
+    g.gain.setValueAtTime(gain, t);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + 0.09);
+    s.connect(f);
+    f.connect(g);
+    g.connect(snd.out);
+    s.start(t, Math.random() * 0.8);
+    s.stop(t + 0.11);
+    tone(95 + Math.random() * 20, 60, 0.07, gain * 0.5, 'sine');
+  }
   function sfx(id, k) {
     if (G.simulating) return;
     switch (id) {
@@ -253,7 +298,32 @@
       case 'door': tone(300, 700, 0.18, 0.08, 'triangle'); hiss(0.35, 0.06, 900, 0.8); break;
       case 'locked': tone(220, 200, 0.16, 0.08, 'square'); break;
       case 'laser': hiss(0.25, 0.14, 3200, 1.5); tone(1800, 300, 0.2, 0.07, 'sawtooth'); break;
-      case 'caught': tone(220, 110, 0.7, 0.11, 'sawtooth'); tone(233, 116, 0.7, 0.08, 'sawtooth', 0.05); break;
+      // k = 1 when sneaking (quieter, softer)
+      case 'step': thud(k ? 0.035 : 0.075, k ? 420 : 700); break;
+      // robots; k = how close the drone is (0..1)
+      case 'query': // heard something: a rising "?" chirp
+        tone(520, 380, 0.08, 0.05 * k, 'square');
+        tone(380, 900, 0.16, 0.05 * k, 'square', 0.09);
+        break;
+      case 'spot': // saw her: a sharp "!" double blip and a servo whine
+        tone(1400, 1400, 0.06, 0.07 * k, 'square');
+        tone(1900, 1900, 0.09, 0.07 * k, 'square', 0.08);
+        tone(300, 800, 0.25, 0.03 * k, 'sawtooth', 0.05);
+        break;
+      case 'camlock': tone(2400, 2400, 0.05, 0.05 * k, 'square'); tone(2400, 2400, 0.05, 0.05 * k, 'square', 0.1); hiss(0.18, 0.04 * k, 1800, 3); break;
+      // warning: the alarm is nearly full
+      case 'warn': [0, 0.32].forEach((d) => tone(600, 1100, 0.28, 0.06, 'sawtooth', d)); break;
+      // she gets hurt (laser): a short pained "ah"
+      case 'hurt': voice(470, 300, 0.24, 0.16, 820, 1250, 0.05); hiss(0.12, 0.05, 2500, 1); break;
+      case 'caught': // a klaxon wails, a heavy clank, and she gasps
+        for (let i = 0; i < 3; i++) {
+          tone(440, 880, 0.22, 0.09, 'sawtooth', i * 0.46);
+          tone(880, 440, 0.22, 0.09, 'sawtooth', i * 0.46 + 0.23);
+        }
+        tone(120, 45, 0.35, 0.16, 'square');
+        hiss(0.3, 0.1, 400, 0.7);
+        voice(330, 560, 0.2, 0.13, 700, 1150, 0.08);
+        break;
       case 'sector': tone(392, 392, 0.2, 0.06, 'triangle'); tone(523, 523, 0.3, 0.06, 'triangle', 0.14); break;
       case 'free': [523, 659, 784, 1046].forEach((f, i) => tone(f, f, 0.5, 0.07, 'triangle', i * 0.13)); break;
       default: break;
@@ -285,10 +355,39 @@
       n.connect(f);
       f.connect(ng);
       ng.connect(g);
+      // drone rotors: a buzzing whir that swells as drones get close (see robotSound)
+      const wo = ac.createOscillator(), wl = ac.createOscillator(), wlg = ac.createGain();
+      wo.type = 'sawtooth';
+      wo.frequency.value = 140;
+      wl.frequency.value = 23;
+      wlg.gain.value = 18;
+      wl.connect(wlg);
+      wlg.connect(wo.frequency);
+      const wf = ac.createBiquadFilter();
+      wf.type = 'bandpass';
+      wf.frequency.value = 900;
+      wf.Q.value = 1.4;
+      const wn = ac.createBufferSource();
+      wn.buffer = snd.noise;
+      wn.loop = true;
+      const wnf = ac.createBiquadFilter();
+      wnf.type = 'bandpass';
+      wnf.frequency.value = 2200;
+      wnf.Q.value = 2;
+      const wg = ac.createGain();
+      wg.gain.value = 0;
+      wo.connect(wf);
+      wf.connect(wg);
+      wn.connect(wnf);
+      wnf.connect(wg);
+      wg.connect(g);
       o1.start();
       o2.start();
       n.start();
-      snd.hum = { g, srcs: [o1, o2, n] };
+      wo.start();
+      wl.start();
+      wn.start();
+      snd.hum = { g, wg, wo, srcs: [o1, o2, n, wo, wl, wn] };
     } else if (!on && snd.hum) {
       const h = snd.hum;
       snd.hum = null;
@@ -298,6 +397,54 @@
         h.g.gain.linearRampToValueAtTime(0, ac.currentTime + 0.4);
         h.srcs.forEach((s) => s.stop(ac.currentTime + 0.45));
       } catch (e) { /* already stopped */ }
+    }
+  }
+
+  // Blue Arrow speaks each memory as its shard is found: window.ECHO_VO maps a memory's text to [clip, seconds]
+  // (inlined by tools/build.py from narration/audio). Without a clip, or if the text changed, it just shows as text.
+  const memVoice = window.Audio ? new Audio() : null;
+  function memClip(text) { return (window.ECHO_VO && window.ECHO_VO[text]) || null; }
+  function speakMemory(text) {
+    const clip = memClip(text);
+    if (!memVoice || !clip || G.simulating) return;
+    const src = clip[0];
+    try {
+      const s = SL.save.settings || {};
+      memVoice.src = src;
+      memVoice.currentTime = 0;
+      memVoice.volume = SL.audio && SL.audio.muted ? 0 : U.clamp(s.master != null ? s.master : 0.9, 0, 1);
+      const pr = memVoice.play();
+      if (pr && pr.catch) pr.catch(() => { /* autoplay blocked: text only */ });
+    } catch (e) { /* no audio */ }
+  }
+  function hushMemory() { try { if (memVoice) memVoice.pause(); } catch (e) { /* no audio */ } }
+
+  // drone whir follows the nearest drone; it revs up while one hunts her
+  function robotSound(R) {
+    const h = snd.hum;
+    if (!h || G.simulating) return;
+    let near = 0, hunt = false;
+    for (const s of R.sentries) {
+      const k = U.clamp(1 - Math.hypot(s.x - R.px, s.y - R.py) / 560, 0, 1);
+      if (k > near) { near = k; hunt = s.mode === 'watch' || s.mode === 'search'; }
+    }
+    const t = snd.ac.currentTime;
+    h.wg.gain.setTargetAtTime(0.05 * near * near, t, 0.15);
+    h.wo.frequency.setTargetAtTime(hunt ? 190 : 140, t, 0.3);
+  }
+  // robot chirps when a drone hears or sees her, or a camera locks on
+  function robotCues(R) {
+    for (const s of R.sentries) {
+      if (s.mode !== s.lastMode) {
+        const k = U.clamp(1.2 - Math.hypot(s.x - R.px, s.y - R.py) / 700, 0.25, 1);
+        if (s.mode === 'watch') sfx('spot', k);
+        else if (s.mode === 'search' && s.lastMode !== 'watch') sfx('query', k);
+        s.lastMode = s.mode;
+      }
+    }
+    for (const c of R.cams) {
+      if (c.lock && !c.wasLock) sfx('camlock', U.clamp(1.2 - Math.hypot(c.x - R.px, c.y - R.py) / 700, 0.25, 1));
+      c.wasLock = c.lock;
     }
   }
 
@@ -330,6 +477,7 @@
     R.calm = 99;
     R.watch = -1;
     R.seenBeep = 0;
+    R.warned = false;
     R.pingCd = 0;
     R.pings.length = 0;
     R.parts.length = 0;
@@ -360,12 +508,12 @@
       return {
         x: pts[0].x, y: pts[0].y, a: Math.atan2(n.y - pts[0].y, n.x - pts[0].x), pts, wi: pts.length > 1 ? 1 : 0,
         speed: d.speed || 75, range: d.range || 250, half: 0.52, mode: 'patrol', route: [], wait: 0, timer: 0,
-        lostT: 0, lastX: 0, lastY: 0, scanA: 0, bob: Math.random() * TAU,
+        lostT: 0, lastX: 0, lastY: 0, scanA: 0, bob: Math.random() * TAU, lastMode: 'patrol',
       };
     });
     R.cams = S.cams.map((d) => ({
       x: d.x * T, y: d.y * T, base: d.a, a: d.a, sweep: d.sweep, period: d.period, range: d.range || 340, half: 0.34,
-      ph: 0, lock: false, lostT: 0, callT: 0,
+      ph: 0, lock: false, wasLock: false, lostT: 0, callT: 0,
     }));
     R.lasers = S.lasers.map((d) => {
       const cx = (d.c + 0.5) * T, cy = (d.r + 0.5) * T;
@@ -511,7 +659,9 @@
     const sp = inp.sneak ? SNEAK : SPEED;
     if (m > 0.15) {
       R.face = turn(R.face, Math.atan2(my, mx), 12 * dt);
+      const was = Math.floor(R.walk / Math.PI);
       R.walk += dt * (inp.sneak ? 5 : 9) * Math.min(1, m);
+      if (Math.floor(R.walk / Math.PI) !== was) sfx('step', inp.sneak ? 1 : 0);
     }
     R.px += mx * sp * dt;
     collide(R);
@@ -530,6 +680,8 @@
     for (const s of R.sentries) updSentry(R, s, dt);
     for (const c of R.cams) updCam(R, c, dt);
     updLasers(R);
+    robotCues(R);
+    robotSound(R);
 
     if (R.watch >= 0) {
       R.alarm += dt * (FILL + FILL_NEAR * R.watch);
@@ -540,6 +692,8 @@
       R.calm += dt;
       if (R.calm > DRAIN_DELAY) R.alarm = Math.max(0, R.alarm - DRAIN * dt);
     }
+    if (R.alarm >= 0.7 && !R.warned) { R.warned = true; sfx('warn'); }
+    else if (R.alarm < 0.4) R.warned = false;
     if (R.alarm >= 1) caught(R);
   }
 
@@ -601,7 +755,9 @@
       const st = store();
       if (st.mem.indexOf(id) < 0) { st.mem.push(id); SL.save.commit(); }
       sfx('shard');
-      say(R, MEMORIES[id], 6, true);
+      const clip = memClip(MEMORIES[id]);
+      say(R, MEMORIES[id], Math.max(6, clip ? clip[1] + 1 : 0), true); // stays up while she speaks
+      speakMemory(MEMORIES[id]);
       sparkle(R, R.px, R.py, '#c9a6ff', 22);
     } else if (ch === 'X') {
       sectorDone(R);
@@ -781,6 +937,7 @@
         R.laserCd = 1;
         R.flash = 1;
         sfx('laser');
+        sfx('hurt');
         sparkle(R, R.px, R.py, '#ff4d6d', 14);
         say(R, 'Tripped a laser. Wait for it to switch off.', 2.4);
       }
@@ -795,6 +952,7 @@
     R.captures++;
     R.flash = 1;
     hum(false);
+    hushMemory();
     sfx('caught');
   }
 
@@ -1216,7 +1374,8 @@
     ctx.fill();
     ctx.restore();
   }
-  // Blue Arrow, seen from above: pale gown, dark hair, a faint glow
+  // Blue Arrow, seen from above: a girl in a pale dress with a flared skirt, a long dark ponytail tied with a blue
+  // ribbon that swings as she walks, and a faint glow. Forward is -y after the rotate.
   function drawGirl(ctx, x, y, face, walk, s) {
     ctx.save();
     ctx.translate(x, y);
@@ -1229,32 +1388,70 @@
     ctx.globalAlpha = 1;
     ctx.rotate(face + Math.PI / 2);
     const sw = Math.sin(walk) * 4;
-    // feet
+    const tail = Math.sin(walk * 0.5) * 3.5; // the ponytail lags her stride
+    // feet, peeking out under the hem
     ctx.fillStyle = '#c9d6e3';
     ctx.beginPath();
-    ctx.ellipse(-5, -sw, 3, 5, 0, 0, TAU);
-    ctx.ellipse(5, sw, 3, 5, 0, 0, TAU);
+    ctx.ellipse(-3.8, -10 - sw * 0.7, 2, 2.8, 0, 0, TAU);
+    ctx.ellipse(3.8, -10 + sw * 0.7, 2, 2.8, 0, 0, TAU);
     ctx.fill();
-    // gown and shoulders
+    // skirt: a wide flared circle with a softly rippled, blue-trimmed hem that sways with her stride
     ctx.fillStyle = '#e8eef5';
+    ctx.strokeStyle = '#5aa8e6';
+    ctx.lineWidth = 1.6;
     ctx.beginPath();
-    ctx.ellipse(0, 2, 12, 8, 0, 0, TAU);
+    for (let i = 0; i <= 48; i++) {
+      const a = (i / 48) * TAU, r = 12 + Math.sin(a * 7) * 0.6 + Math.sin(walk) * 0.6 * Math.cos(a);
+      if (i === 0) ctx.moveTo(Math.cos(a) * r, 1.5 + Math.sin(a) * r * 0.88);
+      else ctx.lineTo(Math.cos(a) * r, 1.5 + Math.sin(a) * r * 0.88);
+    }
+    ctx.closePath();
     ctx.fill();
-    ctx.strokeStyle = '#9fb3c8';
-    ctx.lineWidth = 1.5;
     ctx.stroke();
-    // head and hair (hair falls behind her)
+    // narrow shoulders
+    ctx.fillStyle = '#f6f9fc';
+    ctx.strokeStyle = '#9fb3c8';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.ellipse(0, 0.5, 9.5, 4.6, 0, 0, TAU);
+    ctx.fill();
+    ctx.stroke();
+    // ponytail: falls behind her head and swings
     ctx.fillStyle = '#1c1420';
     ctx.beginPath();
-    ctx.ellipse(0, 3, 7.5, 9, 0, 0, TAU);
+    ctx.moveTo(-3.2, 5);
+    ctx.quadraticCurveTo(-3 + tail * 0.4, 12, tail, 18);
+    ctx.quadraticCurveTo(3 + tail * 0.4, 12, 3.2, 5);
+    ctx.closePath();
     ctx.fill();
+    // head: face toward the front, hair over the crown and back, a lock falling past each cheek
     ctx.fillStyle = '#f1d3c2';
     ctx.beginPath();
-    ctx.arc(0, -2, 5.5, 0, TAU);
+    ctx.arc(0, -2.4, 5.4, 0, TAU);
     ctx.fill();
     ctx.fillStyle = '#1c1420';
     ctx.beginPath();
-    ctx.arc(0, 0, 6, 0, Math.PI);
+    ctx.ellipse(0, -0.4, 6, 5.8, 0, 0, TAU);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.ellipse(-4.9, -3.6, 1.4, 3.2, 0.25, 0, TAU);
+    ctx.ellipse(4.9, -3.6, 1.4, 3.2, -0.25, 0, TAU);
+    ctx.fill();
+    // ribbon bow where the ponytail is tied
+    ctx.fillStyle = '#5aa8e6';
+    ctx.beginPath();
+    ctx.moveTo(0, 5.5);
+    ctx.lineTo(-4.5, 3.2);
+    ctx.lineTo(-4.2, 7.8);
+    ctx.closePath();
+    ctx.moveTo(0, 5.5);
+    ctx.lineTo(4.5, 3.2);
+    ctx.lineTo(4.2, 7.8);
+    ctx.closePath();
+    ctx.fill();
+    ctx.fillStyle = '#8fd0ff';
+    ctx.beginPath();
+    ctx.arc(0, 5.5, 1.4, 0, TAU);
     ctx.fill();
     ctx.restore();
   }
@@ -1453,6 +1650,8 @@
   function startRun(sector) {
     audioOn();
     clearPanel();
+    hushMemory();
+    G.memHeld = false;
     newRun(sector);
     const st = store();
     st.plays++;
@@ -1465,6 +1664,8 @@
   function retrySector() {
     const R = G.run;
     clearPanel();
+    hushMemory();
+    G.memHeld = false;
     R.frags = R.fragsAtStart.slice();
     loadSector(R, R.sector);
     G.state = 'play';
@@ -1476,6 +1677,7 @@
     if (G.state !== 'play') return;
     G.state = 'paused';
     hum(false);
+    if (memVoice && !memVoice.paused) { memVoice.pause(); G.memHeld = true; }
     const p = panel();
     p.append(el('div', 'sl-label', 'Echo · ' + SECTORS[G.run.sector].floor + ' ' + SECTORS[G.run.sector].name), el('h2', 'sl-title sl-title--md', 'Paused'));
     const b = el('div', 'sl-stack');
@@ -1492,6 +1694,7 @@
     G.state = 'play';
     pingWas = true;
     hum(true);
+    if (G.memHeld && memVoice) { G.memHeld = false; const pr = memVoice.play(); if (pr && pr.catch) pr.catch(() => {}); }
   }
 
   const CAUGHT_LINES = [
@@ -1604,6 +1807,8 @@
       raf = 0;
       window.removeEventListener('blur', onBlur);
       hum(false);
+      hushMemory();
+      G.memHeld = false;
       touch.id = -1;
       G.state = 'off';
       if (ui && ui.cleanup) ui.cleanup();
@@ -1643,6 +1848,16 @@
     return b;
   };
   G.open = function () { if (SL.ui) SL.ui.show('echo'); };
+  /** Developer skip (27_devtools.js): counts Echo as escaped without playing it, then carries on with the story
+      (26_cutscenes.js) or goes back to the title. */
+  G.skip = function () {
+    hum(false);
+    flags().echo_escaped = true;
+    flags().echo_seen = true;
+    SL.save.commit();
+    if (SL.cutscenes && SL.cutscenes.inStory()) SL.cutscenes.afterEcho();
+    else leave();
+  };
   /** For the future story trigger: opens Echo on the title screen for good. */
   G.unlock = function () {
     const f = flags();

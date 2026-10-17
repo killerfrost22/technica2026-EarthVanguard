@@ -1,0 +1,57 @@
+/* 27_devtools.css: the developer panel (27_devtools.js). Fixed to the page, above the game and the cutscenes. */
+
+.ev-dev {
+  position: fixed;
+  top: calc(12px + env(safe-area-inset-top, 0px));
+  left: 12px;
+  z-index: 10001;
+  width: min(300px, calc(100vw - 24px));
+  max-height: calc(100vh - 24px);
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 210, 122, 0.45);
+  background: rgba(8, 10, 20, 0.94);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
+  color: #e8eef7;
+  font: 500 13px/1.3 "Barlow Semi Condensed", system-ui, sans-serif;
+  user-select: none;
+}
+.ev-dev__head { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
+.ev-dev__head strong { font: 700 13px/1 Oxanium, system-ui, sans-serif; letter-spacing: 0.14em; text-transform: uppercase; color: #ffd27a; }
+.ev-dev__hint { color: #93a0ba; font-size: 12px; }
+.ev-dev__sec { display: flex; flex-direction: column; gap: 6px; }
+.ev-dev__label { font: 600 11px/1 Oxanium, system-ui, sans-serif; letter-spacing: 0.12em; text-transform: uppercase; color: #93a0ba; }
+.ev-dev__row { display: flex; flex-wrap: wrap; gap: 6px; }
+.ev-dev__btn {
+  appearance: none;
+  padding: 6px 10px;
+  border-radius: 6px;
+  border: 1px solid rgba(127, 227, 255, 0.35);
+  background: rgba(63, 200, 255, 0.12);
+  color: #e8eef7;
+  font: inherit;
+  cursor: pointer;
+}
+.ev-dev__btn:hover:not(:disabled) { background: rgba(63, 200, 255, 0.28); border-color: #7fe3ff; }
+.ev-dev__btn:focus-visible { outline: 2px solid #ffd27a; outline-offset: 2px; }
+.ev-dev__btn:disabled { opacity: 0.35; cursor: default; }
+.ev-dev__toggle { display: inline-flex; align-items: center; gap: 4px; margin-right: 10px; cursor: pointer; }
+.ev-dev-fab {
+  position: fixed;
+  right: 12px;
+  bottom: calc(12px + env(safe-area-inset-bottom, 0px));
+  z-index: 10001;
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 210, 122, 0.6);
+  background: rgba(8, 10, 20, 0.9);
+  color: #ffd27a;
+  font: 700 12px/1 Oxanium, system-ui, sans-serif;
+  letter-spacing: 0.14em;
+  cursor: pointer;
+}
+.ev-dev[hidden] { display: none; }

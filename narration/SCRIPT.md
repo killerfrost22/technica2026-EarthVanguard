@@ -14,7 +14,7 @@ the same words.
 | **Blue Arrow** | Her memories in Echo (section 3) and her cutscene lines | First person, quiet, young woman. Remembering, not performing. |
 | **Puff** | His thoughts in the memory (section 5) and his cutscene lines | Small, tired, brave. Half to himself. |
 | **The Directorate** | The voice over Puff's trial (section 5) | Cold, slow, polite, from everywhere at once. Never raises its voice. |
-| **Commander Kade** | Her lines in the cutscenes | Calm, clipped, decisive. Never shouts. |
+| **Commander Kade** | His lines in the cutscenes | British, male. Calm, clipped, decisive. Never shouts. |
 
 One person can read every part; different voices for Blue Arrow, Puff and the Directorate just make it better.
 
@@ -52,8 +52,9 @@ The Echo minigame. These match the text already on screen. **Voice: Narrator.**
 
 ## 3. Echo: memory shards
 
-Blue Arrow finds these hidden in the facility, two per floor. They are on screen for about 6 seconds each, so
-**keep each one under 6 seconds**. **Voice: Blue Arrow** (first person).
+Blue Arrow finds these hidden in the facility, two per floor, and speaks each one as she picks it up (tools/build.py
+inlines the clips as window.ECHO_VO; src/24_echo.js plays them). The text stays on screen for the clip's length plus a
+second, so aim for under 10 seconds each. **Voice: Blue Arrow** (first person).
 
 | Clip | Text | Length |
 |---|---|---|

@@ -56,15 +56,17 @@ def html_ascii(html):
     return re.sub(r'[^\x00-\x7f]', lambda m: '&#x%x;' % ord(m.group(0)), html)
 
 
-def cutscene_voice():
+def voice_clips(prefix, with_seconds=False):
+    """Generated voice clips whose id starts with prefix, as {on-screen text: data URI} (or [URI, seconds])."""
     manifest = NARRATION / 'manifest.json'
     if not manifest.exists():
         return {}
     vo = {}
     for cid, m in json.loads(manifest.read_text(encoding='utf-8')).items():
         mp3 = NARRATION / (cid + '.mp3')
-        if cid.startswith('cs_') and mp3.exists() and m.get('text'):
-            vo[m['text']] = 'data:audio/mpeg;base64,' + base64.b64encode(mp3.read_bytes()).decode('ascii')
+        if cid.startswith(prefix) and mp3.exists() and m.get('text'):
+            uri = 'data:audio/mpeg;base64,' + base64.b64encode(mp3.read_bytes()).decode('ascii')
+            vo[m['text']] = [uri, m.get('seconds', 0)] if with_seconds else uri
     return vo
 
 
@@ -108,9 +110,17 @@ def main():
     # load after the game modules, in this order. src/26_cutscenes.js wires them into the game.
     # Their voice clips (narration/audio/cs_*.mp3, made by tools/narrate.py) go in first as window.CUTSCENE_VO, a map
     # from each line's text to a data: URI, so a line whose text changed since its clip was made simply plays silent.
-    vo = cutscene_voice()
+    vo = voice_clips('cs_')
     if vo:
         js_parts.append('<script>\nwindow.CUTSCENE_VO = %s;\n</script>' % json.dumps(vo, separators=(',', ':')))
+    # Radio voice lines (narration/audio/radio_*.mp3) for the radio box (src/16_story.js): text -> [data: URI, seconds].
+    radio = voice_clips('radio_', with_seconds=True)
+    if radio:
+        js_parts.append('<script>\nwindow.RADIO_VO = %s;\n</script>' % json.dumps(radio, separators=(',', ':')))
+    # Blue Arrow's memory-shard lines in Echo (narration/audio/echo_memory_*.mp3) for src/24_echo.js, the same way.
+    evo = voice_clips('echo_memory_', with_seconds=True)
+    if evo:
+        js_parts.append('<script>\nwindow.ECHO_VO = %s;\n</script>' % json.dumps(evo, separators=(',', ':')))
     for name in CUTSCENE_JS:
         p = CUTSCENES / name
         if name in exclude:

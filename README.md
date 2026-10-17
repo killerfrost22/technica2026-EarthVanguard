@@ -129,6 +129,12 @@ python3 tools/build.py
 This inlines every `src/*.css` and `src/*.js` file, in name order, into `dist/earthvanguard.html` (and into
 `dist/publish/index.html` for web hosting).
 
+**Developer panel:** press the `` ` `` (backquote) key in the game, or add `?dev=1` to the URL (that also adds a DEV
+button for touch screens). It jumps to any point in the story (Prologue, Echo, After Echo, Mission 1, After
+Mission 1), skips whatever is running (a cutscene, Echo, Puff's memory, to the boss, or wins the mission), and has
+a **Skip minigames** switch (remembered in your browser) so the story passes through Echo and Puff's memory without
+playing them. **Reset story** starts the story over.
+
 Handy URL parameters for testing (add them to the end of the file URL):
 
 - `?mission=m1`: jump straight into a mission

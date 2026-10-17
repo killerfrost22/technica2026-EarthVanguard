@@ -40,7 +40,10 @@ Floors: B3 Cell Block (one camera, tutorial), B2 Research Wing (three drones, on
   flags `unlock_echo`, `echo_seen`, `echo_escaped`.
 
 Like Puff's Ocean, the screen draws on its own canvas inside `#ui` with its own animation loop and its own small
-AudioContext (echo pings with returns, reactor hum, alarm beeps). It draws in screen space with a 720x1280 view in
+AudioContext. Every sound is synthesized in code: echo pings with returns, reactor hum, footsteps (softer when
+sneaking), a drone whir that swells with the nearest drone and revs up while it hunts, robot chirps (a rising `?` when
+a drone hears her, a sharp `!` when one sees her, a double beep when a camera locks on), alarm beeps, a warning siren
+when the alarm passes 70%, a pained cry when a laser hits her, and a klaxon with her gasp when she is caught. It draws in screen space with a 720x1280 view in
 portrait and 1280x720 in landscape; the camera follows her.
 
 ## Editing the floors

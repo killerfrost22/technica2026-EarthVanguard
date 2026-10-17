@@ -107,6 +107,24 @@
     return true;
   }
 
+  // Voiced radio lines: window.RADIO_VO (built from narration/audio/radio_*.mp3 by tools/build.py) maps a line's
+  // on-screen text to [audio URL, seconds]. A voiced line stays up until its clip ends; other lines stay silent.
+  const voice = typeof Audio === 'function' ? new Audio() : null;
+  function stopVoice() { if (voice) { try { voice.pause(); } catch (e) { /* no audio */ } } }
+  function playVoice(text) {
+    const vo = window.RADIO_VO && window.RADIO_VO[text];
+    if (!vo || !voice || (SL.audio && SL.audio.muted)) return 0;
+    voice.src = vo[0];
+    voice.currentTime = 0;
+    const p = voice.play();
+    if (p && p.catch) p.catch(() => { /* autoplay blocked: stay silent */ });
+    return +vo[1] || 0;
+  }
+  SL.onBoot(() => {
+    SL.bus.on('pause', stopVoice);
+    SL.bus.on('menu', stopVoice);
+  });
+
   function startLine(item) {
     if (!ensureBox()) return;
     const ch = S.characters[item.who] || { name: String(item.who || 'RADIO').toUpperCase(), role: '', color: '#93a0ba', portrait: null };
@@ -116,6 +134,9 @@
     box.style.setProperty('--radio-color', ch.color);
     textEl.textContent = '';
     box.classList.add('is-on');
+    stopVoice();
+    const secs = playVoice(item.text);
+    if (secs) cur.hold = Math.max(cur.hold, secs + 0.5 - cur.typeDur);
     if (SL.audio) {
       if (SL.audio.duck) SL.audio.duck(0.4, cur.typeDur + cur.hold);
       if (SL.audio.sfx) SL.audio.sfx('radio_in');
@@ -151,6 +172,7 @@
   S.say = function (who, text, opts) { return S.radio({ who, text }, opts); };
 
   S.clear = function () {
+    stopVoice();
     queue.length = 0;
     endLine();
     gap = 0;
