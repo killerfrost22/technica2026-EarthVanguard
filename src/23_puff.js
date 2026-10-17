@@ -10,6 +10,11 @@
    three times further ahead; panels lay out in two columns.
    The screen draws on its own canvas inside #ui with its own requestAnimationFrame loop, started in onShow and
    stopped in onHide (which also releases the mic).
+   Scenarios: SL.puff.openScenario(sc) runs the screen for a story beat instead of free play (25_puffstory.js uses it
+   for the memory inside the black hole). sc may define intro(api), step(R, dt, api) (return false to stop the step),
+   onOver(R, api) (replaces the game-over panel; runs don't count toward best), skip(api) (offered in place of
+   Quit), drawOver(ctx, R, api) and drawHud(ctx, R, api). api is scenarioApi() below.
+   SL.puff.drawBuddy(ctx, x, y, r, t, mood, vy, level) draws Puff anywhere (radio portrait, the bubble in missions).
    URL test hooks (with ?screen=puff): puff=play (start in keys mode), puff=bot (start with the bot flying),
    t=<sec> (fast-forward), puffsim=<runs> (bot-play that many 90 s runs, report in window.__PUFF__ and the console). */
 (function (SL) {
@@ -64,7 +69,32 @@
     p.plays = Math.max(0, Math.floor(+p.plays || 0));
     p.pearls = Math.max(0, Math.floor(+p.pearls || 0));
     p.sens = U.clamp(+p.sens || 1, 0.5, 2);
+    if (p.board !== boardOk) {
+      // checked once per array, not every call (the HUD reads the store each frame)
+      p.board = (Array.isArray(p.board) ? p.board : []).filter((e) => U.isPlain(e) && +e.score > 0).slice(0, BOARD_SIZE).map((e) => ({
+        name: cleanName(e.name) || 'Pilot', score: Math.floor(+e.score), dist: Math.max(0, Math.floor(+e.dist || 0)),
+        pearls: Math.max(0, Math.floor(+e.pearls || 0)), mode: e.mode === 'voice' ? 'voice' : 'keys', at: +e.at || 0,
+      }));
+      boardOk = p.board;
+    }
+    p.name = cleanName(p.name);
     return p;
+  }
+  // ------------------------------------------------------------------ leaderboard (local: this device's save)
+  const BOARD_SIZE = 10;
+  let boardOk = null;
+  function cleanName(s) { return String(s || '').replace(/[\u0000-\u001f]/g, '').trim().slice(0, 12); }
+  /** Puts a finished run on the board; returns its index (0 = first) or -1 if it didn't make it. */
+  function addToBoard(st, R, total) {
+    const b = st.board;
+    let i = 0;
+    while (i < b.length && b[i].score >= total) i++;
+    if (i >= BOARD_SIZE) return -1;
+    const entry = { name: st.name || callsign(), score: total, dist: Math.floor(R.dist / 40), pearls: R.pearls, mode: G.mode === 'voice' ? 'voice' : 'keys', at: Date.now() };
+    b.splice(i, 0, entry);
+    if (b.length > BOARD_SIZE) b.length = BOARD_SIZE;
+    R.boardEntry = entry;
+    return i;
   }
   function unlocked() {
     const d = SL.save.data;
@@ -245,12 +275,13 @@
 
   // ------------------------------------------------------------------ state
   const G = SL.puff = {
-    state: 'off',   // off | intro | micwait | calib | ready | play | paused | over | error
+    state: 'off',   // off | intro | micwait | calib | ready | play | paused | over | done (scenario won) | error
     mode: 'keys',   // keys | voice
     run: null,
     level: 0,       // smoothed control level 0..1
     bot: false,
     simulating: false,
+    scenario: null, // a story beat running on this screen (openScenario), or null for free play
     unlocked,
   };
   let rng = SL.makeRng(1);
@@ -552,10 +583,13 @@
       R.dead += dt;
       R.y = Math.min(BED - R.r, R.y + 120 * dt);
       updateParts(R, dt, 0);
-      if (R.dead >= 1.1 && !G.simulating) showOver();
+      if (R.dead >= 1.1 && !G.simulating) {
+        if (G.scenario && G.scenario.onOver) { G.state = 'over'; overHold = 0; ambient(false); G.scenario.onOver(R, scenarioApi()); } else showOver();
+      }
       return;
     }
     R.t += dt;
+    if (G.scenario && G.scenario.step && G.scenario.step(R, dt, scenarioApi()) === false) return;
     const spd = speedFor(R.t);
     R.dist += spd * dt;
 
@@ -659,12 +693,18 @@
     R.moodKind = 'ouch';
     R.mood = 99;
     sfx('over');
+    R.rank = -1;
+    if (G.bot) { R.botRun = true; return; } // the bot's runs never count toward best or the leaderboard
+    if (G.scenario) return; // neither do story beats (the memory in the black hole)
     const st = store();
     const total = finalScore(R);
     st.plays++;
     st.pearls += R.pearls;
     if (total > st.best) { st.best = total; R.newBest = true; }
-    if (!G.simulating) SL.save.commit();
+    if (!G.simulating) {
+      R.rank = addToBoard(st, R, total);
+      SL.save.commit();
+    }
   }
   function finalScore(R) { return Math.floor(R.dist / 40) + R.score; }
 
@@ -974,7 +1014,7 @@
       ctx.beginPath();
       ctx.arc(mx, my, 24, 0, TAU);
       ctx.fill();
-      ctx.fillStyle = rgb(w.skyT);
+      ctx.fillStyle = rgb([0, 1, 2].map((j) => U.lerp(w.skyT[j], w.skyB[j], my / SURFACE)));
       ctx.beginPath();
       ctx.arc(mx + 10, my - 6, 20, 0, TAU);
       ctx.fill();
@@ -1727,7 +1767,11 @@
       anchored(ctx, W / 2, 330, () => label(ctx, G.mode === 'voice' ? 'Make a sound to start' : 'Hold Space, click or tap to start', 0, 0, '800 34px Oxanium, sans-serif', '#ffffff', 'center'));
       ctx.globalAlpha = 1;
     }
-    if (G.state === 'play' && R.t < 6) {
+    if (G.state === 'play' && G.bot) {
+      ctx.globalAlpha = 0.75 + 0.25 * Math.sin(R.scroll * 3);
+      anchored(ctx, W / 2, SURFACE + 46, () => label(ctx, 'BOT SWIMMING · Esc or tap for menu', 0, 0, '700 18px Oxanium, sans-serif', '#ffe27a', 'center'));
+      ctx.globalAlpha = 1;
+    } else if (G.state === 'play' && R.t < 6) {
       ctx.globalAlpha = U.clamp(6 - R.t, 0, 1);
       anchored(ctx, W / 2, 330, () => label(ctx, G.mode === 'voice' ? 'Get loud to puff up. Go quiet to sink.' : 'Hold to puff up. Let go to sink.', 0, 0, '700 26px Oxanium, sans-serif', '#ffffff', 'center'));
       ctx.globalAlpha = 1;
@@ -1769,7 +1813,9 @@
     if (R.shield) bubbleShape(ctx, FX, R.y, R.r * 1.35 + 8, 0.85);
     drawParts(ctx, R);
     drawWeatherFront(ctx, R);
+    if (G.scenario && G.scenario.drawOver) G.scenario.drawOver(ctx, R, scenarioApi());
     drawHud(ctx, R);
+    if (G.scenario && G.scenario.drawHud) G.scenario.drawHud(ctx, R, scenarioApi());
     if (ui.meter) ui.meter.style.width = (U.clamp(G.level, 0, 1) * 100).toFixed(1) + '%';
   }
 
@@ -1903,13 +1949,15 @@
   function showIntro() {
     G.state = 'intro';
     ambient(false);
+    if (G.scenario && G.scenario.intro) { G.scenario.intro(scenarioApi()); return; }
     const st = store();
     const p0 = panel('sl-puff__overlay--intro');
     const [p, side] = cols(p0);
     p.append(el('div', 'sl-label', 'Minigame · Puff\'s Ocean'), el('h2', 'sl-title sl-title--md sl-puff__title', 'Puff\'s Ocean'));
     const story = el('p', 'sl-puff__story');
-    story.textContent = 'Puff the pufferfish is ' + callsign() + '\'s best buddy, riding along in a water bubble aboard the Halcyon. ' +
-      'Between sorties Puff dreams of home: Earth\'s ocean, choking on our trash. Help Puff swim through it.';
+    story.textContent = 'Puff flies with ' + callsign() + ' in a water bubble, but he is not from Earth. His home was an ocean world, ' +
+      'coral and light, until the corporations bled it dark. Then the Directorate chose it for one of their games: survive the ' +
+      'trials and win the power to heal your world. These are the trials, the way Puff remembers them.';
     p.appendChild(story);
     const how = el('ul', 'sl-puff__how');
     [['Loud', 'Puff puffs up and floats'], ['Quiet', 'Puff shrinks and sinks: squeeze under the garbage patch'], ['Avoid', 'ghost nets, oil spills, bags, six-pack rings, leaking drums'], ['Grab', 'pearls for points, starfish for hearts, bubbles for a shield']]
@@ -1920,6 +1968,8 @@
     b.append(
       btn('Play with your voice', 'sl-btn--primary', () => startVoice()),
       btn('Keys or touch', '', () => startKeys()),
+      btn('Watch the bot swim', '', () => startBot()),
+      btn('Leaderboard', '', () => showBoard(showIntro)),
       btn('Back to title', 'sl-btn--ghost', () => leave()));
     side.appendChild(b);
     side.appendChild(el('p', 'sl-puff__note', 'Any voice works: a hum, a whistle, a soft "ahh". The mic only measures loudness inside this page; nothing is recorded or sent.'));
@@ -1927,6 +1977,7 @@
   }
 
   async function startVoice() {
+    G.bot = false;
     G.mode = 'voice';
     G.state = 'micwait';
     ambient(false);
@@ -1959,10 +2010,24 @@
     setCalibText(calib);
   }
   function startKeys() {
+    G.bot = false;
     G.mode = 'keys';
     micStop();
     audioOn();
     toReady();
+  }
+  /** Puff swims on autopilot: a demo to watch. Esc opens the menu. */
+  function startBot() {
+    G.mode = 'keys';
+    micStop();
+    audioOn();
+    toReady();
+    G.bot = true;
+    beginPlay();
+  }
+  function stopBot() {
+    G.bot = false;
+    showIntro();
   }
   function toReady() {
     clearPanel();
@@ -2006,11 +2071,14 @@
     G.state = 'paused';
     ambient(false);
     const p = panel();
-    p.append(el('div', 'sl-label', 'Puff\'s Ocean'), el('h2', 'sl-title sl-title--md', 'Paused'));
+    p.append(el('div', 'sl-label', G.bot ? 'Puff\'s Ocean · bot' : 'Puff\'s Ocean'), el('h2', 'sl-title sl-title--md', 'Paused'));
     const b = el('div', 'sl-stack');
-    b.append(btn('Resume', 'sl-btn--primary', () => resume()));
+    b.append(btn(G.bot ? 'Keep watching' : 'Resume', 'sl-btn--primary', () => resume()));
+    if (G.bot) b.append(btn('Play it yourself', '', () => stopBot()));
     if (G.mode === 'voice') b.append(btn('Retune voice', '', () => startCalibration()));
-    b.append(btn('Restart', '', () => restart()), btn('Quit to title', 'sl-btn--ghost', () => leave()));
+    b.append(btn('Restart', '', () => restart()), G.scenario && G.scenario.skip
+      ? btn('Skip memory', 'sl-btn--ghost', () => G.scenario.skip(scenarioApi()))
+      : btn('Quit to title', 'sl-btn--ghost', () => leave()));
     p.appendChild(b);
     const sens = el('div', 'sl-puff__sens');
     if (G.mode === 'voice') {
@@ -2048,17 +2116,111 @@
     const fact = el('p', 'sl-puff__fact');
     fact.append(el('b', '', 'Ocean fact: '), document.createTextNode(FACTS[st.plays % FACTS.length]));
     p.appendChild(fact);
+    if (R.botRun) {
+      const b = el('div', 'sl-stack');
+      b.append(btn('Watch again', 'sl-btn--primary', () => startBot()), btn('Play it yourself', '', () => stopBot()), btn('Back to title', 'sl-btn--ghost', () => leave()));
+      side.append(el('p', 'sl-puff__note', 'Bot runs don\'t count toward your best or the leaderboard.'), b);
+      focusFirst();
+      return;
+    }
+    if (R.rank >= 0 && R.boardEntry) side.appendChild(nameRow(R));
     const b = el('div', 'sl-stack');
-    b.append(btn('Swim again', 'sl-btn--primary', () => restart()));
+    const again = btn('Swim again', 'sl-btn--primary', () => restart());
+    b.append(again);
     if (G.mode === 'voice') b.append(btn('Retune voice', '', () => startCalibration()));
-    b.append(btn('Back to title', 'sl-btn--ghost', () => leave()));
+    b.append(btn('Leaderboard', '', () => showBoard(showOver)), btn('Back to title', 'sl-btn--ghost', () => leave()));
     side.appendChild(b);
     if (G.mode === 'voice') side.appendChild(el('p', 'sl-puff__note', 'Hands-free: hum for a second to swim again.'));
+    if (SL.input.lastDevice !== 'touch') again.focus({ preventScroll: true });
+  }
+
+  /** "#3 on the leaderboard" with a name field that renames this run's entry (and is remembered for next time). */
+  function nameRow(R) {
+    const st = store();
+    const box = el('div', 'sl-puff__rank');
+    box.appendChild(el('b', '', '#' + (R.rank + 1) + ' on the leaderboard'));
+    const row = el('form', 'sl-puff__name');
+    const input = el('input');
+    input.type = 'text';
+    input.maxLength = 12;
+    input.value = R.boardEntry.name;
+    input.setAttribute('aria-label', 'Your name for the leaderboard');
+    input.autocomplete = 'off';
+    const save = btn('Save name', 'sl-btn--small', () => apply());
+    function apply() {
+      const v = cleanName(input.value);
+      if (!v) { input.value = R.boardEntry.name; return; }
+      R.boardEntry.name = v;
+      st.name = v;
+      SL.save.commit();
+      input.value = v;
+      save.textContent = 'Saved';
+      setTimeout(() => { save.textContent = 'Save name'; }, 1200);
+      input.blur();
+    }
+    row.addEventListener('submit', (e) => { e.preventDefault(); apply(); });
+    input.addEventListener('change', () => apply());
+    // typing in the field must not reach the game or the hands-free restart
+    input.addEventListener('keydown', (e) => e.stopPropagation());
+    row.append(input, save);
+    box.appendChild(row);
+    return box;
+  }
+
+  let boardBack = null;
+  function showBoard(back) {
+    const from = G.state;
+    boardBack = () => { G.state = from; back(); };
+    G.state = 'board';
+    const st = store();
+    const mine = G.run && G.run.boardEntry;
+    const p = panel();
+    p.append(el('div', 'sl-label', 'Puff\'s Ocean · on this device'), el('h2', 'sl-title sl-title--md sl-puff__title', 'Leaderboard'));
+    if (!st.board.length) {
+      p.appendChild(el('p', 'sl-puff__story', 'No scores yet. Swim a run to set the first one.'));
+    } else {
+      const ol = el('ol', 'sl-puff__board');
+      st.board.forEach((e, i) => {
+        const li = el('li', e === mine ? 'is-me' : '');
+        li.append(el('span', 'sl-puff__board-rank sl-num', String(i + 1)), el('span', 'sl-puff__board-name', e.name),
+          el('span', 'sl-puff__board-meta', U.fmtInt(e.dist) + ' m · ' + (e.mode === 'voice' ? 'voice' : 'keys')),
+          el('span', 'sl-puff__board-score sl-num', U.fmtInt(e.score)));
+        ol.appendChild(li);
+      });
+      p.appendChild(ol);
+    }
+    const b = el('div', 'sl-stack');
+    b.append(btn('Back', 'sl-btn--primary', () => boardBack()));
+    if (st.board.length) {
+      let armed = false;
+      const clr = btn('Clear leaderboard', 'sl-btn--ghost', () => {
+        if (!armed) { armed = true; clr.textContent = 'Tap again to clear'; return; }
+        st.board.length = 0;
+        if (G.run) G.run.boardEntry = null;
+        SL.save.commit();
+        showBoard(back);
+        G.state = 'board';
+        boardBack = () => { G.state = from; back(); };
+      });
+      b.append(clr);
+    }
+    p.appendChild(b);
     focusFirst();
   }
 
   function leave() {
     if (SL.ui && SL.screens.has('title')) SL.ui.show('title');
+  }
+
+  // What a scenario may use to build panels and drive the run.
+  function scenarioApi() {
+    return {
+      el, btn, panel, cols, focusFirst, label, hudK, startVoice, startKeys, restart,
+      W: () => W, H, SURFACE, BED, FX: () => FX,
+      mode: () => G.mode,
+      /** Ends the current run where it stands (the screen idles behind the next panel). */
+      stopRun() { G.state = 'done'; ambient(false); }, // 'done': idles behind the panel; no hum-to-restart
+    };
   }
 
   // ------------------------------------------------------------------ the screen
@@ -2072,6 +2234,7 @@
       ui = { root, canvas, ctx: canvas.getContext('2d'), panel: null, meter: null };
       const down = (e) => {
         if (e.target !== canvas) return;
+        if (G.bot && G.state === 'play') { showPause(); e.preventDefault(); return; }
         pointerHeld = true;
         if (SL.audio && SL.audio.unlock) SL.audio.unlock();
         e.preventDefault();
@@ -2109,6 +2272,7 @@
       pointerHeld = false;
       G.bot = false;
       G.state = 'off';
+      G.scenario = null;
       if (ui && ui.cleanup) ui.cleanup();
       ui = null;
     },
@@ -2123,6 +2287,8 @@
         return true;
       }
       if (s === 'paused' && (m.pause || m.back)) { resume(); return true; }
+      if (s === 'board' && (m.back || m.pause)) { if (boardBack) boardBack(); return true; }
+      if (G.scenario && (s === 'intro' || s === 'over' || s === 'error')) return false; // story beats have no way back out
       if (s === 'intro' && m.back) { leave(); return true; }
       if ((s === 'over' || s === 'error') && m.back) { showIntro(); return true; }
       return false;
@@ -2151,6 +2317,15 @@
     return b;
   };
   G.open = function () { if (SL.ui) SL.ui.show('puff'); };
+  G.openScenario = function (sc) {
+    if (!SL.ui) return;
+    if (SL.ui.current === 'puff') SL.ui.hide();
+    G.scenario = sc;
+    SL.ui.show('puff');
+  };
+  G.drawBuddy = function (ctx, x, y, r, t, mood, vy, level) {
+    drawPuff(ctx, x, y, r, level == null ? 0.25 : level, t || 0, mood || '', vy || 0);
+  };
 
   let justUnlocked = false;
   SL.onBoot(() => {
@@ -2172,7 +2347,7 @@
       const panelEl = document.querySelector('#ui .sl-ui-results .sl-ui-panel');
       if (!panelEl) return;
       const note = el('div', 'sl-puff-unlock');
-      note.append(el('b', '', 'Unlocked: Puff\'s Ocean'), el('span', '', 'Your pufferfish buddy has a minigame. Find it on the title screen.'));
+      note.append(el('b', '', 'Unlocked: Puff\'s Ocean'), el('span', '', 'Relive Puff\'s trials any time from the title screen.'));
       const row = panelEl.querySelector('.sl-row');
       panelEl.insertBefore(note, row || null);
     });
@@ -2239,6 +2414,8 @@
       G.mode = 'voice';
       startCalibration();
       calib.t = 0.4;
+    } else if (mode === 'board') {
+      showBoard(showIntro);
     } else if (mode === 'over') {
       G.mode = 'keys';
       newRun(7);

@@ -589,7 +589,8 @@
     G.paused = true;
     G.pauseReason = reason;
     SL.time.paused = true;
-    if (reason !== 'choice' && has(SL.ui, 'show') && SL.screens.has('pause')) safe('ui.show pause', () => SL.ui.show('pause', { reason }));
+    // 'choice' (story dialog) and 'story' (a scripted scene such as Puff's memory) bring their own screen
+    if (reason !== 'choice' && reason !== 'story' && has(SL.ui, 'show') && SL.screens.has('pause')) safe('ui.show pause', () => SL.ui.show('pause', { reason }));
     SL.bus.emit('pause', { reason });
     return true;
   };

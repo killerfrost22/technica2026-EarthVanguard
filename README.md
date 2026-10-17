@@ -8,8 +8,11 @@ warship at the Vesta Line. Across five missions you fight through swarms of enem
 of drifting escape pods, and take on screen-filling bosses that break apart in stages. A friend can jump in
 at any time and fly the gold twin jet, the XF-9B *Sunlance*.
 
-Riding along with you is **Puff**, your pufferfish best friend. Clear the first mission to unlock
-**Puff's Ocean**, a voice-controlled minigame where Puff swims home through Earth's polluted ocean.
+Riding along in a water bubble tethered to your jet is **Puff**, a pufferfish who isn't from Earth. His ocean
+world was poisoned by corporations, then chosen by the Directorate for one of its cruel games: survive the
+trials and win the power to heal your home. He won, and lost his world anyway. He won't talk about it. In
+Mission 1 a black hole tears him away, and inside it he relives the first trial, playable with your voice.
+After that, **Puff's Ocean** lets you replay his trials any time from the title screen.
 
 <p align="center">
   <img src="docs/screenshots/coop-blackhole.png" width="24%" alt="Two jets in co-op flying toward a black hole">
@@ -91,9 +94,13 @@ nothing is recorded or sent.
   facility, and the experiments left her able to see with sound. With the power out, every echo she sends lights
   up the walls for a moment, but security drones hear it too. Three floors to the surface, each behind a keycard
   door. Open from the title screen for now (no story trigger yet).
-- **Puff's Ocean** (unlocked by clearing Mission 1): dodge ghost nets, oil spills, plastic bags, six-pack
+- **The black hole (Mission 1):** Puff's tether snaps and he's pulled in. Inside, his memory of the first
+  trial plays as a 45-second Puff's Ocean run with the Directorate watching; then the jet hauls him back out.
+- **Puff's Ocean** (unlocked by the memory or by clearing Mission 1): dodge ghost nets, oil spills, plastic bags, six-pack
   rings and leaking drums; squeeze under floating garbage patches; collect pearls, starfish (extra hearts)
-  and bubble shields. Every game over shows a real ocean-pollution fact.
+  and bubble shields. Every game over shows a real ocean-pollution fact. The sky changes as you swim: storms with
+  lightning, rain, snow, fog, sunsets, moonlit nights and the northern lights. Watch the bot swim
+  from the menu, and chase the top 10 on the leaderboard (saved on your device).
 
 **Designed, not wired into missions yet:** the full five-mission campaign, four side stories, the hangar
 and skill tree, music and the full radio cast are written up in [`docs/GDD.md`](docs/GDD.md). Three of the
@@ -128,6 +135,8 @@ Handy URL parameters for testing (add them to the end of the file URL):
 - `?sandbox=<id>`: open a test sandbox (for example `boss:boss_suneater`, `hazard:black_hole`, `weapons`)
 - `?save=mid&screen=puff`: open Puff's Ocean with a save that has Mission 1 cleared
 - `?save=mid&screen=puff&puff=bot`: watch a bot play Puff's Ocean
+- `?mission=m1`: the black hole and Puff's memory arrive about 35 s in (autopilot and `t=` fast-forward skip the
+  memory)
 - `?screen=echo`: open Echo (`&echo=play&sector=1` starts on a floor, `&echo=reveal` keeps every wall lit)
 - `&coop=1`: start in two-player mode
 - `&boss=1`: skip ahead to the boss
