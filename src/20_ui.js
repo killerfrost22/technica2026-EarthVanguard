@@ -115,6 +115,7 @@
       btns.append(
         button('Start', 'sl-btn--primary', () => SL.game.startMission(firstMission(), { coop: false })),
         button('2 Players', '', () => SL.game.startMission(firstMission(), { coop: true })));
+      if (SL.puff && SL.puff.titleButton) btns.appendChild(SL.puff.titleButton());
       const hint = el('p', 'sl-ui-title__hint', 'Move: WASD or arrows · drag on touch · auto-fire · Bomb: X · Pause: Esc');
       root.append(head, btns, hint);
     },

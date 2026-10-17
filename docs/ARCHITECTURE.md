@@ -80,6 +80,7 @@ flies the XF-9 Starlance jet fighter through space, shooting lasers at enemy jet
 | `src/20_ui.js` | ui | DOM screens + canvas HUD + touch buttons |
 | `src/21_game.js` | core | boot, state machine, main loop, mission lifecycle, director, scoring, results |
 | `src/22_debug.js` | core | URL params, autopilot, sandboxes, in-page tests, perf overlay |
+| `src/23_puff.js`, `src/23_puff.css` | puff | Puff's Ocean minigame screen (voice/keys), title button, unlock after m1 |
 | `tools/*` | core | build, harness, smoke tests, font fetch |
 
 Rules:
