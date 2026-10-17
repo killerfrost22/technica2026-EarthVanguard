@@ -142,4 +142,9 @@ For the full design and engineering details, see [`docs/GDD.md`](docs/GDD.md) an
 
 Built at Technica 2026 by:
 
-- _TODO: add team member names_
+- Yizhan Ao
+- Ruijie Chen
+- Jazmine Yambo
+- Megan Tiller
+
+A project website with the story, campaign, cast and team lives in [`website/index.html`](website/index.html).

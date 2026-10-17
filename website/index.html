@@ -1,0 +1,745 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="description" content="Earth Vanguard is a browser space shooter built at Technica 2026. Fly the XF-9 Starlance against the Nyx Armada, rescue survivors, and help Puff swim home.">
+<!--ARTIFACT-START-->
+<title>Earth Vanguard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Oxanium:wght@500;600;700;800&family=Barlow+Semi+Condensed:ital,wght@0,400;0,500;0,600;1,400&display=swap">
+<style>
+/* Layout: a carrier briefing console. One wide column of mission-control panels over a live starfield,
+   the campaign drawn as a flight route, the crew as radio cards. Single dark theme, the game's own palette. */
+:root {
+  color-scheme: dark;
+  --void: #04050b;
+  --deck: #0a0e1c;
+  --glass: rgba(14, 22, 42, 0.72);
+  --edge: rgba(127, 227, 255, 0.16);
+  --ink: #e8eef7;
+  --ink-dim: #9aa6bf;
+  --ink-faint: #64708a;
+  --lance: #7fe3ff;
+  --lance-deep: #3fc8ff;
+  --sun: #ffd27a;
+  --credit: #ffd34d;
+  --nyx: #ff5c8a;
+  --gravity: #b26bff;
+  --rescue: #5dffb0;
+  --f-display: "Oxanium", "Eurostile", "Bank Gothic", system-ui, sans-serif;
+  --f-body: "Barlow Semi Condensed", "Arial Narrow", system-ui, sans-serif;
+  --step--1: clamp(0.8rem, 0.78rem + 0.1vw, 0.86rem);
+  --step-0: clamp(1rem, 0.96rem + 0.2vw, 1.12rem);
+  --step-1: clamp(1.2rem, 1.1rem + 0.5vw, 1.45rem);
+  --step-2: clamp(1.5rem, 1.3rem + 1vw, 2.1rem);
+  --step-3: clamp(2rem, 1.6rem + 2vw, 3.2rem);
+  --step-hero: clamp(3.2rem, 2rem + 7vw, 7.4rem);
+  --gutter: clamp(16px, 4vw, 40px);
+  --max: 1160px;
+}
+
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  margin: 0;
+  background: var(--void);
+  color: var(--ink);
+  font-family: var(--f-body);
+  font-size: var(--step-0);
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+}
+img { max-width: 100%; display: block; }
+a { color: var(--lance); }
+:focus-visible { outline: 2px solid var(--sun); outline-offset: 3px; border-radius: 4px; }
+
+#stars {
+  position: fixed; inset: 0; width: 100%; height: 100%;
+  z-index: 0; pointer-events: none;
+}
+.page { position: relative; z-index: 1; padding-inline: var(--gutter); }
+.wrap { max-width: var(--max); margin-inline: auto; }
+
+/* ---------- shared type ---------- */
+.eyebrow {
+  font-family: var(--f-display);
+  font-size: var(--step--1);
+  font-weight: 600;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--ink-dim);
+  margin: 0;
+}
+h1, h2, h3 { font-family: var(--f-display); text-wrap: balance; margin: 0; line-height: 1.05; }
+h2 { font-size: var(--step-3); font-weight: 800; letter-spacing: 0.02em; text-transform: uppercase; }
+h3 { font-size: var(--step-1); font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; }
+p { margin: 0; }
+.lede { color: var(--ink-dim); max-width: 62ch; font-size: var(--step-1); line-height: 1.45; }
+
+section { padding-block: clamp(64px, 9vw, 120px); }
+.sec-head { display: grid; gap: 14px; margin-bottom: clamp(32px, 5vw, 56px); }
+
+/* ---------- nav ---------- */
+.nav {
+  position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5;
+  background: rgba(4, 5, 11, 0.78);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--edge);
+  margin-inline: calc(var(--gutter) * -1);
+  padding-inline: var(--gutter);
+}
+.nav .wrap { display: flex; align-items: center; justify-content: space-between; gap: 16px; min-height: 56px; flex-wrap: wrap; }
+.brand { font-family: var(--f-display); font-weight: 800; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink); text-decoration: none; font-size: 0.95rem; }
+.brand span { color: var(--lance); }
+.nav ul { list-style: none; display: flex; gap: clamp(12px, 2.4vw, 28px); margin: 0; padding: 0; flex-wrap: wrap; }
+.nav ul a { font-family: var(--f-display); font-size: 0.78rem; letter-spacing: 0.16em; text-transform: uppercase; color: var(--ink-dim); text-decoration: none; }
+.nav ul a:hover { color: var(--lance); }
+
+/* ---------- hero ---------- */
+.hero { padding-block: clamp(48px, 8vw, 104px) clamp(56px, 8vw, 96px); }
+.hero .wrap { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 0.75fr); gap: clamp(32px, 6vw, 80px); align-items: center; }
+.hero h1 {
+  font-size: var(--step-hero);
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  line-height: 0.92;
+  text-transform: uppercase;
+  margin-block: 18px 26px;
+}
+.hero h1 .l1 { display: block; color: #f4f8ff; text-shadow: 0 0 28px rgba(127, 227, 255, 0.35); }
+.hero h1 .l2 {
+  display: block;
+  background: linear-gradient(180deg, #d6f6ff 0%, var(--lance) 45%, var(--lance-deep) 100%);
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+  filter: drop-shadow(0 0 22px rgba(63, 200, 255, 0.45));
+}
+.hero .lede { margin-bottom: 32px; }
+.cta-row { display: flex; gap: 14px; flex-wrap: wrap; }
+.btn {
+  font-family: var(--f-display); font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase;
+  font-size: 0.92rem; text-decoration: none; padding: 15px 28px; border-radius: 10px;
+  display: inline-flex; align-items: center; gap: 10px; transition: transform 160ms ease-out, box-shadow 160ms ease-out;
+}
+.btn-primary {
+  color: #06121c;
+  background: linear-gradient(180deg, #e9fbff 0%, #8fe6ff 38%, var(--lance-deep) 100%);
+  box-shadow: 0 0 0 2px rgba(255, 210, 122, 0.85), 0 8px 32px rgba(63, 200, 255, 0.35);
+}
+.btn-ghost { color: var(--ink); background: rgba(16, 26, 44, 0.8); border: 1px solid rgba(154, 166, 191, 0.35); }
+.btn:hover { transform: translateY(-2px); }
+.btn-primary:hover { box-shadow: 0 0 0 2px var(--sun), 0 12px 40px rgba(63, 200, 255, 0.5); }
+
+.hero-meta { display: flex; flex-wrap: wrap; gap: 8px 22px; margin-top: 30px; color: var(--ink-faint); font-size: var(--step--1); font-family: var(--f-display); letter-spacing: 0.08em; text-transform: uppercase; }
+.hero-meta b { color: var(--ink-dim); font-weight: 600; }
+
+.screen {
+  position: relative; border-radius: 18px; overflow: hidden;
+  border: 1px solid var(--edge);
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.6), 0 0 60px rgba(178, 107, 255, 0.18);
+  background: var(--deck);
+}
+.hero .screen { aspect-ratio: 9 / 16; max-width: 360px; justify-self: center; width: 100%; transform: rotate(2deg); }
+.hero .screen img { width: 100%; height: 100%; object-fit: cover; }
+.screen figcaption, .shot figcaption {
+  font-size: var(--step--1); color: var(--ink-dim); padding: 10px 14px;
+}
+.hero .screen figcaption {
+  position: absolute; left: 0; right: 0; bottom: 0;
+  background: linear-gradient(0deg, rgba(4, 5, 11, 0.92), transparent);
+  padding-top: 40px;
+}
+
+/* ---------- prologue ---------- */
+.prologue { border-block: 1px solid var(--edge); background: linear-gradient(180deg, rgba(10, 14, 28, 0.6), rgba(4, 5, 11, 0.2)); }
+.prologue .wrap { display: grid; gap: 28px; }
+.card-lines { display: grid; gap: 10px; margin: 0; padding: 0; list-style: none; }
+.card-lines li {
+  font-family: var(--f-display); font-weight: 600; font-size: var(--step-2); line-height: 1.2;
+  color: var(--ink);
+}
+.card-lines li:last-child { color: var(--lance); }
+.card-lines li .t { font-size: var(--step--1); color: var(--ink-faint); letter-spacing: 0.14em; margin-right: 14px; vertical-align: middle; font-weight: 500; }
+
+/* ---------- story / premise ---------- */
+.premise { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: clamp(28px, 5vw, 64px); align-items: start; }
+.premise p + p { margin-top: 1em; }
+.premise p { color: var(--ink-dim); max-width: 62ch; }
+.premise strong { color: var(--ink); font-weight: 600; }
+.factions { display: grid; gap: 14px; }
+.faction { padding: 20px 22px; border-radius: 12px; background: var(--glass); border: 1px solid var(--edge); display: grid; gap: 6px; }
+.faction.enemy { border-color: rgba(255, 92, 138, 0.3); }
+.faction .eyebrow { color: var(--lance); }
+.faction.enemy .eyebrow { color: var(--nyx); }
+.faction p { color: var(--ink-dim); font-size: var(--step-0); }
+
+/* ---------- campaign route ---------- */
+.route { list-style: none; margin: 0; padding: 0; display: grid; gap: 0; position: relative; }
+.route::before {
+  content: ""; position: absolute; left: 23px; top: 24px; bottom: 24px; width: 2px;
+  background: linear-gradient(180deg, var(--lance) 0%, var(--gravity) 55%, var(--nyx) 100%);
+  opacity: 0.6;
+}
+.leg { display: grid; grid-template-columns: 48px minmax(0, 1fr); gap: clamp(16px, 3vw, 32px); padding-block: 18px; }
+.node {
+  width: 48px; height: 48px; border-radius: 50%; display: grid; place-items: center;
+  font-family: var(--f-display); font-weight: 700; font-size: 0.85rem; letter-spacing: 0.06em;
+  background: var(--void); border: 2px solid var(--c, var(--lance)); color: var(--c, var(--lance));
+  box-shadow: 0 0 18px color-mix(in srgb, var(--c, var(--lance)) 45%, transparent);
+  position: relative; z-index: 1;
+}
+.leg-body {
+  display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: 10px clamp(20px, 4vw, 48px);
+  padding: 22px 24px; border-radius: 14px; background: var(--glass); border: 1px solid var(--edge);
+}
+.leg-title { display: grid; gap: 4px; }
+.leg-title h3 { font-size: var(--step-2); color: var(--ink); }
+.loc { font-family: var(--f-display); font-size: var(--step--1); letter-spacing: 0.12em; text-transform: uppercase; color: var(--c, var(--lance)); }
+.leg-moment { color: var(--ink-dim); margin-top: 10px; }
+.radio {
+  display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 4px 12px; align-content: start;
+  padding: 14px 16px; border-radius: 10px; background: rgba(4, 5, 11, 0.55);
+  border: 1px solid color-mix(in srgb, var(--who, var(--sun)) 40%, transparent);
+}
+.radio .who { grid-column: 1 / -1; font-family: var(--f-display); font-size: 0.74rem; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; color: var(--who, var(--sun)); }
+.radio q { grid-column: 1 / -1; color: var(--ink); quotes: "\201C" "\201D"; }
+.radio.vael { background: rgba(20, 0, 28, 0.6); }
+.boss-tag { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 6px 12px; align-items: baseline; margin-top: 6px; padding-top: 12px; border-top: 1px dashed rgba(255, 92, 138, 0.3); }
+.boss-tag .k { font-family: var(--f-display); font-size: 0.72rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--ink-faint); }
+.boss-tag .n { font-family: var(--f-display); font-weight: 800; letter-spacing: 0.08em; color: var(--nyx); }
+.boss-tag .d { color: var(--ink-dim); font-style: italic; }
+
+.side-head { margin-top: clamp(48px, 7vw, 80px); margin-bottom: 22px; display: grid; gap: 10px; }
+.side-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; }
+.side {
+  padding: 20px; border-radius: 12px; background: var(--glass); border: 1px solid var(--edge);
+  display: grid; grid-template-rows: auto auto 1fr auto; gap: 8px;
+  border-top: 3px solid var(--c);
+}
+.side h3 { font-size: 1.05rem; }
+.side .loc { color: var(--c); }
+.side p { color: var(--ink-dim); font-size: 0.98rem; }
+.side .mb { font-family: var(--f-display); font-size: 0.74rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-faint); }
+.side .mb b { color: var(--nyx); font-weight: 700; }
+
+.ending { margin-top: clamp(48px, 7vw, 80px); display: grid; grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr); gap: clamp(24px, 5vw, 56px); align-items: center; }
+.ending blockquote { margin: 0; padding: 0 0 0 20px; border-left: 2px solid var(--sun); display: grid; gap: 10px; }
+.ending blockquote p { font-family: var(--f-display); font-size: var(--step-1); line-height: 1.35; color: var(--ink); }
+.ending blockquote p.end { color: var(--sun); letter-spacing: 0.2em; font-weight: 700; font-size: var(--step-0); }
+.ending .note { color: var(--ink-dim); }
+
+/* ---------- crew ---------- */
+.crew { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; }
+.who-card {
+  display: grid; grid-template-columns: 52px minmax(0, 1fr); gap: 4px 14px; align-items: start;
+  padding: 16px; border-radius: 12px; background: var(--glass); border: 1px solid var(--edge);
+}
+.plate {
+  grid-row: span 3; width: 52px; height: 52px; border-radius: 10px;
+  display: grid; place-items: center; font-family: var(--f-display); font-weight: 800; font-size: 1.1rem;
+  color: var(--c);
+  background: linear-gradient(180deg, color-mix(in srgb, var(--c) 22%, #0a0e1c), #05070f);
+  box-shadow: inset -1px 0 0 var(--c), 0 0 16px color-mix(in srgb, var(--c) 25%, transparent);
+}
+.who-card .cs { font-family: var(--f-display); font-size: 0.72rem; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; color: var(--c); }
+.who-card .nm { font-weight: 600; color: var(--ink); line-height: 1.25; }
+.who-card .rl { color: var(--ink-dim); font-size: 0.92rem; line-height: 1.4; }
+.who-card.villain { border-color: rgba(178, 107, 255, 0.4); background: rgba(20, 0, 28, 0.55); }
+
+/* ---------- gameplay ---------- */
+.shots { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; margin-bottom: clamp(32px, 5vw, 56px); }
+.shot { margin: 0; border-radius: 14px; overflow: hidden; border: 1px solid var(--edge); background: var(--deck); }
+.shot img { width: 100%; aspect-ratio: 9 / 16; object-fit: cover; }
+.shot.wide { grid-column: span 3; }
+.shot.wide img { aspect-ratio: 16 / 10; }
+.features { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 28px 36px; }
+.feature { display: grid; gap: 8px; align-content: start; }
+.feature h3 { font-size: 1.05rem; color: var(--lance); }
+.feature p { color: var(--ink-dim); }
+
+/* ---------- puff ---------- */
+.puff { background: linear-gradient(180deg, rgba(6, 30, 46, 0.0), rgba(6, 40, 58, 0.55) 30%, rgba(4, 22, 34, 0.55) 80%, rgba(4, 5, 11, 0)); }
+.puff-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: clamp(28px, 5vw, 64px); align-items: center; }
+.puff .eyebrow { color: #7ff0d6; }
+.puff h2 { color: #e6fbff; }
+.puff-copy { display: grid; gap: 18px; }
+.puff-copy p { color: var(--ink-dim); max-width: 58ch; }
+.puff-shots { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.puff-shots .shot:nth-child(2) { transform: translateY(28px); }
+.pill-row { display: flex; flex-wrap: wrap; gap: 8px; }
+.pill { font-size: 0.86rem; padding: 4px 12px; border-radius: 999px; border: 1px solid rgba(127, 240, 214, 0.3); color: #bff7ea; background: rgba(6, 40, 58, 0.6); }
+
+/* ---------- controls / build ---------- */
+.two-col { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.8fr); gap: clamp(28px, 5vw, 56px); align-items: start; }
+.table-wrap { overflow-x: auto; border-radius: 12px; border: 1px solid var(--edge); background: var(--glass); }
+table { border-collapse: collapse; width: 100%; min-width: 520px; font-size: 0.95rem; }
+th, td { text-align: left; padding: 10px 14px; border-bottom: 1px solid rgba(127, 227, 255, 0.08); }
+th { font-family: var(--f-display); font-size: 0.72rem; letter-spacing: 0.16em; text-transform: uppercase; color: var(--ink-faint); font-weight: 600; }
+td:first-child { color: var(--ink); font-weight: 600; }
+td { color: var(--ink-dim); }
+tr:last-child td { border-bottom: 0; }
+kbd { font-family: var(--f-display); font-size: 0.82em; padding: 1px 6px; border-radius: 5px; border: 1px solid rgba(154, 166, 191, 0.35); background: rgba(4, 5, 11, 0.6); color: var(--ink); }
+
+.status { display: grid; gap: 16px; }
+.status-block { padding: 20px 22px; border-radius: 12px; background: var(--glass); border: 1px solid var(--edge); display: grid; gap: 10px; }
+.status-block ul { margin: 0; padding-left: 1.1em; color: var(--ink-dim); display: grid; gap: 6px; }
+.status-block .eyebrow { color: var(--rescue); }
+.status-block.planned .eyebrow { color: var(--sun); }
+.tech { color: var(--ink-dim); font-size: 0.98rem; }
+
+/* ---------- team ---------- */
+.team { border-top: 1px solid var(--edge); }
+.squad { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; }
+.pilot {
+  padding: 24px 20px 22px; border-radius: 14px; background: var(--glass); border: 1px solid var(--edge);
+  display: grid; gap: 14px; justify-items: start;
+}
+.pilot .badge {
+  width: 64px; height: 64px; border-radius: 50%;
+  display: grid; place-items: center;
+  font-family: var(--f-display); font-weight: 800; font-size: 1.25rem; letter-spacing: 0.04em;
+  color: #06121c; background: radial-gradient(circle at 35% 30%, #ffffff, var(--c) 55%, color-mix(in srgb, var(--c) 50%, #000) 100%);
+  box-shadow: 0 0 24px color-mix(in srgb, var(--c) 45%, transparent);
+}
+.pilot .slot { font-family: var(--f-display); font-size: 0.72rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--ink-faint); }
+.pilot h3 { font-size: var(--step-1); text-transform: none; letter-spacing: 0.01em; }
+
+footer { padding-block: 40px 56px; border-top: 1px solid var(--edge); color: var(--ink-faint); font-size: var(--step--1); }
+footer .wrap { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+
+/* ---------- responsive ---------- */
+@media (max-width: 960px) {
+  .side-grid, .crew, .squad { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .features { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .two-col, .premise, .ending, .puff-grid { grid-template-columns: minmax(0, 1fr); }
+  .leg-body { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 720px) {
+  .hero .wrap { grid-template-columns: minmax(0, 1fr); }
+  .hero .screen { max-width: 280px; transform: none; }
+  .shots { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .shot.wide { grid-column: span 2; }
+  .shots .shot:nth-child(4) { display: none; }
+  .nav ul { display: none; }
+}
+@media (max-width: 480px) {
+  .side-grid, .crew, .squad, .features { grid-template-columns: minmax(0, 1fr); }
+  .leg { grid-template-columns: 36px minmax(0, 1fr); }
+  .node { width: 36px; height: 36px; font-size: 0.72rem; }
+  .route::before { left: 17px; }
+  .leg-body { padding: 18px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .btn { transition: none; }
+}
+</style>
+<!--ARTIFACT-HEAD-END-->
+</head>
+<body>
+<!--ARTIFACT-BODY-START-->
+<canvas id="stars" aria-hidden="true"></canvas>
+
+<div class="page">
+  <nav class="nav" aria-label="Sections">
+    <div class="wrap">
+      <a class="brand" href="#top">Earth <span>Vanguard</span></a>
+      <ul>
+        <li><a href="#story">Story</a></li>
+        <li><a href="#campaign">Campaign</a></li>
+        <li><a href="#crew">Crew</a></li>
+        <li><a href="#gameplay">Gameplay</a></li>
+        <li><a href="#puff">Puff</a></li>
+        <li><a href="#team">Team</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <header class="hero" id="top">
+    <div class="wrap">
+      <div>
+        <p class="eyebrow">XF-9 Starlance · Technica 2026</p>
+        <h1><span class="l1">Earth</span><span class="l2">Vanguard</span></h1>
+        <p class="lede">A vertical space shooter that runs in your browser. Laser dogfights, screen-filling dreadnoughts, black holes that bend your shots, and the people you pull out of escape pods along the way.</p>
+        <div class="cta-row">
+          <a class="btn btn-primary" href="../dist/earthvanguard.html">Play now</a>
+          <a class="btn btn-ghost" href="#story">Read the story</a>
+        </div>
+        <div class="hero-meta">
+          <span><b>5</b> missions</span>
+          <span><b>4</b> side stories</span>
+          <span><b>9</b> bosses</span>
+          <span><b>2</b>-player co-op</span>
+          <span><b>0</b> installs</span>
+        </div>
+      </div>
+      <figure class="screen" style="margin:0">
+        <img src="assets/coop-blackhole.jpg" alt="Two jets in co-op flying toward a black hole that bends the starfield around it" width="720" height="1280">
+        <figcaption>Co-op: the Starlance and Sunlance near a black hole.</figcaption>
+      </figure>
+    </div>
+  </header>
+
+  <!-- PROLOGUE -->
+  <section class="prologue" id="story" aria-labelledby="prologue-h">
+    <div class="wrap">
+      <p class="eyebrow" id="prologue-h">Prologue card · shown once, on a new save</p>
+      <ol class="card-lines">
+        <li><span class="t">2.5 s</span>The Nyx Armada tows black holes. It drops them on our worlds.</li>
+        <li><span class="t">2.5 s</span>One carrier is left at the Vesta Line. Two prototype jets are in its hangar.</li>
+        <li><span class="t">2.5 s</span>You fly the first one.</li>
+      </ol>
+    </div>
+  </section>
+
+  <!-- PREMISE -->
+  <section aria-labelledby="premise-h">
+    <div class="wrap">
+      <div class="sec-head">
+        <p class="eyebrow">Year 2291 · The story</p>
+        <h2 id="premise-h">The last warship at the Vesta Line</h2>
+      </div>
+      <div class="premise">
+        <div>
+          <p>Out of the Tartarus Rift comes the <strong>Nyx Armada</strong>, an alien fleet that worships the end of stars. Its warships tow captive black holes, called collapsars, and drop them on human stations and colonies like anchors. Its ruler, <strong>Hierarch Vael</strong>, wants one thing: a black hole big enough to swallow the Sun.</p>
+          <p>The carrier <strong>UNS <i>Halcyon</i></strong> is all that stands at the Vesta Line, and its hangar holds two XF-9 prototypes. Commander Kade sends you, the test pilot of the <strong>XF-9 <i>Starlance</i></strong>, against the whole Armada one strike at a time.</p>
+          <p>People you pull out of escape pods ask for help along the way. Every favor you fly for them teaches the <i>Starlance</i> a new skill.</p>
+        </div>
+        <div class="factions">
+          <div class="faction">
+            <p class="eyebrow">Humanity · UNS Halcyon</p>
+            <h3>XF-9 Starlance &amp; XF-9B Sunlance</h3>
+            <p>The fastest jets humanity ever built. White and cyan for player one, graphite and gold for the friend who grabs the second stick.</p>
+          </div>
+          <div class="faction enemy">
+            <p class="eyebrow">The enemy · Nyx Armada</p>
+            <h3>Collapsar fleet of Hierarch Vael</h3>
+            <p>Graphite hulls with burning pink seams. Swarming jets, gravity siege engines, and a throne ship parked between two black holes.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CAMPAIGN -->
+  <section id="campaign" aria-labelledby="campaign-h">
+    <div class="wrap">
+      <div class="sec-head">
+        <p class="eyebrow">Campaign route · Vesta to the Tartarus Rift</p>
+        <h2 id="campaign-h">Five missions, one flight path</h2>
+        <p class="lede">Each mission opens with a short radio briefing and ends against a boss that fills the top of the screen and breaks apart in stages.</p>
+      </div>
+
+      <ol class="route">
+        <li class="leg" style="--c:#7fe3ff">
+          <span class="node">M1</span>
+          <div class="leg-body">
+            <div class="leg-title">
+              <span class="loc">Vesta Shipyards · Asteroid Belt</span>
+              <h3>First Light</h3>
+              <p class="leg-moment">A catapult launch off the <i>Halcyon</i>'s deck into burning shipyards, and the sun cresting Vesta as RAZORBACK goes down.</p>
+            </div>
+            <div class="radio" style="--who:#ffb53f">
+              <span class="who">Anvil · Command</span>
+              <q>Nyx jets are tearing up the Vesta yards. Halcyon launches in five.</q>
+            </div>
+            <div class="boss-tag"><span class="k">Boss</span><span class="n">RAZORBACK</span><span class="d">Nyx Assault Carrier</span></div>
+          </div>
+        </li>
+        <li class="leg" style="--c:#ffcf8a">
+          <span class="node">M2</span>
+          <div class="leg-body">
+            <div class="leg-title">
+              <span class="loc">Kerr Station · Jupiter Trojans</span>
+              <h3>Deep Pull</h3>
+              <p class="leg-moment">Your lasers curve around a black hole to hit the jet hiding behind it. Gravity bends everything: your shots, theirs, and you.</p>
+            </div>
+            <div class="radio" style="--who:#ffb53f">
+              <span class="who">Anvil · Command</span>
+              <q>They dragged a black hole to Kerr Station. It's eating the station alive.</q>
+            </div>
+            <div class="boss-tag"><span class="k">Boss</span><span class="n">LODESTAR</span><span class="d">Gravity Siege Engine</span></div>
+          </div>
+        </li>
+        <li class="leg" style="--c:#8f9bff">
+          <span class="node">M3</span>
+          <div class="leg-body">
+            <div class="leg-title">
+              <span class="loc">Tantalus Nebula</span>
+              <h3>Stormwall</h3>
+              <p class="leg-moment">Lightning lights the cloud canyon from the inside, ion clouds jam your guns, and then the storm's eye opens to stars.</p>
+            </div>
+            <div class="radio" style="--who:#3fc8ff">
+              <span class="who">Sparrow · Wingmate</span>
+              <q>There's a prison convoy in there. Our people. Let's go get them.</q>
+            </div>
+            <div class="boss-tag"><span class="k">Boss</span><span class="n">TEMPEST</span><span class="d">Storm Dreadnought</span></div>
+          </div>
+        </li>
+        <li class="leg" style="--c:#4f8dff">
+          <span class="node">M4</span>
+          <div class="leg-body">
+            <div class="leg-title">
+              <span class="loc">Blue giant Tarsis</span>
+              <h3>Sunbreak</h3>
+              <p class="leg-moment">An eclipse slides over a blue giant while blades of starlight sweep the screen. You survive by hiding in the shadow of anything big.</p>
+            </div>
+            <div class="radio" style="--who:#ffb53f">
+              <span class="who">Anvil · Command</span>
+              <q>Burn the harvester, Lance. Then we knock on their door.</q>
+            </div>
+            <div class="boss-tag"><span class="k">Boss</span><span class="n">SUNEATER</span><span class="d">Stellar Harvester</span></div>
+          </div>
+        </li>
+        <li class="leg" style="--c:#ff5c8a">
+          <span class="node">M5</span>
+          <div class="leg-body">
+            <div class="leg-title">
+              <span class="loc">Tartarus Rift</span>
+              <h3>Nightfall</h3>
+              <p class="leg-moment">You punch through the rift as the <i>Halcyon</i>'s spinal cannon fires past you. The throne ship's final form collapses into a black hole you have to break.</p>
+            </div>
+            <div class="radio vael" style="--who:#b26bff">
+              <span class="who">Hierarch Vael · Channel hijacked</span>
+              <q>Come then, little light. Every star ends in my hand.</q>
+            </div>
+            <div class="boss-tag"><span class="k">Final boss</span><span class="n">OUROBOROS</span><span class="d">Throne of the Hierarch</span></div>
+          </div>
+        </li>
+      </ol>
+
+      <div class="side-head">
+        <p class="eyebrow">Side stories · one radio choice each</p>
+        <h3>Favors for the people you rescue</h3>
+        <p class="lede">Each side story ends in a mini-boss and one decision on the radio. What you pick decides which skill the Starlance learns and how that person's epilogue reads.</p>
+      </div>
+      <div class="side-grid">
+        <article class="side" style="--c:#ffd27a">
+          <span class="loc">Cold Harbor · Callisto</span>
+          <h3>Lantern Run</h3>
+          <p>Escort a refugee liner with twelve hundred souls and one bad engine to orbit. It doesn't stop, so neither do you.</p>
+          <span class="mb">Mini-boss <b>HAILSTORM</b></span>
+        </article>
+        <article class="side" style="--c:#5dffb0">
+          <span class="loc">Edge of Kerr's Eye</span>
+          <h3>Lagrange Deep</h3>
+          <p>Dr. Osei's station is falling into a black hole. Save her crew or her gravity core. Past the horizon, nothing comes back.</p>
+          <span class="mb">Mini-boss <b>TETHER</b></span>
+        </article>
+        <article class="side" style="--c:#d8dde8">
+          <span class="loc">The Boneyard · Tantalus</span>
+          <h3>Rook's Gambit</h3>
+          <p>The veteran ace who flew the first XF-9 wants one sortie against the Nyx ace who shot down her whole squadron.</p>
+          <span class="mb">Mini-boss <b>MANTIS</b></span>
+        </article>
+        <article class="side" style="--c:#ff6fae">
+          <span class="loc">Collapsar Foundry</span>
+          <h3>Seed of Night</h3>
+          <p>A Nyx defector's codes get you inside the foundry where black holes are grown from seeds. One seed is nearly ripe.</p>
+          <span class="mb">Mini-boss <b>CRUCIBLE</b></span>
+        </article>
+      </div>
+
+      <div class="ending">
+        <blockquote>
+          <p>The Tartarus Rift closed at 06:12 ship time.</p>
+          <p>The Halcyon turned for Earth.</p>
+          <p class="end">THE END</p>
+        </blockquote>
+        <p class="note">The ending counts every person you rescued across the campaign, then shows one epilogue card per side story based on the choice you made. Fly the Lantern Run one way and Tamsin paints your callsign on her bow. Fly it the other and Patch's kid brother decides to become a mechanic.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- CREW -->
+  <section id="crew" aria-labelledby="crew-h">
+    <div class="wrap">
+      <div class="sec-head">
+        <p class="eyebrow">Radio cast · procedural portraits, no image files</p>
+        <h2 id="crew-h">Who's on the channel</h2>
+        <p class="lede">Story arrives in short radio lines you can read while dodging. Every character has a color, a portrait drawn in code, and a synthesized radio chirp.</p>
+      </div>
+      <div class="crew">
+        <div class="who-card" style="--c:#ffb53f"><span class="plate">MK</span><span class="cs">Anvil</span><span class="nm">Commander Maren Kade</span><span class="rl">Captain of the Halcyon. Calm, clipped, one warm word per mission.</span></div>
+        <div class="who-card" style="--c:#3fc8ff"><span class="plate">JP</span><span class="cs">Sparrow</span><span class="nm">Lt. Juno Park</span><span class="rl">Your wingmate. Keeps a running kill bet and cheers every rescue.</span></div>
+        <div class="who-card" style="--c:#ff9d4a"><span class="plate">NO</span><span class="cs">Patch</span><span class="nm">Chief Nell Okafor</span><span class="rl">Hangar chief. Talks to the Starlance like a stubborn pet.</span></div>
+        <div class="who-card villain" style="--c:#b26bff"><span class="plate">V</span><span class="cs">Hierarch</span><span class="nm">Hierarch Vael</span><span class="rl">Ruler of the Armada. Hijacks the radio and calls you "little light."</span></div>
+        <div class="who-card" style="--c:#ffd27a"><span class="plate">BT</span><span class="cs">Lantern</span><span class="nm">Captain Bo Tamsin</span><span class="rl">Master of a refugee liner, thirty years of carrying people out.</span></div>
+        <div class="who-card" style="--c:#5dffb0"><span class="plate">HO</span><span class="cs">Doc</span><span class="nm">Dr. Halima Osei</span><span class="rl">Gravity physicist who calls terrifying things "beautiful."</span></div>
+        <div class="who-card" style="--c:#d8dde8"><span class="plate">PH</span><span class="cs">Rook</span><span class="nm">Captain Petra Holt</span><span class="rl">First XF-9 test pilot and Nyx prisoner. Calls you "kid."</span></div>
+        <div class="who-card" style="--c:#ff6fae"><span class="plate">IX</span><span class="cs">Ixa</span><span class="nm">Ixa</span><span class="rl">Nyx foundry engineer who defects. "I am grateful in advance."</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- GAMEPLAY -->
+  <section id="gameplay" aria-labelledby="gameplay-h">
+    <div class="wrap">
+      <div class="sec-head">
+        <p class="eyebrow">Gameplay · portrait 9:16, auto-fire on</p>
+        <h2 id="gameplay-h">Power you can see</h2>
+      </div>
+      <div class="shots">
+        <figure class="shot"><img src="assets/boss.jpg" alt="Boss warning banner with a radio message from Anvil" width="720" height="1280" loading="lazy"><figcaption>Boss warning with a radio call from Anvil.</figcaption></figure>
+        <figure class="shot"><img src="assets/coop-blackhole.jpg" alt="Two jets flying near a black hole" width="720" height="1280" loading="lazy"><figcaption>Black holes bend lasers and the screen.</figcaption></figure>
+        <figure class="shot"><img src="assets/puff-nets.jpg" alt="Puff the pufferfish between two ghost nets" width="540" height="960" loading="lazy"><figcaption>Puff's Ocean, the voice minigame.</figcaption></figure>
+        <figure class="shot wide"><img src="assets/title.jpg" alt="Earth Vanguard title screen with Start and 2 Players buttons" width="1280" height="800" loading="lazy"><figcaption>Title screen. Start solo, or press 2 Players for local co-op.</figcaption></figure>
+      </div>
+      <div class="features">
+        <div class="feature"><h3>Weapons that change the screen</h3><p>Twin pulse lasers become a wall of light, the spread fan widens to nine rays, and the lance beam swells from a needle to a pillar across five levels. Homing missiles and bombs on top.</p></div>
+        <div class="feature"><h3>Space hazards</h3><p>Black holes that bend your shots, asteroid storms, ion storms, solar flares, mine fields and wormholes.</p></div>
+        <div class="feature"><h3>Rescue</h3><p>Escape pods drift through the crossfire. Fly low to scoop survivors out. Some of them start a side story.</p></div>
+        <div class="feature"><h3>Bosses in stages</h3><p>Each boss loses turrets and plates, changes attacks at every health mark, and dies in slow motion.</p></div>
+        <div class="feature"><h3>Drop-in co-op</h3><p>A friend can take the gold XF-9B Sunlance at any time. One keyboard, two gamepads, or a mix.</p></div>
+        <div class="feature"><h3>Plays anywhere</h3><p>On touch screens, drag anywhere and the jet follows your finger's motion, so your thumb never covers it.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PUFF -->
+  <section class="puff" id="puff" aria-labelledby="puff-h">
+    <div class="wrap puff-grid">
+      <div class="puff-copy">
+        <p class="eyebrow">Unlocked after Mission 1 · voice controlled</p>
+        <h2 id="puff-h">Puff's Ocean</h2>
+        <p>Riding along in the cockpit is Puff, your pufferfish best friend. Clear the first mission and Puff gets a game of its own: swim home through Earth's polluted ocean.</p>
+        <p>You steer with your voice. Get loud, with an "ahh", a hum or a whistle, and Puff puffs up and floats. Go quiet and Puff shrinks and sinks under floating garbage patches. Puff tunes itself to your voice first, so a soft hum works as well as a scream. The mic only measures loudness inside the page; nothing is recorded or sent.</p>
+        <p>Every game over shows a real ocean-pollution fact.</p>
+        <div class="pill-row" aria-label="Hazards in Puff's Ocean">
+          <span class="pill">Ghost nets</span><span class="pill">Oil spills</span><span class="pill">Plastic bags</span><span class="pill">Six-pack rings</span><span class="pill">Leaking drums</span><span class="pill">Pearls &amp; starfish</span>
+        </div>
+      </div>
+      <div class="puff-shots">
+        <figure class="shot"><img src="assets/puff.jpg" alt="Puff shrinking to slip under a floating garbage patch" width="540" height="960" loading="lazy"></figure>
+        <figure class="shot"><img src="assets/puff-nets.jpg" alt="Puff swimming between two ghost fishing nets" width="540" height="960" loading="lazy"></figure>
+      </div>
+    </div>
+  </section>
+
+  <!-- CONTROLS + BUILD -->
+  <section aria-labelledby="controls-h">
+    <div class="wrap">
+      <div class="sec-head">
+        <p class="eyebrow">How to play</p>
+        <h2 id="controls-h">Controls &amp; build status</h2>
+      </div>
+      <div class="two-col">
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Action</th><th>Keyboard (solo)</th><th>Gamepad</th></tr></thead>
+            <tbody>
+              <tr><td>Move</td><td><kbd>WASD</kbd> or arrow keys</td><td>Left stick / D-pad</td></tr>
+              <tr><td>Fire</td><td>Automatic, or <kbd>Space</kbd></td><td>Automatic</td></tr>
+              <tr><td>Bomb</td><td><kbd>X</kbd> <kbd>Q</kbd> <kbd>K</kbd></td><td>A</td></tr>
+              <tr><td>Skill</td><td><kbd>C</kbd> <kbd>E</kbd> <kbd>L</kbd></td><td>X or B</td></tr>
+              <tr><td>Focus</td><td><kbd>Shift</kbd></td><td>LB / RB</td></tr>
+              <tr><td>Pause</td><td><kbd>Esc</kbd> or <kbd>P</kbd></td><td>Start</td></tr>
+              <tr><td>Puff up</td><td>Make a sound, or hold <kbd>Space</kbd></td><td>Right trigger</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="status">
+          <div class="status-block">
+            <p class="eyebrow">Playable now</p>
+            <ul>
+              <li>Flight-test Mission 1 with every system: waves, a black hole, rescues, a radio choice and a boss</li>
+              <li>All three weapon types, missiles and bombs</li>
+              <li>Local two-player co-op</li>
+              <li>Puff's Ocean voice minigame</li>
+            </ul>
+          </div>
+          <div class="status-block planned">
+            <p class="eyebrow">Designed, in progress</p>
+            <ul>
+              <li>The full five-mission campaign and four side stories</li>
+              <li>Hangar upgrades, skill tree and music</li>
+              <li>SUNEATER, MANTIS and CRUCIBLE are built and fightable in test sandboxes</li>
+            </ul>
+          </div>
+          <p class="tech">Plain JavaScript, HTML canvas and the Web Audio API. No frameworks, no image or sound files: every jet is drawn in code and every sound is synthesized. Black-hole lensing runs on WebGL. The whole game ships as one HTML file.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- TEAM -->
+  <section class="team" id="team" aria-labelledby="team-h">
+    <div class="wrap">
+      <div class="sec-head">
+        <p class="eyebrow">Flight crew · Technica 2026</p>
+        <h2 id="team-h">The team</h2>
+        <p class="lede">Four people built Earth Vanguard at Technica 2026.</p>
+      </div>
+      <div class="squad">
+        <article class="pilot" style="--c:#7fe3ff"><span class="badge">YA</span><span class="slot">Pilot 01</span><h3>Yizhan Ao</h3></article>
+        <article class="pilot" style="--c:#ffd27a"><span class="badge">RC</span><span class="slot">Pilot 02</span><h3>Ruijie Chen</h3></article>
+        <article class="pilot" style="--c:#5dffb0"><span class="badge">JY</span><span class="slot">Pilot 03</span><h3>Jazmine Yambo</h3></article>
+        <article class="pilot" style="--c:#ff6fae"><span class="badge">MT</span><span class="slot">Pilot 04</span><h3>Megan Tiller</h3></article>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="wrap">
+      <span>Earth Vanguard · built at Technica 2026</span>
+      <a href="../dist/earthvanguard.html">Play in your browser</a>
+    </div>
+  </footer>
+</div>
+
+<script>
+(function () {
+  var c = document.getElementById('stars');
+  if (!c || !c.getContext) return;
+  var ctx = c.getContext('2d');
+  var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var stars = [], w = 0, h = 0, dpr = 1, last = 0;
+  var tints = ['#ffffff', '#cfefff', '#7fe3ff', '#d9c2ff'];
+
+  function resize() {
+    dpr = Math.min(window.devicePixelRatio || 1, 2);
+    w = window.innerWidth; h = window.innerHeight;
+    c.width = Math.round(w * dpr); c.height = Math.round(h * dpr);
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    var n = Math.round((w * h) / 4200);
+    stars = [];
+    for (var i = 0; i < n; i++) {
+      var z = Math.random();
+      stars.push({ x: Math.random() * w, y: Math.random() * h, z: z, r: 0.4 + z * 1.4, tw: Math.random() * 6.28, col: tints[(Math.random() * tints.length) | 0] });
+    }
+    draw(0);
+  }
+
+  function draw(dt) {
+    var g = ctx.createRadialGradient(w * 0.78, h * 0.18, 0, w * 0.78, h * 0.18, Math.max(w, h) * 0.7);
+    g.addColorStop(0, '#160a2a'); g.addColorStop(0.5, '#080a18'); g.addColorStop(1, '#04050b');
+    ctx.fillStyle = g; ctx.fillRect(0, 0, w, h);
+    for (var i = 0; i < stars.length; i++) {
+      var s = stars[i];
+      s.y += dt * (8 + s.z * 46);
+      if (s.y > h + 4) { s.y = -4; s.x = Math.random() * w; }
+      s.tw += dt * 2;
+      ctx.globalAlpha = 0.35 + s.z * 0.5 + Math.sin(s.tw) * 0.12;
+      ctx.fillStyle = s.col;
+      ctx.beginPath(); ctx.arc(s.x, s.y, s.r, 0, 6.2832); ctx.fill();
+    }
+    ctx.globalAlpha = 1;
+  }
+
+  function loop(t) {
+    var dt = last ? Math.min((t - last) / 1000, 0.05) : 0;
+    last = t; draw(dt);
+    requestAnimationFrame(loop);
+  }
+
+  window.addEventListener('resize', resize);
+  resize();
+  if (!reduce) requestAnimationFrame(loop);
+})();
+</script>
+<!--ARTIFACT-BODY-END-->
+</body>
+</html>
