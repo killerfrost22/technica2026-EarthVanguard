@@ -15,6 +15,7 @@ jet. Unlike the pilot, he remembers everything and won't talk about it; his past
 | Inside | A flash and slow-mo, then `SL.game.pause('story')` (no pause menu) and Puff's Ocean opens in scenario mode: a narrated intro, then a 45 s trial in his home sea with a violet cast, the Directorate's voice ("Your world is watching, little fish") and Puff's thoughts. |
 | Fail | Losing all hearts: "That's not how it happened. He didn't fail. He couldn't. Again." (hands-free: hum to retry). |
 | Wake | Surviving 45 s: "Subject survives. Proceed to trial two. There were more trials. There was always one more." **Wake up** resumes the mission, clears stale radio lines, and the jet hauls the bubble back into formation. Anvil: "Got him!" Puff: "...I'm okay. Don't ask. Not yet." |
+| Trust | m1's old beacon choice is replaced: once Puff has said his piece (`talkReady`, about 6 s after waking), the pilot chooses: **Ask what he saw** ("Not now. Please.") or **Give him space** ("...Thanks, {callsign}. I owe you one.", `save.flags.puff_trust` +1). Only asked if the memory happened. |
 
 **Skip memory** is offered in the pause menu, on a failed trial, and in the intro once the memory has been seen
 (`save.flags.puff_memory1`). Finishing or skipping sets `unlock_puff` (Puff's Ocean on the title screen).
@@ -24,7 +25,8 @@ straight back, so smoke runs never stall.
 ## Public surface
 
 - `SL.puffStory.spawnBuddy()`, `.buddy` (the ally entity), `.state` (`off | aboard | pulled | inside`).
-- `SL.puffStory.blackHole()`: the timeline hook above.
+- `SL.puffStory.blackHole()`: the timeline hook above. `memoryDone`, `talkReady`, `trustReply(choiceId)` and the
+  story choice `puff_trust1` drive the trust beat.
 - `SL.puffStory.memoryScenario(onDone)`: the scenario object handed to `SL.puff.openScenario` (see
   `docs/api/puff.md`).
 - Radio character `puff` (`SL.story.characters.puff`), portrait drawn with `SL.puff.drawBuddy`.

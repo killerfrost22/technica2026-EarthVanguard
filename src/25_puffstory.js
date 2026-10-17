@@ -11,7 +11,10 @@
    45 s trial in his home sea, with the Directorate speaking over it. Losing all hearts replays it ("That's not how it
    happened"); finishing it (or Skip memory) wakes him, the jet hauls the bubble back out, and the mission resumes.
    Autopilot, fast-forward and the in-page tests skip the memory (Puff is pulled in and comes straight back).
-   Flags: save.flags.puff_memory1 (seen; Skip memory is offered on replays) and unlock_puff (Puff's Ocean). */
+   After he is back and has said "Don't ask. Not yet." (PS.talkReady), m1 asks the pilot's first trust choice,
+   puff_trust1: Ask what he saw (he shuts down) or Give him space (+1 trust). Later memories can build on it.
+   Flags: save.flags.puff_memory1 (seen; Skip memory is offered on replays), unlock_puff (Puff's Ocean) and
+   puff_trust (how much Puff trusts the pilot, a count). */
 (function (SL) {
   'use strict';
 
@@ -20,7 +23,7 @@
   const TRIAL_LEN = 45;       // seconds of swimming in the memory trial
   const PULL_TIME = 2.6;      // seconds from the tether snapping to Puff vanishing over the horizon
 
-  const PS = SL.puffStory = { buddy: null, state: 'off' };
+  const PS = SL.puffStory = { buddy: null, state: 'off', memoryDone: false, talkReady: false };
 
   function flags() {
     const d = SL.save.data;
@@ -243,9 +246,35 @@
       d.u = 0;
       d.mood = '';
     }
+    PS.memoryDone = true;
     SL.after(0.8, () => say('anvil', 'Got him! Reel him in, {callsign}.', { priority: true }));
     SL.after(3.2, () => say('puff', '...I\'m okay. Don\'t ask. Not yet.'));
+    SL.after(6.2, () => { PS.talkReady = true; });
   }
+
+  // ------------------------------------------------------------------ trust
+  if (SL.story && SL.story.choices) {
+    SL.story.choices.puff_trust1 = {
+      prompt: 'Puff is curled up tight in his bubble, spines out, staring back at the black hole.',
+      options: [{ id: 'ask', text: 'Ask what he saw' }, { id: 'space', text: 'Give him space' }],
+    };
+  }
+  /** Timeline hook after the puff_trust1 choice: Puff answers, and giving him space earns his trust. */
+  PS.trustReply = function (choice) {
+    const b = PS.buddy;
+    if (choice === 'space') {
+      const f = flags();
+      f.puff_trust = (+f.puff_trust || 0) + 1;
+      SL.save.commit();
+      if (b && !b.dead) b.data.mood = 'happy';
+      say('puff', '...Thanks, {callsign}. I owe you one.', { priority: true });
+      SL.after(2, () => { if (b && !b.dead) b.data.mood = ''; });
+    } else {
+      if (b && !b.dead) b.data.mood = 'ouch';
+      say('puff', 'Not now. Please.', { priority: true });
+      SL.after(2, () => { if (b && !b.dead) b.data.mood = ''; });
+    }
+  };
 
   // ------------------------------------------------------------------ the memory: The First Trial
   const VOICE = [
@@ -283,7 +312,7 @@
           api.btn('Remember with keys or touch', '', () => api.startKeys()));
         if (flags().puff_memory1) b.append(api.btn('Skip memory', 'sl-btn--ghost', () => finish()));
         side.appendChild(b);
-        side.appendChild(api.el('p', 'sl-puff__note', 'Loud: Puff puffs up and floats. Quiet: he shrinks and sinks. Survive ' + TRIAL_LEN + ' seconds.'));
+        side.appendChild(api.el('p', 'sl-puff__note', 'Voice: get loud to puff him up, go quiet to sink. Keys: hold Space to puff up, let go to sink. Survive ' + TRIAL_LEN + ' seconds.'));
         api.focusFirst();
       },
       step(R, dt, api) {
@@ -367,6 +396,8 @@
     SL.bus.on('missionStart', (e) => {
       PS.buddy = null;
       PS.state = 'off';
+      PS.memoryDone = false;
+      PS.talkReady = false;
       if (e && e.mission && e.mission.puffBuddy) PS.spawnBuddy();
     });
     SL.bus.on('missionEnd', () => { PS.buddy = null; PS.state = 'off'; });

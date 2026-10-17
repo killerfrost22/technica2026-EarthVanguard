@@ -596,6 +596,7 @@
     const prev = G.level;
     smoothLevel(targetLevel(dt), dt);
     const L = G.level;
+    if (L > 0.5) R.everUp = true; // Puff stops reminding once the player has puffed him up
     if (L - prev > 0.025) { sfx('bubble'); emitBubbles(R, 1); }
 
     const vt = V_SINK + (V_RISE - V_SINK) * L;
@@ -1743,10 +1744,10 @@
         label(ctx, 'BEST ' + U.fmtInt(Math.max(store().best, R.over ? 0 : finalScore(R))), -30, 80, '600 16px Oxanium, sans-serif', 'rgba(230,248,255,0.85)', 'right');
       });
     }
-    // level meter: what Puff hears
+    // level meter: what Puff hears (bottom right, clear of Puff resting on the sand at the left)
     if (G.state !== 'intro' && G.state !== 'error' && G.state !== 'micwait') {
-      anchored(ctx, 0, H, () => {
-        const x = 30, y = -84, w = 300, h = 16;
+      anchored(ctx, W, H, () => {
+        const x = -330, y = -84, w = 300, h = 16;
         ctx.fillStyle = 'rgba(2,20,32,0.55)';
         ctx.fillRect(x - 4, y - 4, w + 8, h + 8);
         const gr = ctx.createLinearGradient(x, 0, x + w, 0);
@@ -1771,11 +1772,48 @@
       ctx.globalAlpha = 0.75 + 0.25 * Math.sin(R.scroll * 3);
       anchored(ctx, W / 2, SURFACE + 46, () => label(ctx, 'BOT SWIMMING · Esc or tap for menu', 0, 0, '700 18px Oxanium, sans-serif', '#ffe27a', 'center'));
       ctx.globalAlpha = 1;
-    } else if (G.state === 'play' && R.t < 6) {
-      ctx.globalAlpha = U.clamp(6 - R.t, 0, 1);
-      anchored(ctx, W / 2, 330, () => label(ctx, G.mode === 'voice' ? 'Get loud to puff up. Go quiet to sink.' : 'Hold to puff up. Let go to sink.', 0, 0, '700 26px Oxanium, sans-serif', '#ffffff', 'center'));
-      ctx.globalAlpha = 1;
+    } else if (G.state === 'ready' || (G.state === 'play' && (R.t < 6 || !R.everUp))) {
+      drawTip(ctx, R);
     }
+  }
+
+  // Puff tells the player how to fly him, in a speech bubble, worded for the device they're using.
+  function tipLines() {
+    if (G.mode === 'voice') return ['Make some noise to puff me up!', 'Go quiet and I sink.'];
+    const dev = SL.input && SL.input.lastDevice;
+    if (dev === 'touch') return ['Hold the screen to puff me up!', 'Let go and I sink.'];
+    if (dev === 'gamepad') return ['Hold the right trigger to puff me up!', 'Let go and I sink.'];
+    return ['Hold SPACE to puff me up!', 'Let go and I sink.'];
+  }
+  function drawTip(ctx, R) {
+    const [main, sub] = tipLines();
+    const k = hudK();
+    ctx.save();
+    ctx.font = '800 22px Oxanium, sans-serif';
+    const w = Math.max(ctx.measureText(main).width, 150) + 36, h = 64;
+    // beside Puff, above him unless he's near the surface
+    const below = R.y - R.r - (h + 30) * k < SURFACE + 60;
+    ctx.translate(FX + R.r * 0.4, below ? R.y + R.r + 18 * k : R.y - R.r - 18 * k);
+    ctx.scale(k, k);
+    const by = below ? 14 : -h - 14;
+    ctx.globalAlpha = 0.92 + 0.08 * Math.sin(R.scroll * 5);
+    ctx.fillStyle = '#ffffff';
+    ctx.strokeStyle = 'rgba(10,60,90,0.35)';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    if (ctx.roundRect) ctx.roundRect(-10, by, w, h, 16); else ctx.rect(-10, by, w, h);
+    ctx.moveTo(4, below ? by : by + h);
+    ctx.lineTo(0, below ? 0 : 0);
+    ctx.lineTo(22, below ? by : by + h);
+    ctx.fill();
+    ctx.stroke();
+    ctx.textAlign = 'left';
+    ctx.fillStyle = '#0b3a52';
+    ctx.fillText(main, 8, by + 28);
+    ctx.font = '600 16px Oxanium, sans-serif';
+    ctx.fillStyle = '#3d6f88';
+    ctx.fillText(sub, 8, by + 50);
+    ctx.restore();
   }
 
   function render() {
@@ -1960,7 +1998,7 @@
       'trials and win the power to heal your world. These are the trials, the way Puff remembers them.';
     p.appendChild(story);
     const how = el('ul', 'sl-puff__how');
-    [['Loud', 'Puff puffs up and floats'], ['Quiet', 'Puff shrinks and sinks: squeeze under the garbage patch'], ['Avoid', 'ghost nets, oil spills, bags, six-pack rings, leaking drums'], ['Grab', 'pearls for points, starfish for hearts, bubbles for a shield']]
+    [['Loud', 'Puff puffs up and floats'], ['Quiet', 'Puff shrinks and sinks: squeeze under the garbage patch'], ['Keys', 'hold Space (or the screen) to puff up, let go to sink'], ['Avoid', 'ghost nets, oil spills, bags, six-pack rings, leaking drums'], ['Grab', 'pearls for points, starfish for hearts, bubbles for a shield']]
       .forEach(([k, v]) => { const li = el('li'); li.append(el('b', '', k + ': '), document.createTextNode(v)); how.appendChild(li); });
     p.appendChild(how);
     if (st.best) p.appendChild(el('div', 'sl-puff__best sl-num', 'Best: ' + U.fmtInt(st.best)));

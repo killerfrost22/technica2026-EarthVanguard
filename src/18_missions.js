@@ -3,7 +3,8 @@
    spawns, repeat, if, radio, pods, pickups, banners, music, scroll, bg phases, waitClear, a checkpoint, a
    story choice, the test_blackhole hazard, then test_boss and an afterBoss line) and 'm1' as a copy of it so
    ?mission=m1 works before real content lands. 'test' is flagged dev: true (menus may hide it). m1 adds Puff's
-   bubble (puffBuddy) and swaps the stub hazard for a real black_hole that pulls Puff in (25_puffstory.js). */
+   bubble (puffBuddy), swaps the stub hazard for a real black_hole that pulls Puff in, and replaces the beacon choice
+   with Puff's first trust choice (25_puffstory.js). */
 (function (SL) {
   'use strict';
 
@@ -53,14 +54,21 @@
   // m1 flies the test range with Puff aboard and a real black hole: it pulls Puff in, and inside it he remembers
   // the first of the Directorate's trials (25_puffstory.js).
   function m1Timeline() {
-    const story = (fn) => () => { if (SL.puffStory) SL.puffStory[fn](); };
+    const PS = () => SL.puffStory || {};
+    const back = () => !!PS().memoryDone;
     return testTimeline()
+      // the test range's beacon choice gives way to Puff's trust choice below
+      .filter((ev) => ev.choice !== 'test_choice' && !(ev.if && String(ev.if).indexOf('test_choice') >= 0))
       .map((ev) => (ev.hazard === 'test_blackhole'
         ? { at: ev.at, hazard: 'black_hole', x: 360, y: -150, opts: { size: 'medium', vy: 62, life: 26 } }
         : ev))
       .concat([
         { at: 3, radio: { who: 'puff', text: 'Bubble sealed, tether locked. Try not to fly into anything this time, {callsign}.' } },
-        { at: 31, call: story('blackHole') },
+        { at: 31, call: () => PS().blackHole && PS().blackHole() },
+        // once Puff is back and has said his piece, the pilot chooses how to answer him
+        { at: 37.5, if: back, until: () => !!PS().talkReady, timeout: 15 },
+        { at: 37.6, if: back, choice: 'puff_trust1' },
+        { at: 37.7, if: back, call: (s) => PS().trustReply && PS().trustReply(s.flags.puff_trust1) },
       ]);
   }
 
