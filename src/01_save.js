@@ -13,6 +13,7 @@
   const SKEY = 'earthvanguard.settings.v1';
   const DIFFS = ['cadet', 'pilot', 'ace'];
   const QUALITIES = ['auto', 'high', 'medium', 'low'];
+  const TEXT_SCALES = [1.15, 1.3, 1.5]; // Normal, Large, Extra large (x the original text size)
   const memory = Object.create(null);
 
   function storage() {
@@ -58,7 +59,7 @@
   function defaultSettings() {
     return {
       master: 0.9, music: 0.7, sfx: 0.85, autoFire: true, quality: 'auto', shake: 1.0, flashes: true,
-      showHitbox: 'focus', touchSensitivity: 1.0, radioSpeed: 1.0,
+      showHitbox: 'focus', touchSensitivity: 1.0, radioSpeed: 1.0, textScale: 1.15,
     };
   }
 
@@ -101,6 +102,7 @@
     if (s.showHitbox !== 'always') s.showHitbox = 'focus';
     s.touchSensitivity = num(s.touchSensitivity, 1, 0.25, 3);
     s.radioSpeed = num(s.radioSpeed, 1, 0.25, 4);
+    s.textScale = TEXT_SCALES.indexOf(+s.textScale) >= 0 ? +s.textScale : 1.15;
     return s;
   }
   function parseJSON(text) {

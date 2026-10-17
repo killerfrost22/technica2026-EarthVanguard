@@ -81,6 +81,7 @@ flies the XF-9 Starlance jet fighter through space, shooting lasers at enemy jet
 | `src/21_game.js` | core | boot, state machine, main loop, mission lifecycle, director, scoring, results |
 | `src/22_debug.js` | core | URL params, autopilot, sandboxes, in-page tests, perf overlay |
 | `src/23_puff.js`, `src/23_puff.css` | puff | Puff's Ocean minigame screen (voice/keys), title button, unlock after m1 |
+| `src/24_echo.js`, `src/24_echo.css` | echo | Echo stealth minigame screen (the protagonist's escape), title button; no unlock trigger yet |
 | `tools/*` | core | build, harness, smoke tests, font fetch |
 
 Rules:
@@ -218,7 +219,8 @@ the game runs end to end before content lands. Content modules (6.10) replace th
     rescuedTotal:0, stats:{ kills, deaths, playSeconds, bombs }, updatedAt }
   ```
 - Settings: `{ master:0.9, music:0.7, sfx:0.85, autoFire:true, quality:'auto'|'high'|'medium'|'low',
-  shake:1.0, flashes:true, showHitbox:'focus'|'always', touchSensitivity:1.0, radioSpeed:1.0 }`.
+  shake:1.0, flashes:true, showHitbox:'focus'|'always', touchSensitivity:1.0, radioSpeed:1.0,
+  textScale:1.15|1.3|1.5 }` (Text size: Normal / Large / Extra large, set from the title screen).
 
 ### 6.3 `02_input.js`
 
@@ -285,6 +287,17 @@ the game runs end to end before content lands. Content modules (6.10) replace th
   11 HUD on `#hud` (`SL.hud.draw`) → 12 DOM `#ui`.
 - Default entity drawing: `def.sprite` via `SL.art.drawSprite` with `e.rot`, `e.scale`, `e.alpha`, plus a
   white hit flash for 0.06 s after damage, unless `def.draw(e, ctx)` exists.
+
+- **Landscape (side-scroller).** When the viewport is wider than tall (or `?orient=land`; `?orient=port` forces
+  portrait), `html` gets `.sl-land`, `#game` becomes the largest 16:9 box, and the finished frame is shown a quarter
+  turn round: logical up (-y, the way the jet flies) points to screen right and logical +x to screen down. Gameplay,
+  content and the scene canvas are unchanged (still 720x1280); the GL composite (`uRot`), the 2D fallback, the
+  ambient backdrop, `toLogical` / `toScreen` and `02_input.js` (mx/my and drag deltas; raw screen axes in sx/sy)
+  apply the turn. `R.land`, and `R.vw` x `R.vh` (720x1280 or 1280x720) is the HUD / screen-space logical size; bus
+  `orient {land}` fires on change. Text drawn in the world must be counter-turned (see `SL.fx.text`).
+- **Sizing units.** CSS inside `#game` uses `var(--u)` (1% of the box's short side: 1cqw portrait, 0.85cqh landscape)
+  for layout and `var(--f)` (`--u` x `--ts`, the Text size setting) for body text. The HUD lays out in
+  `R.vw / textScale` x `R.vh / textScale`. Panels scroll rather than outgrow the box.
 
 ### 6.6 `05_art.js`
 

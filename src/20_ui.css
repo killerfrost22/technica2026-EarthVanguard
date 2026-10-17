@@ -1,79 +1,79 @@
 /* STUB: replaced by ui
    20_ui.css provides: layout for the stub screens (.sl-ui-screen, .sl-ui-title, .sl-ui-panel, .sl-ui-stats,
    .sl-ui-rank), the toast (.sl-toast) and the touch buttons (.sl-touch, .sl-touch-btn). Uses the tokens and
-   primitives from 01_base.css; sizes in cqw. */
+   primitives from 01_base.css; sizes in var(--u), text in var(--f). */
 
 .sl-ui-screen { animation: sl-ui-in var(--sl-med) var(--sl-ease) both; }
-@keyframes sl-ui-in { from { opacity: 0; transform: translateY(1.5cqw); } }
+@keyframes sl-ui-in { from { opacity: 0; transform: translateY(calc(1.5 * var(--u))); } }
 
 .sl-ui-title {
   justify-content: flex-start;
-  padding-top: 22cqw;
-  padding-bottom: 9cqw;
+  padding-top: calc(22 * var(--u));
+  padding-bottom: calc(9 * var(--u));
 }
-.sl-ui-title__head { display: flex; flex-direction: column; align-items: center; gap: 2.4cqw; }
-.sl-ui-title .sl-title { font-size: 13cqw; }
-.sl-ui-title__tag { margin: 0; max-width: 70cqw; font-size: 3.9cqw; line-height: 1.35; color: var(--sl-text-dim); text-wrap: balance; }
-.sl-ui-title__btns { width: 62cqw; margin-top: auto; }
-.sl-ui-title__hint { margin: 0; font-size: 3cqw; color: var(--sl-text-faint); letter-spacing: 0.02em; }
+.sl-ui-title__head { display: flex; flex-direction: column; align-items: center; gap: calc(2.4 * var(--u)); }
+.sl-ui-title .sl-title { font-size: calc(13 * var(--u)); }
+.sl-ui-title__tag { margin: 0; max-width: calc(70 * var(--u)); font-size: calc(3.9 * var(--f)); line-height: 1.35; color: var(--sl-text-dim); text-wrap: balance; }
+.sl-ui-title__btns { width: calc(62 * var(--u)); margin-top: auto; }
+.sl-ui-title__hint { margin: 0; font-size: calc(3 * var(--f)); color: var(--sl-text-faint); letter-spacing: 0.02em; }
 
 .sl-ui-panel {
   width: 100%;
-  max-width: 84cqw;
+  max-width: calc(84 * var(--u));
   display: flex;
   flex-direction: column;
   align-items: stretch;
-  gap: 3.4cqw;
+  gap: calc(3.4 * var(--u));
   text-align: left;
 }
 .sl-ui-panel .sl-title { text-align: left; }
-.sl-ui-panel > .sl-stack, .sl-ui-panel > .sl-row { margin-top: 1cqw; }
+.sl-ui-panel > .sl-stack, .sl-ui-panel > .sl-row { margin-top: calc(1 * var(--u)); }
 .sl-ui-panel > .sl-row { justify-content: stretch; }
 .sl-ui-panel > .sl-row .sl-btn { flex: 1; min-width: 0; }
 
-.sl-ui-results__top { display: flex; align-items: center; justify-content: space-between; gap: 3cqw; }
-.sl-ui-results__name { display: flex; flex-direction: column; gap: 1.4cqw; min-width: 0; }
+.sl-ui-results__top { display: flex; align-items: center; justify-content: space-between; gap: calc(3 * var(--u)); }
+.sl-ui-results__name { display: flex; flex-direction: column; gap: calc(1.4 * var(--u)); min-width: 0; }
 
 .sl-ui-rank {
   flex: none;
   display: grid;
   place-items: center;
-  width: 20cqw;
-  height: 20cqw;
+  width: calc(20 * var(--u));
+  height: calc(20 * var(--u));
   border-radius: 50%;
-  border: 0.5cqw solid var(--sl-cyan-hi);
-  font: 800 12cqw/1 var(--sl-display);
+  border: calc(0.5 * var(--u)) solid var(--sl-cyan-hi);
+  font: 800 calc(12 * var(--u))/1 var(--sl-display);
   color: var(--sl-cyan-hi);
-  box-shadow: 0 0 6cqw var(--sl-cyan-glow), inset 0 0 4cqw var(--sl-cyan-glow);
+  box-shadow: 0 0 calc(6 * var(--u)) var(--sl-cyan-glow), inset 0 0 calc(4 * var(--u)) var(--sl-cyan-glow);
 }
-.sl-ui-rank--S { color: var(--sl-gold); border-color: var(--sl-gold); box-shadow: 0 0 6cqw rgba(255, 211, 77, 0.45), inset 0 0 4cqw rgba(255, 211, 77, 0.3); }
+.sl-ui-rank--S { color: var(--sl-gold); border-color: var(--sl-gold); box-shadow: 0 0 calc(6 * var(--u)) rgba(255, 211, 77, 0.45), inset 0 0 calc(4 * var(--u)) rgba(255, 211, 77, 0.3); }
 
 .sl-ui-stats {
   display: grid;
   grid-template-columns: 1fr auto;
-  gap: 1.4cqw 4cqw;
+  gap: calc(1.4 * var(--u)) calc(4 * var(--u));
   margin: 0;
-  padding: 3cqw 0;
-  border-block: 0.2cqw solid var(--sl-line);
-  font-size: 3.8cqw;
+  padding: calc(3 * var(--u)) 0;
+  border-block: calc(0.2 * var(--u)) solid var(--sl-line);
+  font-size: calc(3.8 * var(--f));
 }
 .sl-ui-stats dt { color: var(--sl-text-dim); }
 .sl-ui-stats dd { margin: 0; text-align: right; font-family: var(--sl-display); font-weight: 700; }
 
-.sl-ui-best { font: 700 3.4cqw/1 var(--sl-display); letter-spacing: 0.16em; text-transform: uppercase; color: var(--sl-gold); }
+.sl-ui-best { font: 700 calc(3.4 * var(--f))/1 var(--sl-display); letter-spacing: 0.16em; text-transform: uppercase; color: var(--sl-gold); }
 
 .sl-toast {
   position: absolute;
   left: 50%;
-  top: 30cqw;
-  max-width: 80cqw;
-  padding: 1.8cqw 4cqw;
-  border-radius: 6cqw;
-  border: 0.2cqw solid var(--sl-line-strong);
+  top: calc(30 * var(--u));
+  max-width: calc(80 * var(--u));
+  padding: calc(1.8 * var(--u)) calc(4 * var(--u));
+  border-radius: calc(6 * var(--u));
+  border: calc(0.2 * var(--u)) solid var(--sl-line-strong);
   background: var(--sl-glass-strong);
-  font: 600 3.4cqw/1.2 var(--sl-body);
+  font: 600 calc(3.4 * var(--f))/1.2 var(--sl-body);
   opacity: 0;
-  transform: translate(-50%, -1cqw);
+  transform: translate(-50%, calc(-1 * var(--u)));
   transition: opacity var(--sl-med) var(--sl-ease), transform var(--sl-med) var(--sl-ease);
   pointer-events: none;
 }
@@ -81,12 +81,12 @@
 
 .sl-touch {
   position: absolute;
-  right: 4cqw;
-  bottom: 6cqw;
+  right: calc(4 * var(--u));
+  bottom: calc(6 * var(--u));
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 3cqw;
+  gap: calc(3 * var(--u));
 }
 .sl-touch-btn {
   -webkit-appearance: none;
@@ -95,27 +95,43 @@
   display: grid;
   place-items: center;
   align-content: center;
-  width: 17cqw;
-  height: 17cqw;
+  width: calc(17 * var(--u));
+  height: calc(17 * var(--u));
   border-radius: 50%;
-  border: 0.3cqw solid rgba(255, 170, 120, 0.7);
+  border: calc(0.3 * var(--u)) solid rgba(255, 170, 120, 0.7);
   background: radial-gradient(circle at 35% 30%, rgba(255, 220, 190, 0.35), rgba(255, 120, 60, 0.18) 45%, rgba(20, 8, 6, 0.6));
   color: #fff3e6;
-  font: 800 3cqw/1 var(--sl-display);
+  font: 800 calc(3 * var(--f))/1 var(--sl-display);
   letter-spacing: 0.1em;
   touch-action: none;
   pointer-events: auto;
-  box-shadow: 0 0 4cqw rgba(255, 122, 61, 0.3), inset 0 0.3cqw 0 rgba(255, 255, 255, 0.3);
+  box-shadow: 0 0 calc(4 * var(--u)) rgba(255, 122, 61, 0.3), inset 0 calc(0.3 * var(--u)) 0 rgba(255, 255, 255, 0.3);
 }
-.sl-touch-btn span { font-size: 2.6cqw; opacity: 0.85; margin-top: 0.6cqw; }
+.sl-touch-btn span { font-size: calc(2.6 * var(--f)); opacity: 0.85; margin-top: calc(0.6 * var(--u)); }
 .sl-touch-btn--skill {
-  width: 13cqw;
-  height: 13cqw;
+  width: calc(13 * var(--u));
+  height: calc(13 * var(--u));
   border-color: rgba(127, 227, 255, 0.7);
   background: radial-gradient(circle at 35% 30%, rgba(200, 245, 255, 0.35), rgba(63, 200, 255, 0.18) 45%, rgba(4, 12, 24, 0.6));
-  box-shadow: 0 0 4cqw var(--sl-cyan-glow), inset 0 0.3cqw 0 rgba(255, 255, 255, 0.3);
+  box-shadow: 0 0 calc(4 * var(--u)) var(--sl-cyan-glow), inset 0 calc(0.3 * var(--u)) 0 rgba(255, 255, 255, 0.3);
   color: var(--sl-text);
-  font-size: 2.4cqw;
+  font-size: calc(2.4 * var(--f));
 }
 .sl-touch-btn.is-down { transform: scale(0.94); filter: brightness(1.3); }
-.sl-touch-btn:focus-visible { outline: 0.55cqw solid var(--sl-amber-hi); outline-offset: 0.6cqw; }
+.sl-touch-btn:focus-visible { outline: calc(0.55 * var(--u)) solid var(--sl-amber-hi); outline-offset: calc(0.6 * var(--u)); }
+
+.sl-ui-title__text { font-size: calc(3.2 * var(--f)); padding-block: calc(1.4 * var(--u)); }
+
+/* Landscape title: the jet flies on the left, the title and a 2 x 2 button grid sit on the right. */
+.sl-land .sl-ui-title {
+  align-items: flex-end;
+  justify-content: center;
+  padding: calc(6 * var(--u)) calc(10 * var(--u));
+  gap: calc(4 * var(--u));
+}
+.sl-land .sl-ui-title__head,
+.sl-land .sl-ui-title__btns,
+.sl-land .sl-ui-title__hint { width: calc(124 * var(--u)); }
+.sl-land .sl-ui-title .sl-title { font-size: calc(11 * var(--u)); }
+.sl-land .sl-ui-title__tag { max-width: none; }
+.sl-land .sl-ui-title__btns { margin-top: 0; display: grid; grid-template-columns: 1fr 1fr; }

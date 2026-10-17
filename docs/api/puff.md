@@ -53,6 +53,11 @@ Puff's top vertical speed, plus 0.8 s. Once a wall's far edge is behind Puff's c
 - On `missionComplete` for `m1`, it sets the unlock flag and adds an "Unlocked: Puff's Ocean" note to the
   results screen.
 
+**Landscape.** The ocean keeps its 1280 px depth and widens to 16:9 (2276 px), Puff swims at x 300 instead of
+210, and Puff sees about three times further ahead. The canvas HUD (hearts, score, meter) and in-world labels are
+anchored to the screen edges and scaled by the Text size setting (x1.45 in landscape). Panels lay out in two
+columns. Bot fairness in landscape: 30 of 30 runs of 150 s with no hits.
+
 The screen draws on its own canvas inside `#ui` with its own animation loop, started in `onShow` and stopped
 in `onHide`, which also releases the microphone. It uses its own AudioContext (the mic needs one); effects are
 short and quiet in voice mode so the mic doesn't hear them, and the surf ambience plays only in keys mode.

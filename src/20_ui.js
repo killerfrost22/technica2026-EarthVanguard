@@ -4,6 +4,8 @@
    onInput(menu)}), and SL.hud = { draw(ctx), banner(text, {sub, color, duration}), touchButtons(show) }: hull and
    shield bars, lives, bombs, weapon, score, multiplier, credits, boss bar with phase marks, banners (also for
    bus 'bossWarning' and 'hazardWarning'), and DOM BOMB / SKILL touch buttons.
+   The HUD lays itself out in SL.render.vw x vh (720x1280 portrait, 1280x720 landscape) divided by the Text size
+   setting (settings.textScale, also the CSS --ts factor), so bigger text scales the whole HUD.
    21_game.js calls SL.ui.update(realDt) every frame; it dispatches onInput(menu) to the current screen and
    moves focus between buttons with the arrows / D-pad (a gamepad A press clicks the focused button). */
 (function (SL) {
@@ -29,6 +31,24 @@
     });
     return b;
   }
+  const TEXT_SIZES = [[1.15, 'Normal'], [1.3, 'Large'], [1.5, 'Extra large']];
+  function textScale() {
+    const v = SL.save && SL.save.settings && +SL.save.settings.textScale;
+    return v > 0 ? v : 1.15;
+  }
+  function applyTextScale() {
+    document.documentElement.style.setProperty('--ts', String(textScale()));
+  }
+  function textSizeButton() {
+    const name = () => (TEXT_SIZES.find((t) => t[0] === textScale()) || TEXT_SIZES[0])[1];
+    const b = button('Text size: ' + name(), 'sl-btn--ghost sl-ui-title__text', () => {
+      const i = TEXT_SIZES.findIndex((t) => t[0] === textScale());
+      SL.save.setSetting('textScale', TEXT_SIZES[(i + 1) % TEXT_SIZES.length][0]);
+      b.textContent = 'Text size: ' + name();
+    });
+    return b;
+  }
+
   function firstMission() {
     const ids = SL.missions.ids().filter((id) => !SL.missions.get(id).dev && SL.missions.get(id).kind !== 'side');
     ids.sort((a, b) => (SL.missions.get(a).order || 0) - (SL.missions.get(b).order || 0));
@@ -99,6 +119,7 @@
       if (step) {
         const next = btns[(i < 0 ? 0 : i + step + btns.length) % btns.length];
         next.focus({ preventScroll: true });
+        next.scrollIntoView({ block: 'nearest' });
         if (SL.audio && SL.audio.sfx) SL.audio.sfx('ui_move');
       } else if (m.confirm && SL.input.lastDevice === 'gamepad') (btns[i] || btns[0]).click();
     },
@@ -116,6 +137,8 @@
         button('Start', 'sl-btn--primary', () => SL.game.startMission(firstMission(), { coop: false })),
         button('2 Players', '', () => SL.game.startMission(firstMission(), { coop: true })));
       if (SL.puff && SL.puff.titleButton) btns.appendChild(SL.puff.titleButton());
+      if (SL.echo && SL.echo.titleButton) btns.appendChild(SL.echo.titleButton());
+      btns.appendChild(textSizeButton());
       const hint = el('p', 'sl-ui-title__hint', 'Move: WASD or arrows · drag on touch · auto-fire · Bomb: X · Pause: Esc');
       root.append(head, btns, hint);
     },
@@ -179,6 +202,7 @@
   });
 
   // ------------------------------------------------------------------ HUD (canvas, logical 720 x 1280)
+  let VW = W, VH = SL.H; // HUD layout size for this frame (screen logical size / text scale)
   const banners = [];
   let banner = null;
   const gradCache = new Map();
@@ -242,7 +266,7 @@
 
   function drawLivesBombs(ctx, s) {
     const p = SL.world.players[0];
-    const y = 1236;
+    const y = VH - 44;
     for (let i = 0; i < Math.min(s.lives, 8); i++) {
       const x = 32 + i * 26;
       ctx.fillStyle = C.rgba(SL.pal.player.trim, 0.95);
@@ -271,22 +295,23 @@
   function drawScore(ctx, s) {
     if (textCache.score !== s.score) { textCache.score = s.score; textCache.scoreStr = U.fmtInt(s.score); }
     if (textCache.credits !== s.credits) { textCache.credits = s.credits; textCache.creditsStr = U.fmtInt(s.credits); }
-    text(ctx, 'SCORE', 694, 30, '600 13px Oxanium, sans-serif', 'rgba(160,190,220,0.85)', 'right');
-    text(ctx, textCache.scoreStr, 694, 60, '700 30px Oxanium, sans-serif', '#eef6ff', 'right');
+    const rx = VW - 26;
+    text(ctx, 'SCORE', rx, 30, '600 13px Oxanium, sans-serif', 'rgba(160,190,220,0.85)', 'right');
+    text(ctx, textCache.scoreStr, rx, 60, '700 30px Oxanium, sans-serif', '#eef6ff', 'right');
     if (s.mult > 1) {
-      text(ctx, '×' + s.mult.toFixed(1), 694, 88, '800 20px Oxanium, sans-serif', '#ffd34d', 'right');
+      text(ctx, '×' + s.mult.toFixed(1), rx, 88, '800 20px Oxanium, sans-serif', '#ffd34d', 'right');
       ctx.fillStyle = 'rgba(255,211,77,0.75)';
-      ctx.fillRect(694 - 60 * (s.multT / 2.5), 95, 60 * (s.multT / 2.5), 2.5);
+      ctx.fillRect(rx - 60 * (s.multT / 2.5), 95, 60 * (s.multT / 2.5), 2.5);
     }
     ctx.fillStyle = SL.pal.credit;
     ctx.beginPath();
-    ctx.moveTo(612, 108);
-    ctx.lineTo(618, 116);
-    ctx.lineTo(612, 124);
-    ctx.lineTo(606, 116);
+    ctx.moveTo(rx - 82, 108);
+    ctx.lineTo(rx - 76, 116);
+    ctx.lineTo(rx - 82, 124);
+    ctx.lineTo(rx - 88, 116);
     ctx.closePath();
     ctx.fill();
-    text(ctx, textCache.creditsStr, 694, 122, '700 17px Oxanium, sans-serif', '#ffe59a', 'right');
+    text(ctx, textCache.creditsStr, rx, 122, '700 17px Oxanium, sans-serif', '#ffe59a', 'right');
   }
 
   function drawBoss(ctx, dt) {
@@ -297,7 +322,9 @@
     const k = b.maxHp > 0 ? U.clamp(b.hp / b.maxHp, 0, 1) : 0;
     boss.hp = b.introDone ? U.approach(boss.hp, k, dt * 1.5) : U.approach(boss.hp, 1, dt * 0.7);
     ctx.globalAlpha = boss.shown;
-    const x = 80, y = 158, w = 560;
+    // portrait: a full-width bar under the panels; landscape: centered along the top between them
+    const land = VW > VH;
+    const w = land ? Math.min(640, VW - 620) : VW - 160, x = (VW - w) / 2, y = land ? 46 : 158;
     text(ctx, String(b.name || '').toUpperCase(), x, y - 12, '800 18px Oxanium, sans-serif', '#ffd0dc');
     if (b.title) text(ctx, b.title, x + w, y - 12, '500 14px "Barlow Semi Condensed", sans-serif', 'rgba(255,200,215,0.75)', 'right');
     bar(ctx, 'boss', x, y, w, 10, b.introDone ? boss.hp : boss.hp * 0.999, '#ff2f6d', '#ffb0c4');
@@ -314,19 +341,19 @@
     if (t >= d) { banner = null; return; }
     const a = Math.min(1, t / 0.18, (d - t) / 0.35);
     const sc = 1 + 0.08 * Math.max(0, 1 - t / 0.25);
-    const y = 470;
+    const y = Math.round(VH * 0.367);
     ctx.globalAlpha = a * 0.75;
-    ctx.fillStyle = grad(ctx, 'band', 0, 0, W, 0, [[0, 'rgba(2,4,10,0)'], [0.2, 'rgba(2,4,10,0.7)'], [0.8, 'rgba(2,4,10,0.7)'], [1, 'rgba(2,4,10,0)']]);
-    ctx.fillRect(0, y - 52, W, banner.sub ? 104 : 80);
+    ctx.fillStyle = grad(ctx, 'band' + VW, 0, 0, VW, 0, [[0, 'rgba(2,4,10,0)'], [0.2, 'rgba(2,4,10,0.7)'], [0.8, 'rgba(2,4,10,0.7)'], [1, 'rgba(2,4,10,0)']]);
+    ctx.fillRect(0, y - 52, VW, banner.sub ? 104 : 80);
     ctx.globalAlpha = a;
     ctx.fillStyle = banner.color;
-    ctx.fillRect(W / 2 - 160 * a, y - 50, 320 * a, 2);
+    ctx.fillRect(VW / 2 - 160 * a, y - 50, 320 * a, 2);
     ctx.save();
-    ctx.translate(W / 2, y);
+    ctx.translate(VW / 2, y);
     ctx.scale(sc, sc);
     text(ctx, banner.text, 0, 12, '800 46px Oxanium, sans-serif', '#ffffff', 'center');
     ctx.restore();
-    if (banner.sub) text(ctx, banner.sub, W / 2, y + 42, '600 18px "Barlow Semi Condensed", sans-serif', C.rgba(banner.color, 0.95), 'center');
+    if (banner.sub) text(ctx, banner.sub, VW / 2, y + 42, '600 18px "Barlow Semi Condensed", sans-serif', C.rgba(banner.color, 0.95), 'center');
     ctx.globalAlpha = 1;
   }
 
@@ -338,6 +365,10 @@
       lastHud = now;
       const g = SL.game, s = g.session;
       if (!s || (g.state !== 'mission' && g.state !== 'results')) { banners.length = 0; banner = null; return; }
+      const ts = textScale(), R = SL.render;
+      VW = (R.vw || W) / ts;
+      VH = (R.vh || SL.H) / ts;
+      ctx.scale(ts, ts);
       ctx.textBaseline = 'alphabetic';
       const players = SL.world.players;
       for (let i = 0; i < players.length; i++) if (!players[i].display) drawPlayerPanel(ctx, players[i], 34 + i * 48);
@@ -393,6 +424,8 @@
     SL.bus.on('bossWarning', (e) => HUD.banner('WARNING', { sub: (e && e.name ? e.name + ' approaching' : 'Massive contact'), color: '#ff5c8a', duration: 2.6 }));
     SL.bus.on('hazardWarning', (e) => HUD.banner((e && e.text) || 'HAZARD', { sub: 'Hazard ahead', color: '#ffb53f', duration: 2.2 }));
     SL.bus.on('missionStart', () => { banners.length = 0; banner = null; boss.shown = 0; boss.hp = 1; });
+    applyTextScale();
+    SL.bus.on('settingsChanged', (e) => { if (e && e.key === 'textScale') applyTextScale(); });
     SL.bus.on('missionEnd', () => { banners.length = 0; banner = null; });
     try { if (document.fonts && document.fonts.load) { document.fonts.load('700 20px Oxanium'); document.fonts.load('500 20px "Barlow Semi Condensed"'); } } catch (e) { /* fonts API missing */ }
   });

@@ -6,6 +6,8 @@
    ocean. Loudness sets Puff's size and buoyancy: loud = puff up and float, quiet = shrink and sink. Big Puff can't
    fit under the garbage patch; small Puff sinks into the oil-free deep. Keys / touch / gamepad hold work too.
    The mic only measures loudness inside the page (getUserMedia -> AnalyserNode RMS); nothing is recorded or sent.
+   Landscape (SL.render.land): the ocean keeps its 1280 px depth and widens to 16:9 (2276 px), so Puff sees about
+   three times further ahead; panels lay out in two columns.
    The screen draws on its own canvas inside #ui with its own requestAnimationFrame loop, started in onShow and
    stopped in onHide (which also releases the mic).
    URL test hooks (with ?screen=puff): puff=play (start in keys mode), puff=bot (start with the bot flying),
@@ -14,13 +16,14 @@
   'use strict';
 
   const U = SL.util;
-  const W = SL.W, H = SL.H;
+  const H = SL.H;
+  let W = SL.W;                 // ocean width: 720 in portrait, 16:9 of H in landscape (fitWorld)
   const TAU = Math.PI * 2;
 
   // ------------------------------------------------------------------ tuning
   const SURFACE = 170;          // water line
   const BED = 1150;             // top of the sand
-  const FX = 210;               // Puff's x
+  let FX = 210;                 // Puff's x (300 in landscape)
   const R_MIN = 26, R_MAX = 72; // body radius, deflated .. fully puffed
   const V_SINK = 330, V_RISE = -400; // vertical speed at level 0 and level 1 (neutral near 0.45)
   const V_RESP = 7;             // how fast Puff reaches that speed (1/s)
@@ -29,6 +32,15 @@
   const UNLOCK_MISSION = 'm1';
   // TEMPORARY for team playtesting: Puff's Ocean is open without clearing m1. Set to false before submitting.
   const PLAYTEST_UNLOCK = true;
+
+  function fitWorld() {
+    const land = !!(SL.render && SL.render.land);
+    const w = land ? Math.round((H * 16) / 9) : SL.W;
+    if (w === W) return;
+    W = w;
+    FX = land ? 300 : 210;
+    bgCache = null;
+  }
 
   function radiusFor(L) { return R_MIN + (R_MAX - R_MIN) * Math.pow(U.clamp(L, 0, 1), 0.9); }
   function speedFor(t) { return 230 + Math.min(130, t * 1.1); }
@@ -142,6 +154,11 @@
       case 'start': [523, 659, 784].forEach((f, i) => tone(f, f, 0.14, 0.07 * v, 'triangle', i * 0.08)); break;
       case 'over': [440, 349, 262].forEach((f, i) => tone(f, f * 0.98, 0.26, 0.08 * v, 'triangle', i * 0.16)); break;
       case 'tick': tone(880, 880, 0.06, 0.05 * v, 'square'); break;
+      case 'thunder': // keys mode only: the mic would hear it
+        if (G.mode === 'voice') return;
+        tone(70, 38, 1.4, 0.1, 'sine', 0.35);
+        hiss(1.6, 0.09, 140, 0.6);
+        break;
       default: break;
     }
   }
@@ -247,6 +264,7 @@
       y: (SURFACE + BED) / 2, vy: 0, r: radiusFor(0.45), mood: 0, moodKind: '', dead: 0, over: false,
       obs: [], items: [], parts: [], wait: 420, prevOut: (SURFACE + BED) / 2, pending: null, lastStar: -99, lastBubble: 0,
       lanes: [], hitLog: [], scroll: 0, startT: 0, hintT: 0, newBest: false,
+      wx0: Math.floor(Math.random() * WX_CYCLE.length), wxId: '', wxLabel: null, wxBolt: null, wxFlash: 0,
     };
     G.run.pending = pickPattern(G.run);
     G.run.wait = 260 + travel(G.run.y, G.run.pending, speedFor(0));
@@ -471,8 +489,9 @@
     if (!I) return { up: false, down: false };
     const h = (c) => I.isHeld && I.isHeld(c);
     const p = I.players && I.players[0];
-    const up = h('Space') || h('ArrowUp') || h('KeyW') || h('KeyZ') || h('KeyJ') || pointerHeld || !!(p && (p.fire || p.my < -0.4));
-    const down = h('ArrowDown') || h('KeyS') || !!(p && p.my > 0.4);
+    // screen-direction axes (sy), so a stick pushed up puffs Puff up in either orientation
+    const up = h('Space') || h('ArrowUp') || h('KeyW') || h('KeyZ') || h('KeyJ') || pointerHeld || !!(p && (p.fire || p.sy < -0.4));
+    const down = h('ArrowDown') || h('KeyS') || !!(p && p.sy > 0.4);
     return { up, down };
   }
   function targetLevel(dt) {
@@ -520,6 +539,7 @@
     const R = G.run;
     if (!R) return;
     R.scroll += dt;
+    updateWeather(R, dt);
     if (G.state !== 'play') {
       // idle bob in the menus
       const tl = G.state === 'calib' ? G.level : 0.45 + Math.sin(R.scroll * 0.9) * 0.08;
@@ -684,7 +704,7 @@
   // ------------------------------------------------------------------ drawing
   let bgCache = null;
   const snow = [];
-  for (let i = 0; i < 70; i++) snow.push({ x: Math.random() * W, y: SURFACE + Math.random() * (BED - SURFACE), z: 0.2 + Math.random() * 0.8, ph: Math.random() * TAU });
+  for (let i = 0; i < 110; i++) snow.push({ x: Math.random() * 2400, y: SURFACE + Math.random() * (BED - SURFACE), z: 0.2 + Math.random() * 0.8, ph: Math.random() * TAU });
 
   function backdrop() {
     if (bgCache) return bgCache;
@@ -698,15 +718,6 @@
     gr.addColorStop(1, '#d7eef2');
     g.fillStyle = gr;
     g.fillRect(0, 0, W, SURFACE);
-    g.fillStyle = 'rgba(255,248,220,0.9)';
-    g.beginPath();
-    g.arc(560, 70, 34, 0, TAU);
-    g.fill();
-    const sun = g.createRadialGradient(560, 70, 20, 560, 70, 150);
-    sun.addColorStop(0, 'rgba(255,240,200,0.55)');
-    sun.addColorStop(1, 'rgba(255,240,200,0)');
-    g.fillStyle = sun;
-    g.fillRect(380, 0, 340, SURFACE);
     // water
     gr = g.createLinearGradient(0, SURFACE, 0, BED);
     gr.addColorStop(0, '#2a9cc0');
@@ -729,7 +740,7 @@
     g.fill();
     // sand speckles
     const r = SL.makeRng(7);
-    for (let i = 0; i < 220; i++) {
+    for (let i = 0; i < Math.round(W * 0.3); i++) {
       g.fillStyle = r.chance(0.5) ? 'rgba(255,240,200,0.35)' : 'rgba(90,64,30,0.3)';
       g.fillRect(r.range(0, W), r.range(BED + 10, H), r.range(1, 3), r.range(1, 2.5));
     }
@@ -740,11 +751,18 @@
   function drawWorld(ctx, R) {
     const t = R.scroll;
     ctx.drawImage(backdrop(), 0, 0);
+    const wx = weatherAt(R);
+    drawSky(ctx, R, wx, t);
+    // the water darkens with the sky above it (night, storm)
+    if (wx.tint[3] > 0.005) {
+      ctx.fillStyle = 'rgba(' + (wx.tint[0] | 0) + ',' + (wx.tint[1] | 0) + ',' + (wx.tint[2] | 0) + ',' + wx.tint[3].toFixed(3) + ')';
+      ctx.fillRect(0, SURFACE, W, H - SURFACE);
+    }
     // distant kelp and rocks (parallax)
     const off = (R.dist * 0.25) % 260;
     ctx.strokeStyle = 'rgba(6,58,70,0.55)';
     ctx.lineCap = 'round';
-    for (let i = -1; i < 5; i++) {
+    for (let i = -1; i < Math.ceil(W / 260) + 1; i++) {
       const bx = i * 260 - off + 90;
       for (let s = 0; s < 3; s++) {
         ctx.lineWidth = 7 - s * 1.5;
@@ -760,7 +778,7 @@
     }
     const off2 = (R.dist * 0.5) % 380;
     ctx.fillStyle = 'rgba(9,40,58,0.75)';
-    for (let i = -1; i < 4; i++) {
+    for (let i = -1; i < Math.ceil(W / 380) + 1; i++) {
       const x = i * 380 - off2 + 120;
       ctx.beginPath();
       ctx.ellipse(x, BED + 8, 70, 34, 0, Math.PI, TAU);
@@ -770,9 +788,9 @@
     // light rays
     ctx.save();
     ctx.globalCompositeOperation = 'lighter';
-    for (let i = 0; i < 6; i++) {
+    for (let i = 0; i < (wx.rays > 0.02 ? Math.ceil((W + 300) / 170) : 0); i++) {
       const x = ((i * 170 - R.dist * 0.08) % (W + 300) + W + 300) % (W + 300) - 150;
-      const a = 0.05 + 0.035 * Math.sin(t * 0.7 + i * 1.7);
+      const a = (0.05 + 0.035 * Math.sin(t * 0.7 + i * 1.7)) * wx.rays;
       const gr = ctx.createLinearGradient(0, SURFACE, 0, BED - 200);
       gr.addColorStop(0, 'rgba(190,240,255,' + a.toFixed(3) + ')');
       gr.addColorStop(1, 'rgba(190,240,255,0)');
@@ -799,11 +817,270 @@
     ctx.fillStyle = 'rgba(210,245,255,0.55)';
     ctx.beginPath();
     ctx.moveTo(0, SURFACE - 6);
-    for (let x = 0; x <= W; x += 16) ctx.lineTo(x, SURFACE + Math.sin(x * 0.03 + t * 2.2) * 5 + Math.sin(x * 0.011 - t * 1.3) * 4);
+    for (let x = 0; x <= W; x += 16) ctx.lineTo(x, SURFACE + (Math.sin(x * 0.03 + t * 2.2 * wx.chop) * 5 + Math.sin(x * 0.011 - t * 1.3 * wx.chop) * 4) * wx.waves);
     ctx.lineTo(W, SURFACE + 14);
     ctx.lineTo(0, SURFACE + 14);
     ctx.closePath();
     ctx.fill();
+  }
+
+  // ------------------------------------------------------------------ weather above the water (looks only, never gameplay)
+  // The sky cycles through these as Puff swims, WX_LEN seconds each with a WX_FADE second blend into the next. Each run
+  // starts at a random point in the cycle. Colors are [r, g, b]; tint is the [r, g, b, a] laid over the water.
+  const WX_LEN = 24, WX_FADE = 6;
+  const WX_BASE = {
+    skyT: [143, 203, 230], skyB: [215, 238, 242], tint: [0, 0, 0, 0], sun: 1, sunY: 70, moon: 0, stars: 0,
+    cloud: 0.2, cloudC: [255, 255, 255], rain: 0, snow: 0, bolt: 0, fog: 0, rays: 1, waves: 1, chop: 1, aurora: 0, rainbow: 0,
+  };
+  function wxPreset(name, o) { return Object.assign({}, WX_BASE, o, { name }); }
+  const WEATHER = {
+    day: wxPreset('Sunny', {}),
+    cloudy: wxPreset('Clouding over', { skyT: [150, 166, 180], skyB: [205, 214, 220], tint: [30, 50, 60, 0.15], sun: 0.3, cloud: 0.75, cloudC: [228, 232, 238], rays: 0.45, waves: 1.3 }),
+    rain: wxPreset('Rain', { skyT: [96, 110, 124], skyB: [150, 162, 172], tint: [20, 35, 45, 0.28], sun: 0, cloud: 0.95, cloudC: [150, 158, 168], rain: 0.55, rays: 0.2, waves: 1.6, chop: 1.3 }),
+    storm: wxPreset('Thunderstorm', { skyT: [26, 30, 42], skyB: [66, 74, 88], tint: [5, 12, 22, 0.45], sun: 0, cloud: 1, cloudC: [62, 68, 80], rain: 1, bolt: 1, rays: 0, waves: 2.6, chop: 1.8 }),
+    rainbow: wxPreset('Rainbow', { skyT: [126, 188, 222], skyB: [226, 238, 234], tint: [0, 0, 0, 0.04], sun: 0.85, sunY: 58, cloud: 0.45, cloudC: [236, 240, 244], rainbow: 1, rays: 0.9, waves: 1.3 }),
+    fog: wxPreset('Sea fog', { skyT: [186, 194, 200], skyB: [222, 226, 228], tint: [70, 85, 95, 0.22], sun: 0.15, cloud: 0.3, cloudC: [236, 236, 236], fog: 1, rays: 0.2, waves: 0.7, chop: 0.7 }),
+    snow: wxPreset('Snow', { skyT: [168, 178, 194], skyB: [226, 230, 238], tint: [30, 40, 58, 0.25], sun: 0, cloud: 0.85, cloudC: [232, 236, 242], snow: 1, rays: 0.3, waves: 1.1 }),
+    sunset: wxPreset('Sunset', { skyT: [74, 70, 140], skyB: [255, 160, 112], tint: [70, 30, 40, 0.18], sun: 1, sunY: 150, cloud: 0.3, cloudC: [255, 182, 160], rays: 0.6 }),
+    night: wxPreset('Night', { skyT: [6, 10, 32], skyB: [24, 38, 74], tint: [0, 6, 26, 0.55], sun: 0, sunY: 200, moon: 1, stars: 1, cloud: 0.15, cloudC: [60, 70, 100], rays: 0.12, waves: 0.9 }),
+    aurora: wxPreset('Northern lights', { skyT: [4, 14, 30], skyB: [16, 44, 66], tint: [0, 22, 30, 0.5], sun: 0, sunY: 200, moon: 0.4, stars: 1, cloud: 0, cloudC: [60, 70, 100], aurora: 1, rays: 0.15, waves: 0.8 }),
+    dawn: wxPreset('Dawn', { skyT: [120, 140, 200], skyB: [255, 200, 170], tint: [40, 30, 40, 0.12], sun: 1, sunY: 140, stars: 0.2, cloud: 0.25, cloudC: [255, 212, 200], rays: 0.7 }),
+  };
+  const WX_CYCLE = ['day', 'cloudy', 'rain', 'storm', 'rainbow', 'fog', 'snow', 'sunset', 'night', 'aurora', 'dawn'];
+
+  // fixed sky furniture, drawn wrapped around the ocean width
+  const wxR = SL.makeRng(21);
+  const STARS = [], CLOUDS = [], DROPS = [], FLAKES = [];
+  for (let i = 0; i < 90; i++) STARS.push({ x: wxR.range(0, 2400), y: wxR.range(6, SURFACE - 30), s: wxR.range(1, 2.6), ph: wxR.range(0, TAU) });
+  for (let i = 0; i < 10; i++) {
+    const puffs = [];
+    for (let k = 0; k < 5; k++) puffs.push({ dx: wxR.range(-70, 70), dy: wxR.range(-14, 10), r: wxR.range(22, 40) });
+    CLOUDS.push({ x: wxR.range(0, 2400), y: wxR.range(34, 110), s: wxR.range(0.7, 1.3), puffs });
+  }
+  for (let i = 0; i < 150; i++) DROPS.push({ x: wxR.range(0, 2400), y: wxR.range(0, SURFACE), sp: wxR.range(0.8, 1.2) });
+  for (let i = 0; i < 90; i++) FLAKES.push({ x: wxR.range(0, 2400), y: wxR.range(0, SURFACE), z: wxR.range(0.4, 1), ph: wxR.range(0, TAU) });
+
+  const wx = Object.assign({}, WX_BASE, { skyT: [0, 0, 0], skyB: [0, 0, 0], tint: [0, 0, 0, 0], cloudC: [0, 0, 0] });
+  /** The blended weather at this moment of the run (one shared object, updated in place). */
+  function weatherAt(R) {
+    if (G.forceWeather) return Object.assign(wx, WEATHER[G.forceWeather]);
+    const n = WX_CYCLE.length;
+    const p = R.scroll / WX_LEN + R.wx0;
+    const i = Math.floor(p);
+    const a = WEATHER[WX_CYCLE[i % n]], b = WEATHER[WX_CYCLE[(i + 1) % n]];
+    const k = U.smoothstep(1 - WX_FADE / WX_LEN, 1, p - i);
+    for (const key in WX_BASE) {
+      const va = a[key], vb = b[key];
+      if (Array.isArray(va)) for (let j = 0; j < va.length; j++) wx[key][j] = va[j] + (vb[j] - va[j]) * k;
+      else wx[key] = va + (vb - va) * k;
+    }
+    wx.name = k < 0.5 ? a.name : b.name;
+    return wx;
+  }
+  function updateWeather(R, dt) {
+    const w = weatherAt(R);
+    if (w.name !== R.wxId) {
+      if (R.wxId && G.state === 'play') R.wxLabel = { text: w.name, t: 3 };
+      R.wxId = w.name;
+    }
+    if (R.wxLabel && (R.wxLabel.t -= dt) <= 0) R.wxLabel = null;
+    R.wxFlash = Math.max(0, R.wxFlash - dt * 3);
+    if (R.wxBolt && (R.wxBolt.t -= dt) <= 0) R.wxBolt = null;
+    if (G.simulating || w.bolt < 0.5 || R.wxBolt || Math.random() > dt * 0.35 * w.bolt) return;
+    // lightning: a jagged bolt from the clouds down to the water, a flash, then thunder
+    const pts = [];
+    let x = Math.random() * W, y = 0;
+    while (y < SURFACE) { pts.push(x, y); x += (Math.random() - 0.5) * 50; y += 14 + Math.random() * 18; }
+    pts.push(x, SURFACE);
+    R.wxBolt = { pts, t: 0.3 };
+    R.wxFlash = 1;
+    sfx('thunder');
+  }
+  function rgb(c, a) { return 'rgba(' + (c[0] | 0) + ',' + (c[1] | 0) + ',' + (c[2] | 0) + ',' + (a == null ? 1 : a.toFixed(3)) + ')'; }
+  function wrapX(x, span) { return ((x % span) + span) % span; }
+
+  function drawSky(ctx, R, w, t) {
+    const gr = ctx.createLinearGradient(0, 0, 0, SURFACE);
+    gr.addColorStop(0, rgb(w.skyT));
+    gr.addColorStop(1, rgb(w.skyB));
+    ctx.fillStyle = gr;
+    ctx.fillRect(0, 0, W, SURFACE + 2);
+    ctx.save();
+    ctx.beginPath();
+    ctx.rect(0, 0, W, SURFACE);
+    ctx.clip();
+    if (w.stars > 0.02) {
+      ctx.fillStyle = '#ffffff';
+      for (const s of STARS) {
+        if (s.x > W) continue;
+        ctx.globalAlpha = w.stars * (0.45 + 0.4 * Math.sin(t * 2 + s.ph));
+        ctx.fillRect(s.x, s.y, s.s, s.s);
+      }
+      ctx.globalAlpha = 1;
+    }
+    if (w.aurora > 0.02) {
+      ctx.globalCompositeOperation = 'lighter';
+      ctx.lineCap = 'round';
+      const bands = [['80,255,170', 34], ['120,200,255', 58], ['190,120,255', 80]];
+      for (let b = 0; b < bands.length; b++) {
+        ctx.strokeStyle = 'rgba(' + bands[b][0] + ',' + (0.16 * w.aurora).toFixed(3) + ')';
+        for (let lw = 26; lw > 0; lw -= 12) {
+          ctx.lineWidth = lw;
+          ctx.beginPath();
+          for (let x = -20; x <= W + 20; x += 30) {
+            const y = bands[b][1] + Math.sin(x * 0.006 + t * 0.4 + b) * 16 + Math.sin(x * 0.017 - t * 0.7) * 6;
+            if (x < 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+          }
+          ctx.stroke();
+        }
+      }
+      ctx.globalCompositeOperation = 'source-over';
+    }
+    if (w.rainbow > 0.02) {
+      const cols = ['255,80,80', '255,160,60', '255,230,90', '100,220,120', '80,170,255', '120,100,230', '180,110,220'];
+      ctx.lineWidth = 6;
+      for (let i = 0; i < cols.length; i++) {
+        ctx.strokeStyle = 'rgba(' + cols[i] + ',' + (0.32 * w.rainbow).toFixed(3) + ')';
+        ctx.beginPath();
+        ctx.arc(W * 0.32, SURFACE + 60, 230 - i * 6, Math.PI, TAU);
+        ctx.stroke();
+      }
+    }
+    // sun sets toward the water, the moon rises opposite
+    if (w.sun > 0.02 && w.sunY < SURFACE + 30) {
+      const sx = W - 160, sy = w.sunY;
+      const warm = U.clamp((sy - 70) / 80, 0, 1);
+      const a = w.sun * (1 - w.cloud * 0.55);
+      const glow = ctx.createRadialGradient(sx, sy, 20, sx, sy, 150);
+      glow.addColorStop(0, 'rgba(255,' + Math.round(240 - 70 * warm) + ',' + Math.round(200 - 110 * warm) + ',' + (0.55 * a).toFixed(3) + ')');
+      glow.addColorStop(1, 'rgba(255,240,200,0)');
+      ctx.fillStyle = glow;
+      ctx.fillRect(sx - 180, sy - 150, 360, 300);
+      ctx.globalAlpha = a;
+      ctx.fillStyle = 'rgb(255,' + Math.round(248 - 80 * warm) + ',' + Math.round(220 - 130 * warm) + ')';
+      ctx.beginPath();
+      ctx.arc(sx, sy, 34 + warm * 8, 0, TAU);
+      ctx.fill();
+      ctx.globalAlpha = 1;
+    }
+    if (w.moon > 0.02) {
+      const mx = W * 0.24, my = 62;
+      ctx.globalAlpha = w.moon;
+      ctx.fillStyle = 'rgba(220,230,255,0.18)';
+      ctx.beginPath();
+      ctx.arc(mx, my, 48, 0, TAU);
+      ctx.fill();
+      ctx.fillStyle = '#eef2ff';
+      ctx.beginPath();
+      ctx.arc(mx, my, 24, 0, TAU);
+      ctx.fill();
+      ctx.fillStyle = rgb(w.skyT);
+      ctx.beginPath();
+      ctx.arc(mx + 10, my - 6, 20, 0, TAU);
+      ctx.fill();
+      ctx.globalAlpha = 1;
+    }
+    if (w.cloud > 0.02) {
+      const span = W + 400;
+      const shade = [w.cloudC[0] * 0.78, w.cloudC[1] * 0.78, w.cloudC[2] * 0.8];
+      for (let i = 0; i < CLOUDS.length; i++) {
+        const vis = U.clamp(w.cloud * CLOUDS.length - i, 0, 1);
+        if (vis <= 0) continue;
+        const c = CLOUDS[i];
+        const x = wrapX(c.x - t * 12 - R.dist * 0.04, span) - 200;
+        const s = c.s * (1 + w.cloud * 0.5);
+        for (let pass = 0; pass < 2; pass++) {
+          ctx.fillStyle = pass ? rgb(w.cloudC, 0.92 * vis) : rgb(shade, 0.8 * vis);
+          ctx.beginPath();
+          for (const p of c.puffs) {
+            ctx.moveTo(x + p.dx * s + p.r * s, c.y + p.dy * s + (pass ? 0 : 8));
+            ctx.arc(x + p.dx * s, c.y + p.dy * s + (pass ? 0 : 8), p.r * s, 0, TAU);
+          }
+          ctx.fill();
+        }
+      }
+    }
+    if (R.wxBolt) {
+      const p = R.wxBolt.pts;
+      ctx.lineJoin = 'round';
+      for (const [lw, col] of [[7, 'rgba(180,200,255,0.35)'], [2.5, '#ffffff']]) {
+        ctx.strokeStyle = col;
+        ctx.lineWidth = lw;
+        ctx.beginPath();
+        ctx.moveTo(p[0], p[1]);
+        for (let i = 2; i < p.length; i += 2) ctx.lineTo(p[i], p[i + 1]);
+        ctx.stroke();
+      }
+    }
+    if (w.rain > 0.02) {
+      ctx.strokeStyle = 'rgba(205,222,240,0.55)';
+      ctx.lineWidth = 1.6;
+      ctx.beginPath();
+      const n = Math.round(DROPS.length * w.rain);
+      for (let i = 0; i < n; i++) {
+        const d = DROPS[i];
+        const y = wrapX(d.y + t * 700 * d.sp, SURFACE + 24) - 24;
+        const x = wrapX(d.x - t * 160 - y * 0.25, W + 40) - 20;
+        ctx.moveTo(x, y);
+        ctx.lineTo(x - 5, y + 18);
+      }
+      ctx.stroke();
+    }
+    if (w.snow > 0.02) {
+      ctx.fillStyle = '#ffffff';
+      const n = Math.round(FLAKES.length * w.snow);
+      for (let i = 0; i < n; i++) {
+        const f = FLAKES[i];
+        const y = wrapX(f.y + t * 45 * f.z, SURFACE + 10) - 6;
+        const x = wrapX(f.x - t * 20 + Math.sin(t * 1.3 + f.ph) * 14, W + 20) - 10;
+        ctx.globalAlpha = 0.5 + 0.5 * f.z;
+        ctx.beginPath();
+        ctx.arc(x, y, 1.4 + f.z * 2, 0, TAU);
+        ctx.fill();
+      }
+      ctx.globalAlpha = 1;
+    }
+    ctx.restore();
+    // raindrops ringing the surface
+    if (w.rain > 0.02) {
+      ctx.strokeStyle = 'rgba(220,240,255,0.5)';
+      ctx.lineWidth = 1.2;
+      const n = Math.round(18 * w.rain);
+      for (let i = 0; i < n; i++) {
+        const cyc = t * 1.6 + i * 0.37;
+        const life = cyc - Math.floor(cyc);
+        const x = wrapX(Math.floor(cyc) * 331 + i * 997, W);
+        ctx.globalAlpha = 1 - life;
+        ctx.beginPath();
+        ctx.ellipse(x, SURFACE + 2, 4 + life * 16, 1.5 + life * 4, 0, 0, TAU);
+        ctx.stroke();
+      }
+      ctx.globalAlpha = 1;
+    }
+  }
+
+  /** Over the whole scene: lightning flash, fog bank, and the name of new weather. */
+  function drawWeatherFront(ctx, R) {
+    if (R.wxFlash > 0) {
+      ctx.fillStyle = 'rgba(235,240,255,' + (R.wxFlash * 0.45).toFixed(3) + ')';
+      ctx.fillRect(0, 0, W, SURFACE);
+      ctx.fillStyle = 'rgba(235,240,255,' + (R.wxFlash * 0.14).toFixed(3) + ')';
+      ctx.fillRect(0, SURFACE, W, H - SURFACE);
+    }
+    if (wx.fog > 0.02) {
+      // thick above the surface, a light haze just below it: hazards stay readable
+      const gr = ctx.createLinearGradient(0, SURFACE - 120, 0, SURFACE + 160);
+      gr.addColorStop(0, 'rgba(230,236,240,0)');
+      gr.addColorStop(0.4, 'rgba(230,236,240,' + (0.6 * wx.fog).toFixed(3) + ')');
+      gr.addColorStop(1, 'rgba(230,236,240,0)');
+      ctx.fillStyle = gr;
+      ctx.fillRect(0, SURFACE - 120, W, 280);
+    }
+    if (R.wxLabel) {
+      ctx.globalAlpha = U.clamp(Math.min(R.wxLabel.t, 3 - R.wxLabel.t) * 2.5, 0, 1);
+      anchored(ctx, W / 2, 64, () => label(ctx, R.wxLabel.text, 0, 0, '700 22px Oxanium, sans-serif', '#ffffff', 'center'));
+      ctx.globalAlpha = 1;
+    }
   }
 
   // --- obstacles
@@ -1006,7 +1283,7 @@
     // a sign of what it is
     if (w > 200) {
       ctx.fillStyle = 'rgba(255,215,120,0.85)';
-      ctx.font = '700 15px Oxanium, sans-serif';
+      ctx.font = '700 ' + Math.round(15 * hudK()) + 'px Oxanium, sans-serif';
       ctx.textAlign = 'center';
       ctx.fillText('GO QUIET', x + w / 2, bottom - 26);
     }
@@ -1092,7 +1369,7 @@
       }
     }
     ctx.fillStyle = 'rgba(255,215,120,0.85)';
-    ctx.font = '700 15px Oxanium, sans-serif';
+    ctx.font = '700 ' + Math.round(15 * hudK()) + 'px Oxanium, sans-serif';
     ctx.textAlign = 'center';
     ctx.fillText('OIL SPILL · STAY LOW', x + w / 2, y1 - 30);
   }
@@ -1357,7 +1634,7 @@
         ctx.fill();
       } else if (p.kind === 'text') {
         ctx.globalAlpha = a;
-        ctx.font = '800 26px Oxanium, sans-serif';
+        ctx.font = '800 ' + Math.round(26 * hudK()) + 'px Oxanium, sans-serif';
         ctx.textAlign = 'center';
         ctx.lineWidth = 4;
         ctx.strokeStyle = 'rgba(2,20,30,0.7)';
@@ -1399,40 +1676,60 @@
     ctx.fillText(str, x, y);
   }
 
+  // HUD size: the Text size setting, plus a boost in landscape where the wider ocean is drawn smaller
+  function hudK() {
+    const ts = (SL.save && SL.save.settings && +SL.save.settings.textScale) || 1.15;
+    return ts * (W > SL.W ? 1.45 : 1);
+  }
+  /** Runs fn in a HUD space anchored at (ax, ay) and scaled by hudK(). */
+  function anchored(ctx, ax, ay, fn) {
+    const k = hudK();
+    ctx.save();
+    ctx.translate(ax, ay);
+    ctx.scale(k, k);
+    fn();
+    ctx.restore();
+  }
+
   function drawHud(ctx, R) {
     ctx.textBaseline = 'alphabetic';
     if (G.state === 'play' || G.state === 'paused' || G.state === 'over') {
-      for (let i = 0; i < MAX_HEARTS; i++) heart(ctx, 46 + i * 46, 214, 1.9, i < R.hearts);
-      label(ctx, U.fmtInt(finalScore(R)), 690, 222, '800 34px Oxanium, sans-serif', '#ffffff', 'right');
-      label(ctx, 'BEST ' + U.fmtInt(Math.max(store().best, R.over ? 0 : finalScore(R))), 690, 250, '600 16px Oxanium, sans-serif', 'rgba(230,248,255,0.85)', 'right');
-      if (R.shield) bubbleShape(ctx, 46 + MAX_HEARTS * 46, 208, 14, 0.9);
+      anchored(ctx, 0, SURFACE, () => {
+        for (let i = 0; i < MAX_HEARTS; i++) heart(ctx, 46 + i * 46, 44, 1.9, i < R.hearts);
+        if (R.shield) bubbleShape(ctx, 46 + MAX_HEARTS * 46, 38, 14, 0.9);
+      });
+      anchored(ctx, W, SURFACE, () => {
+        label(ctx, U.fmtInt(finalScore(R)), -30, 52, '800 34px Oxanium, sans-serif', '#ffffff', 'right');
+        label(ctx, 'BEST ' + U.fmtInt(Math.max(store().best, R.over ? 0 : finalScore(R))), -30, 80, '600 16px Oxanium, sans-serif', 'rgba(230,248,255,0.85)', 'right');
+      });
     }
     // level meter: what Puff hears
     if (G.state !== 'intro' && G.state !== 'error' && G.state !== 'micwait') {
-      const x = 30, y = 1196, w = 300, h = 16;
-      ctx.fillStyle = 'rgba(2,20,32,0.55)';
-      ctx.fillRect(x - 4, y - 4, w + 8, h + 8);
-      const gr = ctx.createLinearGradient(x, 0, x + w, 0);
-      gr.addColorStop(0, '#5dffb0');
-      gr.addColorStop(0.5, '#ffe27a');
-      gr.addColorStop(1, '#ff8a5c');
-      ctx.fillStyle = gr;
-      ctx.fillRect(x, y, w * U.clamp(G.level, 0, 1), h);
-      ctx.fillStyle = 'rgba(255,255,255,0.85)';
-      const nx = x + w * levelForVy(0);
-      ctx.fillRect(nx - 1, y - 6, 2, h + 12);
-      label(ctx, (G.mode === 'voice' ? 'MIC' : 'KEYS') + '  ·  quiet = sink   loud = puff up', x, y - 12, '600 14px Oxanium, sans-serif', 'rgba(240,250,255,0.9)');
-      label(ctx, 'hover', nx, y + h + 22, '600 12px Oxanium, sans-serif', 'rgba(240,250,255,0.75)', 'center');
+      anchored(ctx, 0, H, () => {
+        const x = 30, y = -84, w = 300, h = 16;
+        ctx.fillStyle = 'rgba(2,20,32,0.55)';
+        ctx.fillRect(x - 4, y - 4, w + 8, h + 8);
+        const gr = ctx.createLinearGradient(x, 0, x + w, 0);
+        gr.addColorStop(0, '#5dffb0');
+        gr.addColorStop(0.5, '#ffe27a');
+        gr.addColorStop(1, '#ff8a5c');
+        ctx.fillStyle = gr;
+        ctx.fillRect(x, y, w * U.clamp(G.level, 0, 1), h);
+        ctx.fillStyle = 'rgba(255,255,255,0.85)';
+        const nx = x + w * levelForVy(0);
+        ctx.fillRect(nx - 1, y - 6, 2, h + 12);
+        label(ctx, (G.mode === 'voice' ? 'MIC' : 'KEYS') + '  ·  quiet = sink   loud = puff up', x, y - 12, '600 14px Oxanium, sans-serif', 'rgba(240,250,255,0.9)');
+        label(ctx, 'hover', nx, y + h + 22, '600 12px Oxanium, sans-serif', 'rgba(240,250,255,0.75)', 'center');
+      });
     }
     if (G.state === 'ready') {
-      const a = 0.65 + 0.35 * Math.sin(R.scroll * 4);
-      ctx.globalAlpha = a;
-      label(ctx, G.mode === 'voice' ? 'Make a sound to start' : 'Hold Space, click or tap to start', W / 2, 330, '800 34px Oxanium, sans-serif', '#ffffff', 'center');
+      ctx.globalAlpha = 0.65 + 0.35 * Math.sin(R.scroll * 4);
+      anchored(ctx, W / 2, 330, () => label(ctx, G.mode === 'voice' ? 'Make a sound to start' : 'Hold Space, click or tap to start', 0, 0, '800 34px Oxanium, sans-serif', '#ffffff', 'center'));
       ctx.globalAlpha = 1;
     }
     if (G.state === 'play' && R.t < 6) {
       ctx.globalAlpha = U.clamp(6 - R.t, 0, 1);
-      label(ctx, G.mode === 'voice' ? 'Get loud to puff up. Go quiet to sink.' : 'Hold to puff up. Let go to sink.', W / 2, 330, '700 26px Oxanium, sans-serif', '#ffffff', 'center');
+      anchored(ctx, W / 2, 330, () => label(ctx, G.mode === 'voice' ? 'Get loud to puff up. Go quiet to sink.' : 'Hold to puff up. Let go to sink.', 0, 0, '700 26px Oxanium, sans-serif', '#ffffff', 'center'));
       ctx.globalAlpha = 1;
     }
   }
@@ -1471,6 +1768,7 @@
     ctx.globalAlpha = 1;
     if (R.shield) bubbleShape(ctx, FX, R.y, R.r * 1.35 + 8, 0.85);
     drawParts(ctx, R);
+    drawWeatherFront(ctx, R);
     drawHud(ctx, R);
     if (ui.meter) ui.meter.style.width = (U.clamp(G.level, 0, 1) * 100).toFixed(1) + '%';
   }
@@ -1585,17 +1883,29 @@
     ui.panel = wrap;
     return p;
   }
+  /** Two content columns: stacked in portrait, side by side in landscape (CSS). */
+  function cols(p) {
+    const wrap = el('div', 'sl-puff__cols');
+    const a = el('div', 'sl-puff__col'), b = el('div', 'sl-puff__col sl-puff__col--side');
+    wrap.append(a, b);
+    p.appendChild(wrap);
+    return [a, b];
+  }
   function focusFirst() {
     if (!ui || !ui.panel) return;
     const b = ui.panel.querySelector('button');
     if (b && SL.input.lastDevice !== 'touch') b.focus({ preventScroll: true });
+    // a tall panel (large text) scrolls: start at the top so the title shows first
+    const pn = ui.panel.querySelector('.sl-puff__panel');
+    if (pn) pn.scrollTop = 0;
   }
 
   function showIntro() {
     G.state = 'intro';
     ambient(false);
     const st = store();
-    const p = panel('sl-puff__overlay--intro');
+    const p0 = panel('sl-puff__overlay--intro');
+    const [p, side] = cols(p0);
     p.append(el('div', 'sl-label', 'Minigame · Puff\'s Ocean'), el('h2', 'sl-title sl-title--md sl-puff__title', 'Puff\'s Ocean'));
     const story = el('p', 'sl-puff__story');
     story.textContent = 'Puff the pufferfish is ' + callsign() + '\'s best buddy, riding along in a water bubble aboard the Halcyon. ' +
@@ -1611,8 +1921,8 @@
       btn('Play with your voice', 'sl-btn--primary', () => startVoice()),
       btn('Keys or touch', '', () => startKeys()),
       btn('Back to title', 'sl-btn--ghost', () => leave()));
-    p.appendChild(b);
-    p.appendChild(el('p', 'sl-puff__note', 'Any voice works: a hum, a whistle, a soft "ahh". The mic only measures loudness inside this page; nothing is recorded or sent.'));
+    side.appendChild(b);
+    side.appendChild(el('p', 'sl-puff__note', 'Any voice works: a hum, a whistle, a soft "ahh". The mic only measures loudness inside this page; nothing is recorded or sent.'));
     focusFirst();
   }
 
@@ -1727,7 +2037,7 @@
     ambient(false);
     const st = store();
     const total = finalScore(R);
-    const p = panel();
+    const [p, side] = cols(panel());
     p.append(el('div', 'sl-label', R.newBest ? 'New best!' : 'Puff needs a breather'), el('h2', 'sl-title sl-title--md sl-puff__title', U.fmtInt(total)));
     const dl = el('dl', 'sl-ui-stats sl-puff__stats');
     const add = (k, v) => dl.append(el('dt', '', k), el('dd', 'sl-num', v));
@@ -1742,8 +2052,8 @@
     b.append(btn('Swim again', 'sl-btn--primary', () => restart()));
     if (G.mode === 'voice') b.append(btn('Retune voice', '', () => startCalibration()));
     b.append(btn('Back to title', 'sl-btn--ghost', () => leave()));
-    p.appendChild(b);
-    if (G.mode === 'voice') p.appendChild(el('p', 'sl-puff__note', 'Hands-free: hum for a second to swim again.'));
+    side.appendChild(b);
+    if (G.mode === 'voice') side.appendChild(el('p', 'sl-puff__note', 'Hands-free: hum for a second to swim again.'));
     focusFirst();
   }
 
@@ -1780,6 +2090,7 @@
       const d = SL.save.data;
       if (!U.isPlain(d.flags)) d.flags = {};
       if (!d.flags.puff_seen) { d.flags.puff_seen = true; SL.save.commit(); }
+      fitWorld();
       newRun();
       showIntro();
       last = 0;
@@ -1843,6 +2154,7 @@
 
   let justUnlocked = false;
   SL.onBoot(() => {
+    SL.bus.on('orient', () => { if (G.state !== 'off') fitWorld(); });
     SL.bus.on('missionComplete', (e) => {
       const r = e && e.result;
       if (!r || r.missionId !== UNLOCK_MISSION || (e.session && e.session.sandbox)) return;
@@ -1908,6 +2220,7 @@
     let q;
     try { q = new URLSearchParams(location.search); } catch (e) { return; }
     const mode = q.get('puff');
+    G.forceWeather = WEATHER[q.get('weather')] ? q.get('weather') : null;
     if (q.get('puffsim')) {
       const rep = G.simRuns(+q.get('puffsim') || 10, +q.get('puffsec') || 90);
       const pre = el('pre', 'sl-puff-report', JSON.stringify(rep));

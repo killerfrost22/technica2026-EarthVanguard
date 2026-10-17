@@ -47,6 +47,20 @@ Firing is automatic. Hold Fire to keep shooting when auto-fire is off.
 
 On touch screens, drag anywhere to move. The jet follows your finger's motion, so your thumb never covers it.
 
+**Landscape or portrait.** On a wide screen (a laptop, or a phone turned sideways) the game plays as a side-scroller:
+your jet flies right and enemies come from the right, and the arrow keys and stick follow the screen. On a tall
+screen it plays as a vertical shooter. It switches automatically when the window or phone turns. **Text size**
+(Normal, Large, Extra large) is on the title screen.
+
+### Echo
+
+| Action | Keys | Touch / gamepad |
+|---|---|---|
+| Move | WASD or arrow keys | Drag / left stick |
+| Echo (light up the walls) | Space, Z or J | Tap / A, X, B or RT |
+| Sneak (half speed) | Shift | LB / RB |
+| Pause | Esc or P | Start |
+
 ### Puff's Ocean
 
 | Action | Voice | Keys / touch / gamepad |
@@ -73,6 +87,10 @@ nothing is recorded or sent.
   storms, solar flares, mine fields and wormholes.
 - **Rescue:** pull survivors out of escape pods drifting through the crossfire.
 - **Local co-op** for two players on one keyboard, two gamepads, or a mix.
+- **Echo:** a stealth minigame about the protagonist's escape. She grew up as a test subject inside a sealed
+  facility, and the experiments left her able to see with sound. With the power out, every echo she sends lights
+  up the walls for a moment, but security drones hear it too. Three floors to the surface, each behind a keycard
+  door. Open from the title screen for now (no story trigger yet).
 - **Puff's Ocean** (unlocked by clearing Mission 1): dodge ghost nets, oil spills, plastic bags, six-pack
   rings and leaking drums; squeeze under floating garbage patches; collect pearls, starfish (extra hearts)
   and bubble shields. Every game over shows a real ocean-pollution fact.
@@ -110,6 +128,7 @@ Handy URL parameters for testing (add them to the end of the file URL):
 - `?sandbox=<id>`: open a test sandbox (for example `boss:boss_suneater`, `hazard:black_hole`, `weapons`)
 - `?save=mid&screen=puff`: open Puff's Ocean with a save that has Mission 1 cleared
 - `?save=mid&screen=puff&puff=bot`: watch a bot play Puff's Ocean
+- `?screen=echo`: open Echo (`&echo=play&sector=1` starts on a floor, `&echo=reveal` keeps every wall lit)
 - `&coop=1`: start in two-player mode
 - `&boss=1`: skip ahead to the boss
 - `&god=1`: invincibility

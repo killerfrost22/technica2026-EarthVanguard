@@ -1,25 +1,25 @@
 /* STUB: replaced by story
    16_story.css provides: the radio box (.sl-radio, __face, __body, __who, __text; .is-on shows it) and the
-   choice dialog (.sl-choice, __panel, __prompt). Sized in cqw like everything inside #game. */
+   choice dialog (.sl-choice, __panel, __prompt). Sized in var(--u) / var(--f) like everything inside #game. */
 
 .sl-radio {
   --radio-color: var(--sl-cyan);
   position: absolute;
-  left: 3.4cqw;
-  right: 3.4cqw;
-  top: 25cqw;
+  left: calc(3.4 * var(--u));
+  right: calc(3.4 * var(--u));
+  top: calc(25 * var(--u));
   display: flex;
   align-items: center;
-  gap: 2.6cqw;
-  padding: 2cqw 2.8cqw;
-  border-radius: 2cqw;
-  border: 0.22cqw solid color-mix(in srgb, var(--radio-color) 45%, transparent);
+  gap: calc(2.6 * var(--u));
+  padding: calc(2 * var(--u)) calc(2.8 * var(--u));
+  border-radius: calc(2 * var(--u));
+  border: calc(0.22 * var(--u)) solid color-mix(in srgb, var(--radio-color) 45%, transparent);
   background:
     linear-gradient(180deg, rgba(190, 235, 255, 0.10) 0%, rgba(255, 255, 255, 0.02) 40%, transparent 41%),
     var(--sl-glass-strong);
-  box-shadow: inset 0 0.2cqw 0 rgba(255, 255, 255, 0.08), 0 2cqw 6cqw rgba(0, 0, 0, 0.55);
+  box-shadow: inset 0 calc(0.2 * var(--u)) 0 rgba(255, 255, 255, 0.08), 0 calc(2 * var(--u)) calc(6 * var(--u)) rgba(0, 0, 0, 0.55);
   opacity: 0;
-  transform: translateY(-2cqw);
+  transform: translateY(calc(-2 * var(--u)));
   transition: opacity var(--sl-med) var(--sl-ease), transform var(--sl-med) var(--sl-ease);
   pointer-events: none;
 }
@@ -27,24 +27,24 @@
 
 .sl-radio__face {
   flex: none;
-  width: 13cqw;
-  height: 13cqw;
-  border-radius: 1.4cqw;
-  border: 0.22cqw solid color-mix(in srgb, var(--radio-color) 60%, transparent);
+  width: calc(13 * var(--u));
+  height: calc(13 * var(--u));
+  border-radius: calc(1.4 * var(--u));
+  border: calc(0.22 * var(--u)) solid color-mix(in srgb, var(--radio-color) 60%, transparent);
   background: #04050b;
 }
 .sl-radio__body { min-width: 0; flex: 1; }
 .sl-radio__who {
   font-family: var(--sl-display);
   font-weight: 700;
-  font-size: 2.7cqw;
+  font-size: calc(2.7 * var(--f));
   letter-spacing: 0.2em;
   text-transform: uppercase;
 }
 .sl-radio__text {
-  margin-top: 0.6cqw;
+  margin-top: calc(0.6 * var(--u));
   min-height: 2.6em;
-  font-size: 3.7cqw;
+  font-size: calc(3.7 * var(--f));
   line-height: 1.3;
   color: var(--sl-text);
 }
@@ -54,9 +54,20 @@
   inset: 0;
   display: grid;
   place-items: center;
-  padding: 6cqw;
+  padding: calc(6 * var(--u));
   background: rgba(2, 4, 10, 0.55);
   pointer-events: auto;
 }
-.sl-choice__panel { width: 100%; max-width: 86cqw; text-align: center; }
-.sl-choice__prompt { margin: 2cqw 0 4cqw; font-size: 4.2cqw; line-height: 1.35; text-wrap: pretty; }
+.sl-choice__panel { width: 100%; max-width: calc(86 * var(--u)); text-align: center; }
+.sl-choice__prompt { margin: calc(2 * var(--u)) 0 calc(4 * var(--u)); font-size: calc(4.2 * var(--f)); line-height: 1.35; text-wrap: pretty; }
+
+/* Landscape: the radio box sits at the bottom center, clear of the boss bar, the HUD corners and menu panels. */
+.sl-land .sl-radio {
+  left: calc(50% - 62 * var(--u));
+  right: auto;
+  width: calc(124 * var(--u));
+  top: auto;
+  bottom: calc(4 * var(--u));
+}
+/* the pause menu covers the flight: let it, not the radio chatter, have the screen */
+#ui:has(> .sl-ui-pause) .sl-radio { opacity: 0; }

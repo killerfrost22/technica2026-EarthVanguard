@@ -10,6 +10,10 @@
    aberration, soft-limited bloom, flash, desaturate, vignette, dither -> #screen.
    Fallback (no WebGL, ?nogl=1, context lost, Low quality): the scene is blitted to a 2D #screen with 2D
    flash, desaturate and vignette; lens and ripple are skipped (distortion = false).
+   Orientation: on a landscape viewport (or ?orient=land) the game box is 16:9 and the finished frame is turned a
+   quarter turn: logical "up" (-y, the way the jet flies) points to screen right, logical +x points to screen down.
+   The world still runs and draws in 720x1280; only the output, toLogical/toScreen and the HUD space change.
+   R.land, R.vw x R.vh (the HUD / screen logical size: 720x1280 or 1280x720); bus 'orient' {land} on change.
    Post effects are per frame: those added during SL.update persist until the next update step (so a
    paused frame keeps them); those added while drawing are cleared after the frame. Also owns the
    blurred #ambient backdrop that fills the page around the 9:16 game box. */
@@ -67,6 +71,9 @@
     q: 1,
     cssW: W * 0.5,
     cssH: H * 0.5,
+    land: false,
+    vw: W,
+    vh: H,
     left: 0,
     top: 0,
     dpr: 1,
@@ -142,9 +149,11 @@
     },
 
     toLogical(clientX, clientY) {
-      return { x: ((clientX - R.left) / Math.max(1, R.cssW)) * W, y: ((clientY - R.top) / Math.max(1, R.cssH)) * H };
+      const u = (clientX - R.left) / Math.max(1, R.cssW), v = (clientY - R.top) / Math.max(1, R.cssH);
+      return R.land ? { x: v * W, y: (1 - u) * H } : { x: u * W, y: v * H };
     },
     toScreen(x, y) {
+      if (R.land) return { x: R.left + (1 - y / H) * R.cssW, y: R.top + (x / W) * R.cssH };
       return { x: R.left + (x / W) * R.cssW, y: R.top + (y / H) * R.cssH };
     },
 
@@ -162,14 +171,38 @@
   };
 
   // ------------------------------------------------------------------ sizing
+  let orientParam = '';
+  function wantLand() {
+    if (orientParam === 'land' || orientParam === 'landscape') return true;
+    if (orientParam === 'port' || orientParam === 'portrait') return false;
+    const aw = appEl ? appEl.clientWidth : window.innerWidth, ah = appEl ? appEl.clientHeight : window.innerHeight;
+    return aw > ah * 1.05;
+  }
+  function setOrientation(land) {
+    if (land === R.land && document.documentElement.classList.contains('sl-land') === land) return false;
+    R.land = land;
+    R.vw = land ? H : W;
+    R.vh = land ? W : H;
+    document.documentElement.classList.toggle('sl-land', land);
+    if (ambientEl && ambCtx) {
+      ambientEl.width = land ? 64 : 36;
+      ambientEl.height = land ? 36 : 64;
+      ambCtx.fillStyle = '#04050b';
+      ambCtx.fillRect(0, 0, ambientEl.width, ambientEl.height);
+    }
+    return true;
+  }
+
   function measure() {
     dirty = false;
     if (!gameEl) return;
+    const turned = setOrientation(wantLand());
     if (!cqSupported && appEl) {
       const aw = appEl.clientWidth, ah = appEl.clientHeight;
-      const w = Math.max(1, Math.min(aw, (ah * 9) / 16));
+      const k = R.land ? 16 / 9 : 9 / 16;
+      const w = Math.max(1, Math.min(aw, ah * k));
       gameEl.style.width = w + 'px';
-      gameEl.style.height = (w * 16) / 9 + 'px';
+      gameEl.style.height = w / k + 'px';
     }
     const r = gameEl.getBoundingClientRect();
     R.cssW = Math.max(1, r.width);
@@ -177,7 +210,7 @@
     R.left = r.left;
     R.top = r.top;
     R.dpr = Math.min(window.devicePixelRatio || 1, 2);
-    R.scale = R.cssW / W;
+    R.scale = (R.land ? R.cssH : R.cssW) / W;
     const nw = Math.max(1, Math.round(R.cssW * R.dpr)), nh = Math.max(1, Math.round(R.cssH * R.dpr));
     if (nw !== bw || nh !== bh) {
       bw = nw; bh = nh;
@@ -186,6 +219,7 @@
       if (hudEl) { hudEl.width = bw; hudEl.height = bh; }
       SL.bus.emit('resize', { w: R.cssW, h: R.cssH, dpr: R.dpr });
     }
+    if (turned) SL.bus.emit('orient', { land: R.land });
   }
 
   function sizeScene() {
@@ -249,10 +283,12 @@
       'uniform vec2 uRes;',
       'uniform vec4 uLens[6];uniform int uLensN;',
       'uniform vec4 uRip[8];uniform float uRipW[8];uniform int uRipN;',
-      'uniform vec3 uBloomW;uniform float uBloomK;uniform float uChroma;uniform vec4 uFlash;uniform float uDesat;uniform float uVig;uniform float uTime;',
+      'uniform vec3 uBloomW;uniform float uBloomK;uniform float uChroma;uniform vec4 uFlash;uniform float uDesat;uniform float uVig;uniform float uTime;uniform float uRot;',
       'float hash(vec2 p){return fract(sin(dot(p,vec2(12.9898,78.233)))*43758.5453);}',
       'void main(){',
-      '  vec2 p=vUv*uRes;',
+      // landscape: the screen shows the portrait scene a quarter turn round (scene up -> screen right)
+      '  vec2 sv=uRot>0.5?vec2(1.0-vUv.y,vUv.x):vUv;',
+      '  vec2 p=sv*uRes;',
       '  vec2 src=p;',
       '  float mask=1.0;',
       '  float rim=0.0;',
@@ -283,7 +319,7 @@
       '  vec2 uv=src/uRes;',
       '  vec3 col;',
       '  if(uChroma>0.001){',
-      '    vec2 off=(vUv-0.5)*uChroma*0.022;',
+      '    vec2 off=(sv-0.5)*uChroma*0.022;',
       '    col.r=texture2D(uScene,uv+off).r;',
       '    col.g=texture2D(uScene,uv).g;',
       '    col.b=texture2D(uScene,uv-off).b;',
@@ -296,7 +332,7 @@
       '  col=1.0-(1.0-col)*(1.0-uFlash.rgb*uFlash.a);',
       '  float l=dot(col,vec3(0.299,0.587,0.114));',
       '  col=mix(col,vec3(l),uDesat);',
-      '  vec2 q=vUv-0.5;',
+      '  vec2 q=sv-0.5;',
       '  float v=smoothstep(0.32,0.92,length(q*vec2(1.25,1.0))*1.18);',
       '  col*=1.0-uVig*v;',
       '  col+=(hash(gl_FragCoord.xy+uTime)-0.5)/255.0;',
@@ -365,7 +401,7 @@
       down: program(gl, FS_DOWN, ['uTex', 'uTexel']),
       blur: program(gl, FS_BLUR, ['uTex', 'uDir']),
       comp: program(gl, compositeSrc(prec), ['uScene', 'uB0', 'uB1', 'uB2', 'uRes', 'uLens', 'uLensN', 'uRip', 'uRipW',
-        'uRipN', 'uBloomW', 'uBloomK', 'uChroma', 'uFlash', 'uDesat', 'uVig', 'uTime']),
+        'uRipN', 'uBloomW', 'uBloomK', 'uChroma', 'uFlash', 'uDesat', 'uVig', 'uTime', 'uRot']),
       buf: gl.createBuffer(),
       sceneTex: texture(gl, 0, 0),
       sceneW: 0, sceneH: 0,
@@ -530,6 +566,7 @@
     gl.uniform1f(u.uDesat, fx.desat);
     gl.uniform1f(u.uVig, fx.vig);
     gl.uniform1f(u.uTime, (frameNo % 997) * 0.731);
+    gl.uniform1f(u.uRot, R.land ? 1 : 0);
     draw();
     return true;
   }
@@ -560,16 +597,27 @@
     return c;
   }
 
+  /** Draws a portrait-shaped source over a w x h target, turned a quarter turn in landscape. */
+  function turnedBlit(c, src, w, h) {
+    if (R.land) {
+      c.setTransform(0, h / src.width, -w / src.height, 0, w, 0);
+      c.drawImage(src, 0, 0);
+    } else {
+      c.setTransform(1, 0, 0, 1, 0, 0);
+      c.drawImage(src, 0, 0, w, h);
+    }
+  }
+
   function composite2D(fx) {
     const c = c2;
-    c.setTransform(1, 0, 0, 1, 0, 0);
     c.globalAlpha = 1;
     c.globalCompositeOperation = 'source-over';
-    c.drawImage(R.scene, 0, 0, bw, bh);
+    turnedBlit(c, R.scene, bw, bh);
     if (fx.vig > 0.001) {
       c.globalAlpha = Math.min(1, fx.vig * 1.25);
-      c.drawImage(vigCanvas, 0, 0, bw, bh);
+      turnedBlit(c, vigCanvas, bw, bh);
     }
+    c.setTransform(1, 0, 0, 1, 0, 0);
     if (fx.desat > 0.01) {
       c.globalCompositeOperation = 'saturation';
       c.globalAlpha = fx.desat;
@@ -717,13 +765,13 @@
     if (hudCtx) {
       hudCtx.setTransform(1, 0, 0, 1, 0, 0);
       hudCtx.clearRect(0, 0, bw, bh);
-      hudCtx.setTransform(bw / W, 0, 0, bh / H, 0, 0);
+      hudCtx.setTransform(bw / R.vw, 0, 0, bh / R.vh, 0, 0);
       hudCtx.globalAlpha = 1;
       hudCtx.globalCompositeOperation = 'source-over';
       try {
         if (SL.hud && typeof SL.hud.draw === 'function') SL.hud.draw(hudCtx);
       } catch (err) { reportDrawError(err); }
-      hudCtx.setTransform(bw / W, 0, 0, bh / H, 0, 0);
+      hudCtx.setTransform(bw / R.vw, 0, 0, bh / R.vh, 0, 0);
       hudCtx.globalAlpha = 1;
       hudCtx.globalCompositeOperation = 'source-over';
       try {
@@ -733,7 +781,7 @@
 
     if (ambCtx && frameNo % 4 === 0) {
       ambCtx.globalAlpha = 1;
-      ambCtx.drawImage(R.scene, 0, 0, ambientEl.width, ambientEl.height);
+      turnedBlit(ambCtx, R.scene, ambientEl.width, ambientEl.height);
     }
     clearFx(fxD);
   }
@@ -778,6 +826,7 @@
     vigCanvas = makeVignette();
 
     const params = (SL.debug && SL.debug.params) || {};
+    orientParam = String(params.orient || '');
     noGL = params.nogl === '1' || params.nogl === 'true';
     const setting = (SL.save && SL.save.settings && SL.save.settings.quality) || 'auto';
     const forced = QUALITY[params.quality] ? params.quality : null;

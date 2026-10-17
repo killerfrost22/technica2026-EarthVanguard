@@ -616,6 +616,7 @@
       ctx.globalAlpha = 1;
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
+      const land = !!(SL.render && SL.render.land);
       for (let i = 0; i < texts.length; i++) {
         const t = texts[i];
         if (!t.alive) continue;
@@ -623,8 +624,10 @@
         const pop = k < 0.12 ? SL.ease.outBack(k / 0.12) : 1;
         ctx.globalAlpha = k > 0.6 ? 1 - (k - 0.6) / 0.4 : 1;
         ctx.font = t.font;
-        const y = t.y - t.rise * SL.ease.outCubic(k);
-        ctx.setTransform(bs * pop, 0, 0, bs * pop, bx + t.x * bs, by + y * bs);
+        const rise = t.rise * SL.ease.outCubic(k), sp = bs * pop;
+        // landscape shows the world turned a quarter turn: counter-turn the text so it reads upright and rises up
+        if (land) ctx.setTransform(0, -sp, sp, 0, bx + (t.x - rise) * bs, by + t.y * bs);
+        else ctx.setTransform(sp, 0, 0, sp, bx + t.x * bs, by + (t.y - rise) * bs);
         ctx.lineWidth = 4;
         ctx.strokeStyle = 'rgba(4,6,14,0.75)';
         ctx.strokeText(t.str, 0, 0);

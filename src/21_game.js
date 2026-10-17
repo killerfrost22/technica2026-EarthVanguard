@@ -733,7 +733,7 @@
     SL.world.setBackground(o.bg || 'default', o.bgOpts || {});
     const sc = o.scroll != null ? +o.scroll : 70;
     SL.world.scroll.speed = SL.world.scroll.target = sc;
-    const m = G.menuScene = { t: 0, x: o.x != null ? o.x : W / 2, y: o.y != null ? o.y : SL.H * 0.56, player: null };
+    const m = G.menuScene = { t: 0, x: o.x != null ? o.x : W / 2, y: o.y != null ? o.y : menuY(), player: null };
     if (o.player !== false) {
       const po = o.player && typeof o.player === 'object' ? o.player : {};
       const p = SL.player.create(po.index === 1 ? 1 : 0, SL.player.defaultStats());
@@ -746,6 +746,9 @@
     }
     return m;
   };
+
+  // Landscape puts the idle jet on the left of the screen (logical y near the bottom), clear of the title column.
+  function menuY() { return SL.render && SL.render.land ? SL.H * 0.76 : SL.H * 0.5; }
 
   function menuStep(dt) {
     const m = G.menuScene;
@@ -879,6 +882,7 @@
 
   SL.onBoot(() => {
     registerHot();
+    SL.bus.on('orient', () => { if (G.menuScene && menuOpts.y == null) G.menuScene.y = menuY(); });
     G.state = 'menu';
     G.setMenuScene({});
     if (has(SL.ui, 'show') && SL.screens.has('title')) safe('ui.show title', () => SL.ui.show('title'));

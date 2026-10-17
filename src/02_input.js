@@ -3,7 +3,9 @@
    menu {up, down, left, right, confirm, back, pause, any}, update(), inject(i, partial), press(i, action),
    setCoop(bool), reset(), isHeld(code), coop, lastDevice, padFor, autoPads, forceAutoFire, gamepads }.
    Keyboard (KeyboardEvent.code), standard-mapping gamepads, touch drag and mouse drag on #game feed
-   per-player state once per frame. Calls SL.audio.unlock() on the first gestures and pauses missions on
+   per-player state once per frame. mx/my and dragX/dragY are in world (logical) directions: in landscape
+   (SL.render.land) the screen is the world turned a quarter turn, so screen right = world up (-y) and screen down =
+   world +x. sx/sy keep the raw screen-direction axes for screens that draw in screen space (Puff's Ocean). Calls SL.audio.unlock() on the first gestures and pauses missions on
    window blur or a hidden tab. */
 (function (SL) {
   'use strict';
@@ -35,10 +37,10 @@
   const DEADZONE = 0.2;
 
   function blankPlayer() {
-    return { mx: 0, my: 0, dragX: 0, dragY: 0, fire: false, focus: false, bomb: false, skill: false, pause: false, any: false };
+    return { mx: 0, my: 0, sx: 0, sy: 0, dragX: 0, dragY: 0, fire: false, focus: false, bomb: false, skill: false, pause: false, any: false };
   }
   function clearPlayer(p) {
-    p.mx = 0; p.my = 0; p.dragX = 0; p.dragY = 0;
+    p.mx = 0; p.my = 0; p.sx = 0; p.sy = 0; p.dragX = 0; p.dragY = 0;
     p.fire = false; p.focus = false; p.bomb = false; p.skill = false; p.pause = false; p.any = false;
   }
 
@@ -103,12 +105,20 @@
 
       pollPads(realDt);
 
+      const land = !!(SL.render && SL.render.land);
+      for (let i = 0; i < 2; i++) {
+        const p = P[i];
+        p.sx = p.mx;
+        p.sy = p.my;
+        if (land) { p.mx = p.sy; p.my = -p.sx; }
+      }
       if (dragX || dragY) {
-        const w = (SL.render && SL.render.cssW) || cssWidth();
+        // the world's 720 px width spans the box width in portrait and the box height in landscape
+        const w = (SL.render && (land ? SL.render.cssH : SL.render.cssW)) || cssWidth();
         const sens = (SL.save && SL.save.settings && SL.save.settings.touchSensitivity) || 1;
         const k = (SL.W / Math.max(1, w)) * sens;
-        P[0].dragX = dragX * k;
-        P[0].dragY = dragY * k;
+        P[0].dragX = (land ? dragY : dragX) * k;
+        P[0].dragY = (land ? -dragX : dragY) * k;
       }
       dragX = 0;
       dragY = 0;

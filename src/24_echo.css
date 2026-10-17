@@ -1,0 +1,80 @@
+/* 24_echo.css (echo)
+   Echo minigame screen (.sl-echo), its overlay panels and the title-screen button (.sl-echo-btn).
+   Uses the tokens and primitives from 01_base.css; sizes in var(--u), text in var(--f). */
+
+.sl-echo { padding: 0; justify-content: flex-start; background: #04060b; }
+.sl-echo__canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; touch-action: none; cursor: crosshair; }
+
+.sl-echo__overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: calc(6 * var(--u));
+  background: radial-gradient(ellipse at 50% 40%, rgba(10, 30, 50, 0.45), rgba(2, 4, 9, 0.85));
+  animation: sl-ui-in var(--sl-med) var(--sl-ease) both;
+}
+.sl-echo__overlay--caught { background: radial-gradient(ellipse at 50% 45%, rgba(80, 8, 24, 0.35), rgba(2, 4, 9, 0.8)); }
+.sl-echo__overlay--free { align-items: flex-start; padding-top: calc(14 * var(--u)); background: linear-gradient(180deg, rgba(4, 8, 24, 0.55), transparent 70%); }
+
+.sl-echo__panel {
+  width: 100%;
+  max-width: calc(84 * var(--u));
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: calc(2.8 * var(--u));
+  text-align: left;
+  border-color: rgba(159, 232, 255, 0.4);
+}
+.sl-echo__panel .sl-title { text-align: left; }
+.sl-echo__title {
+  background: linear-gradient(180deg, #ffffff 0%, #dff7ff 40%, #9fe8ff 62%, #5a8cff 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  letter-spacing: 0.18em;
+  filter: drop-shadow(0 0 calc(2.2 * var(--u)) rgba(127, 227, 255, 0.45));
+}
+.sl-echo__story { margin: 0; font-size: calc(3.7 * var(--f)); line-height: 1.4; color: var(--sl-text); text-wrap: pretty; }
+.sl-echo__how { margin: 0; padding: 0; list-style: none; display: grid; gap: calc(1.2 * var(--u)); font-size: calc(3.4 * var(--f)); line-height: 1.35; color: var(--sl-text-dim); }
+.sl-echo__how b { color: #9fe8ff; font-family: var(--sl-display); font-weight: 700; letter-spacing: 0.04em; }
+.sl-echo__best { font-family: var(--sl-display); font-size: calc(3.4 * var(--f)); color: #c9a6ff; }
+.sl-echo__note { margin: 0; font-size: calc(3 * var(--f)); line-height: 1.4; color: var(--sl-text-faint); }
+.sl-echo__stats { margin: 0; }
+
+/* content columns: stacked in portrait, side by side in landscape */
+.sl-echo__cols { display: flex; flex-direction: column; gap: calc(2.8 * var(--u)); }
+.sl-echo__col { display: flex; flex-direction: column; gap: calc(2.8 * var(--u)); min-width: 0; }
+.sl-land .sl-echo__panel:has(.sl-echo__cols) { max-width: calc(170 * var(--u)); }
+.sl-land .sl-echo__cols { flex-direction: row; align-items: center; gap: calc(6 * var(--u)); }
+.sl-land .sl-echo__col { flex: 1.35; }
+.sl-land .sl-echo__col--side { flex: 1; }
+
+/* title-screen entry */
+.sl-echo-btn {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: calc(0.4 * var(--u));
+  border-color: rgba(159, 232, 255, 0.55);
+  letter-spacing: 0.18em;
+  text-shadow: 0 0 calc(1.8 * var(--u)) rgba(127, 227, 255, 0.5);
+}
+.sl-echo-btn:hover { border-color: #9fe8ff; }
+.sl-echo-btn__sub { font-family: var(--sl-body); font-size: calc(2.8 * var(--f)); letter-spacing: 0.02em; text-transform: none; color: var(--sl-text-dim); text-shadow: none; }
+.sl-echo-btn--locked { opacity: 0.7; border-color: var(--sl-line); text-shadow: none; }
+.sl-echo-btn--locked[aria-disabled="true"] { cursor: pointer; filter: saturate(0.5); }
+.sl-echo-btn__new {
+  position: absolute;
+  top: calc(-1.6 * var(--u));
+  right: calc(-1.2 * var(--u));
+  padding: calc(0.5 * var(--u)) calc(1.6 * var(--u));
+  border-radius: calc(2 * var(--u));
+  background: #9fe8ff;
+  color: var(--sl-ink);
+  font: 800 calc(2.4 * var(--f))/1.2 var(--sl-display);
+  letter-spacing: 0.08em;
+  text-shadow: none;
+}
