@@ -1,60 +1,4 @@
 {
-  "opening_01": {
-    "role": "Narrator",
-    "voice": "hnFidmF05jrIKH0LAjEc",
-    "model": "eleven_multilingual_v2",
-    "seconds": 7.26,
-    "chars": 117,
-    "text": "Out past the edge of every map, there is a civilization so old and so powerful that it has run out of things to want."
-  },
-  "opening_02": {
-    "role": "Narrator",
-    "voice": "hnFidmF05jrIKH0LAjEc",
-    "model": "eleven_multilingual_v2",
-    "seconds": 7.58,
-    "chars": 105,
-    "text": "So it plays games. It chooses a world, invents a trial, and promises salvation to anyone who survives it."
-  },
-  "opening_03": {
-    "role": "Narrator",
-    "voice": "hnFidmF05jrIKH0LAjEc",
-    "model": "eleven_multilingual_v2",
-    "seconds": 8.83,
-    "chars": 123,
-    "text": "The ones who fail lose everything. Their planets are destroyed, or stripped for parts. To the players, it is entertainment."
-  },
-  "opening_04": {
-    "role": "Narrator",
-    "voice": "hnFidmF05jrIKH0LAjEc",
-    "model": "eleven_multilingual_v2",
-    "seconds": 9.67,
-    "chars": 159,
-    "text": "Not everyone is willing to watch. A small band of pilots and rescuers has formed to protect the worlds caught in the game. They call themselves Earth Vanguard."
-  },
-  "opening_05": {
-    "role": "Narrator",
-    "voice": "hnFidmF05jrIKH0LAjEc",
-    "model": "eleven_multilingual_v2",
-    "seconds": 5.59,
-    "chars": 96,
-    "text": "Its newest pilot is a young woman called Blue Arrow. She doesn't talk about where she came from."
-  },
-  "opening_06": {
-    "role": "Narrator",
-    "voice": "hnFidmF05jrIKH0LAjEc",
-    "model": "eleven_multilingual_v2",
-    "seconds": 7.21,
-    "chars": 123,
-    "text": "She flies with her best friend, Puff, a pufferfish from an ocean world very far from here. He doesn't talk about it either."
-  },
-  "opening_07": {
-    "role": "Narrator",
-    "voice": "hnFidmF05jrIKH0LAjEc",
-    "model": "eleven_multilingual_v2",
-    "seconds": 4.05,
-    "chars": 64,
-    "text": "Tonight a distress call comes in, and the two of them fly first."
-  },
   "echo_intro": {
     "role": "Narrator",
     "voice": "n1PvBOwxb8X6m7tahp2h",
@@ -238,13 +182,5 @@
     "seconds": 4.21,
     "chars": 50,
     "text": "There were more trials. There was always one more."
-  },
-  "ending_01": {
-    "role": "Narrator",
-    "voice": "eJYPLhqh88tqzFmJMbNX",
-    "model": "eleven_multilingual_v2",
-    "seconds": 5.54,
-    "chars": 77,
-    "text": "Two survivors who once struggled to save themselves now fight to save others."
   }
 }

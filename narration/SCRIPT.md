@@ -1,26 +1,26 @@
 # Narration recording script
 
 Every line of story narration in Earth Vanguard, ready to record. Record each **clip** as its own audio file, name
-the file with the clip's id (for example `opening_01.wav`), and put it in [`audio/`](audio/).
+the file with the clip's id (for example `echo_intro.wav`), and put it in [`audio/`](audio/).
 
-Most clips match text the game already shows on screen, so **read the text exactly as written**: the subtitles
-will show the same words. Clips marked **NEW** are not in the game yet; their text can still change, so tell us if
-a line doesn't feel right to say out loud.
+Every clip matches text the game shows on screen, so **read the text exactly as written**: the subtitles show
+the same words.
 
 ## Voices
 
 | Voice | Who reads it | Direction |
 |---|---|---|
-| **Narrator** | Most clips | Calm, warm, a little hushed. A storyteller, not a movie trailer. Unhurried. |
-| **Blue Arrow** | Her memories in Echo (section 3) | First person, quiet, young woman. Remembering, not performing. |
-| **Puff** | His thoughts in the memory (section 5) | Small, tired, brave. Half to himself. |
+| **Narrator** | Most clips, and the cutscenes | Calm, warm, a little hushed. A storyteller, not a movie trailer. Unhurried. |
+| **Blue Arrow** | Her memories in Echo (section 3) and her cutscene lines | First person, quiet, young woman. Remembering, not performing. |
+| **Puff** | His thoughts in the memory (section 5) and his cutscene lines | Small, tired, brave. Half to himself. |
 | **The Directorate** | The voice over Puff's trial (section 5) | Cold, slow, polite, from everywhere at once. Never raises its voice. |
+| **Commander Kade** | Her lines in the cutscenes | Calm, clipped, decisive. Never shouts. |
 
 One person can read every part; different voices for Blue Arrow, Puff and the Directorate just make it better.
 
 ## How to record
 
-- **One clip per file**, named with the clip id: `opening_01.wav`, `echo_intro.wav` and so on.
+- **One clip per file**, named with the clip id: `echo_intro.wav`, `puff_intro.wav` and so on.
 - **WAV** is best. A high-quality MP3 or a phone voice memo (M4A) also works; we will convert and compress them.
 - A quiet room, the mic or phone about a hand's width from your mouth, and soft things around you (a closet full of
   clothes is a great booth). Turn off fans and notifications.
@@ -31,20 +31,12 @@ One person can read every part; different voices for Blue Arrow, Puff and the Di
 
 ---
 
-## 1. Opening · NEW
+## 1. Story cutscenes
 
-Plays once, the first time a player starts a new game, before Mission 1. It sets up the world without giving away
-Blue Arrow's or Puff's past (the player discovers those later). **Voice: Narrator.** About 50 seconds in all.
-
-| Clip | Text | Length |
-|---|---|---|
-| `opening_01` | Out past the edge of every map, there is a civilization so old and so powerful that it has run out of things to want. | 7 s |
-| `opening_02` | So it plays games. It chooses a world, invents a trial, and promises salvation to anyone who survives it. | 7 s |
-| `opening_03` | The ones who fail lose everything. Their planets are destroyed, or stripped for parts. To the players, it is entertainment. | 8 s |
-| `opening_04` | Not everyone is willing to watch. A small band of pilots and rescuers has formed to protect the worlds caught in the game. They call themselves Earth Vanguard. | 10 s |
-| `opening_05` | Its newest pilot is a young woman called Blue Arrow. She doesn't talk about where she came from. | 6 s |
-| `opening_06` | She flies with her best friend, Puff, a pufferfish from an ocean world very far from here. He doesn't talk about it either. | 8 s |
-| `opening_07` | Tonight a distress call comes in, and the two of them fly first. | 4 s |
+The cutscenes' spoken lines are not listed here: they come straight from the cutscene script,
+`cutscenes/earth-vanguard-cutscenes/cutscenes/scenes.js`, so the voice always matches the words on screen. To see
+them with their clip ids and voices, run `node tools/cutscene_lines.js`. `tools/narrate.py` generates them along
+with the clips below.
 
 ## 2. Echo: Blue Arrow's escape
 
@@ -114,14 +106,9 @@ the Directorate and Puff speak **during** the 45-second swim, each line at a set
 | `memory1_end_1` | The Directorate | Subject survives. Proceed to trial two. | 3 s |
 | `memory1_end_2` | Narrator | There were more trials. There was always one more. | 4 s |
 
-## 6. Closing line · NEW
-
-The last line of the story, for the ending screen once the campaign is finished. **Voice: Narrator.**
-
-| Clip | Text | Length |
-|---|---|---|
+---|---|---|
 | `ending_01` | Two survivors who once struggled to save themselves now fight to save others. | 5 s |
 
 ---
 
-**Total:** 31 clips, about 3½ minutes of audio. Narrator 18 clips, Blue Arrow 6, The Directorate 5, Puff 2.
+**Total:** 23 clips here (Echo, Puff's Ocean and Mission 1), plus the cutscene lines.

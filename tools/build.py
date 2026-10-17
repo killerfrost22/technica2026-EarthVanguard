@@ -9,7 +9,8 @@ src/shell.html holds two marked regions:
   <!--HEAD--> ... <!--/HEAD-->   title, meta tags (goes first, so <title> sits in the first 8 KB)
   <!--BODY--> ... <!--/BODY-->   page markup
 All src/*.css files (sorted by name) are inlined into one <style>; all src/*.js files (sorted by name)
-are inlined, each in its own <script> ending with //# sourceURL=src/<name>, so stack traces and the
+are inlined, then the cutscene player, art and script from cutscenes/earth-vanguard-cutscenes/cutscenes/,
+each in its own <script> ending with //# sourceURL=<path>, so stack traces and the
 test harness name the real source file and line.
 
 Options:
@@ -18,12 +19,17 @@ Options:
   --no-publish       skip dist/publish/index.html
 """
 import argparse
+import base64
+import json
 import pathlib
 import re
 import sys
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 SRC = ROOT / 'src'
+CUTSCENES = ROOT / 'cutscenes' / 'earth-vanguard-cutscenes' / 'cutscenes'
+CUTSCENE_JS = ['cutscenes.js', 'art.js', 'scenes.js']
+NARRATION = ROOT / 'narration' / 'audio'
 
 
 # The artifact host may serve the page without a charset, so the output is pure ASCII: non-ASCII characters
@@ -48,6 +54,18 @@ def css_ascii(css):
 
 def html_ascii(html):
     return re.sub(r'[^\x00-\x7f]', lambda m: '&#x%x;' % ord(m.group(0)), html)
+
+
+def cutscene_voice():
+    manifest = NARRATION / 'manifest.json'
+    if not manifest.exists():
+        return {}
+    vo = {}
+    for cid, m in json.loads(manifest.read_text(encoding='utf-8')).items():
+        mp3 = NARRATION / (cid + '.mp3')
+        if cid.startswith('cs_') and mp3.exists() and m.get('text'):
+            vo[m['text']] = 'data:audio/mpeg;base64,' + base64.b64encode(mp3.read_bytes()).decode('ascii')
+    return vo
 
 
 def region(text, name):
@@ -85,6 +103,22 @@ def main():
         if '</script' in code.lower():
             sys.exit('%s contains "</script", which would end the inlined <script> early; split the string' % p.name)
         js_parts.append('<script>\n%s\n//# sourceURL=src/%s\n</script>' % (js_ascii(code), p.name))
+
+    # The story cutscenes keep their own folder (with a standalone preview, demo.html); the player, art and script
+    # load after the game modules, in this order. src/26_cutscenes.js wires them into the game.
+    # Their voice clips (narration/audio/cs_*.mp3, made by tools/narrate.py) go in first as window.CUTSCENE_VO, a map
+    # from each line's text to a data: URI, so a line whose text changed since its clip was made simply plays silent.
+    vo = cutscene_voice()
+    if vo:
+        js_parts.append('<script>\nwindow.CUTSCENE_VO = %s;\n</script>' % json.dumps(vo, separators=(',', ':')))
+    for name in CUTSCENE_JS:
+        p = CUTSCENES / name
+        if name in exclude:
+            continue
+        code = p.read_text(encoding='utf-8')
+        if '</script' in code.lower():
+            sys.exit('%s contains "</script", which would end the inlined <script> early; split the string' % p)
+        js_parts.append('<script>\n%s\n//# sourceURL=%s\n</script>' % (js_ascii(code), p.relative_to(ROOT).as_posix()))
 
     style = '<style>\n%s\n</style>' % '\n'.join(css_parts)
     scripts = '\n'.join(js_parts)

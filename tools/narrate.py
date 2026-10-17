@@ -1,10 +1,15 @@
 #!/usr/bin/env python3
-"""Generate the narration clips in narration/SCRIPT.md with ElevenLabs text-to-speech.
+"""Generate the narration clips in narration/SCRIPT.md and the story cutscenes with ElevenLabs text-to-speech.
 
 Reads every clip table in the script (clip id, text, voice role, length), picks each clip's voice from
 narration/voices.json ("sections": a voice per clip-id prefix, longest match wins; otherwise the role's voice; the
 role's settings always apply), and writes narration/audio/<clip id>.mp3 plus narration/audio/manifest.json (voice,
-duration, characters). Clips that already exist are skipped, so re-running only fills the gaps; --force redoes them.
+duration, characters). Clips that already exist are skipped, so re-running only fills the gaps; --force redoes them. A clip whose text
+changed since it was generated (the manifest keeps the text) is redone automatically, so audio always matches the
+words on screen.
+The cutscene lines (ids cs_<cutscene>_<nn>) come from cutscenes/earth-vanguard-cutscenes/cutscenes/scenes.js through
+tools/cutscene_lines.js (needs Node), use the role voices, and are written at 64 kbps because tools/build.py inlines
+them into the game file. --prune deletes cs_ clips whose line is no longer in the script.
 Clips with a time limit (the script's "keep each under N seconds" notes and "(hard limit)" lengths) are checked
 after generation and reported if they run long.
 
@@ -25,6 +30,7 @@ import json
 import os
 import pathlib
 import re
+import subprocess
 import sys
 import urllib.error
 import urllib.request
@@ -34,8 +40,26 @@ SCRIPT = ROOT / 'narration' / 'SCRIPT.md'
 VOICES = ROOT / 'narration' / 'voices.json'
 OUT = ROOT / 'narration' / 'audio'
 API = 'https://api.elevenlabs.io/v1'
-ROLES = ['Narrator', 'Blue Arrow', 'Puff', 'The Directorate']
-OUTPUT_FORMAT = 'mp3_44100_128'  # constant 128 kbps, so duration = bytes * 8 / 128000
+ROLES = ['Narrator', 'Blue Arrow', 'Puff', 'The Directorate', 'Commander Kade']
+OUTPUT_FORMAT = 'mp3_44100_128'     # constant 128 kbps, so duration = bytes * 8 / 128000
+CUTSCENE_FORMAT = 'mp3_44100_64'    # inlined into the game, so half the size
+
+
+def kbps(fmt):
+    return int(fmt.rsplit('_', 1)[1])
+
+
+def cutscene_clips():
+    """The spoken lines of every cutscene, from tools/cutscene_lines.js."""
+    try:
+        out = subprocess.run(['node', str(ROOT / 'tools' / 'cutscene_lines.js')], check=True, capture_output=True,
+                             text=True).stdout
+    except FileNotFoundError:
+        sys.exit('Node is needed to read the cutscene script (tools/cutscene_lines.js).')
+    except subprocess.CalledProcessError as e:
+        sys.exit('tools/cutscene_lines.js failed:\n' + e.stderr)
+    return [{'id': c['id'], 'text': c['text'], 'role': c['role'], 'limit': None, 'format': CUTSCENE_FORMAT}
+            for c in json.loads(out)]
 
 
 def parse_script(text):
@@ -132,6 +156,7 @@ def main():
     ap.add_argument('--only', default='', help='comma-separated clip ids')
     ap.add_argument('--role', default='', help='only clips for this voice role')
     ap.add_argument('--force', action='store_true', help='regenerate clips that already exist')
+    ap.add_argument('--prune', action='store_true', help='delete cutscene clips whose line is no longer in the script')
     a = ap.parse_args()
 
     key = os.environ.get('ELEVENLABS_API_KEY', '').strip()
@@ -143,17 +168,27 @@ def main():
         return
 
     config = json.loads(VOICES.read_text(encoding='utf-8'))
-    clips = parse_script(SCRIPT.read_text(encoding='utf-8'))
+    clips = parse_script(SCRIPT.read_text(encoding='utf-8')) + cutscene_clips()
+    mpath = OUT / 'manifest.json'
+    manifest = json.loads(mpath.read_text(encoding='utf-8')) if mpath.exists() else {}
+    if a.prune:
+        live = {c['id'] for c in clips}
+        for k in [k for k in manifest if k.startswith('cs_') and k not in live]:
+            (OUT / (k + '.mp3')).unlink(missing_ok=True)
+            del manifest[k]
+            print('pruned', k)
+        mpath.write_text(json.dumps(manifest, indent=2) + '\n', encoding='utf-8')
     only = {x.strip() for x in a.only.split(',') if x.strip()}
     unknown = only - {c['id'] for c in clips}
     if unknown:
-        sys.exit('not in SCRIPT.md: ' + ', '.join(sorted(unknown)))
+        sys.exit('not in SCRIPT.md or the cutscenes: ' + ', '.join(sorted(unknown)))
     todo = [c for c in clips if (not only or c['id'] in only) and (not a.role or c['role'] == a.role)]
     if not a.force:
-        todo = [c for c in todo if not (OUT / (c['id'] + '.mp3')).exists()]
+        todo = [c for c in todo if not (OUT / (c['id'] + '.mp3')).exists()
+                or manifest.get(c['id'], {}).get('text', c['text']) != c['text']]
 
     chars = sum(len(c['text']) for c in todo)
-    print('%d clips in SCRIPT.md; %d to generate (%d characters)' % (len(clips), len(todo), chars))
+    print('%d clips in SCRIPT.md and the cutscenes; %d to generate (%d characters)' % (len(clips), len(todo), chars))
     if a.dry_run:
         for c in todo:
             lim = ' (limit %gs)' % c['limit'] if c['limit'] else ''
@@ -167,8 +202,6 @@ def main():
     ids = resolve({voice_for(c, config) for c in todo}, key)
     model = config.get('model', 'eleven_multilingual_v2')
     OUT.mkdir(parents=True, exist_ok=True)
-    mpath = OUT / 'manifest.json'
-    manifest = json.loads(mpath.read_text(encoding='utf-8')) if mpath.exists() else {}
     long = []
     for i, c in enumerate(todo, 1):
         role = config[c['role']]
@@ -178,9 +211,10 @@ def main():
             'voice_settings': {k: role[k] for k in ('stability', 'similarity_boost', 'style', 'use_speaker_boost', 'speed') if k in role},
         }
         voice = voice_for(c, config)
-        audio = api('/text-to-speech/%s?output_format=%s' % (ids[voice], OUTPUT_FORMAT), key, body)
+        fmt = c.get('format', OUTPUT_FORMAT)
+        audio = api('/text-to-speech/%s?output_format=%s' % (ids[voice], fmt), key, body)
         (OUT / (c['id'] + '.mp3')).write_bytes(audio)
-        secs = len(audio) * 8 / 128000
+        secs = len(audio) * 8 / (kbps(fmt) * 1000)
         manifest[c['id']] = {'role': c['role'], 'voice': voice, 'model': model, 'seconds': round(secs, 2),
                              'chars': len(c['text']), 'text': c['text']}
         flag = ''
