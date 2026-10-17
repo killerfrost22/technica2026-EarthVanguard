@@ -24,9 +24,9 @@ However, even after overcoming the challenges and the experiment, his planet was
 Puff survived, but he lost his home and the civilization he had fought so desperately to protect.
 
 Knowing the truth about what happened, he eventually joined Earth Vanguard, hoping to prevent other worlds from
-suffering the same fate.
+suffering the same fate. There he became Blue Arrow's best friend and fighting buddy.
 
 Unlike the main protagonist, Puff remembers what happened to his home but is reluctant to discuss it.
 
-His experiences are gradually revealed through conversations and memory sequences as the protagonist earns his
+His experiences are gradually revealed through conversations and memory sequences as Blue Arrow earns his
 trust.

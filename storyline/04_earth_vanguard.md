@@ -2,10 +2,9 @@
 
 The main story takes place after both protagonists have joined Earth Vanguard.
 
-The player controls the main protagonist, now a pilot fighting against forces associated with the advanced
-civilization.
+The player controls Blue Arrow, now a pilot fighting against forces associated with the advanced civilization.
 
-Puff serves as her companion and wingmate.
+Puff is her best friend and fighting buddy, flying beside her on every mission.
 
 Although the two characters come from very different backgrounds, they share a common goal: protecting innocent
 civilizations from the cruelty of those who treat suffering as entertainment.
@@ -21,5 +20,5 @@ Puff.
 
 The relationship between the two protagonists develops based on the player's decisions and actions.
 
-As Puff begins to trust the main character, he gradually reveals more about his destroyed home planet and the
+As Puff begins to trust Blue Arrow, he gradually reveals more about his destroyed home planet and the
 events that led him to join Earth Vanguard.

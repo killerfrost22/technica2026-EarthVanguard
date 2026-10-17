@@ -1,8 +1,8 @@
 # Echo (`src/24_echo.js`, `src/24_echo.css`)
 
-A stealth minigame inside Earth Vanguard about the protagonist's escape. She was a test subject (Subject 7) in a
-sealed experimental facility run by the Directorate, a subordinate arm of an advanced civilization, and spent most
-of her life there, cut off from the outside world. The experiments left her able to see with sound. The power has
+A stealth minigame inside Earth Vanguard about the escape of Blue Arrow, the main character (see `storyline/`).
+She was a test subject, known only as Subject 7, in a sealed experimental facility run by the Directorate, a
+subordinate arm of an advanced civilization, and spent most of her life there, cut off from the outside world. The experiments left her able to see with sound. The power has
 failed, and Echo is her escape: three floors up to the surface.
 
 There is **no unlock trigger yet**. `PLAYTEST_UNLOCK` (top of `24_echo.js`) keeps it open on the title screen; once a

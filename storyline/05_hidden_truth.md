@@ -1,13 +1,13 @@
 # 5. The Hidden Truth
 
-At the beginning of the story, players only know that Puff is a survivor from a distant ocean planet and that the
-protagonist has a mysterious past.
+At the beginning of the story, players only know that Puff is a survivor from a distant ocean planet and that Blue Arrow
+has a mysterious past.
 
 Their personal histories are not immediately explained.
 
 As the story progresses, players gradually discover that:
 
-1. Echo represents the protagonist's escape from an experimental facility.
+1. Echo is Blue Arrow's escape from an experimental facility.
 2. Puff took part in the advanced civilization's trials to save his planet.
 3. Despite his efforts, Puff's planet was destroyed.
 4. Both protagonists are victims of the same advanced civilization.

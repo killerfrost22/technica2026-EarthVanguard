@@ -1,42 +1,27 @@
 # Notes and open questions
 
-Places where this storyline and the current game (or the draft text) don't match yet. Decide each one, then update
-the story files or the game.
+Decisions so far, and places where this storyline and the current game still disagree.
 
-## Echo: a girl or a fish?
+## Decided
 
-The story says the player controls "a girl" in Echo, but also that "the fish represents the protagonist" and that
-she searches for her **school** of fish. The Echo minigame in the game right now (`src/24_echo.js`) is the girl:
-she escapes a dark facility floor by floor, sees with sound, avoids drones, cameras and lasers, and ends by climbing
-out under the open sky. There is no fish or school in it.
+- **The main character is Blue Arrow.** Inside the facility she had only a number, **Subject 7**; the Echo game
+  uses that number in her memories and calls her Blue Arrow everywhere else.
+- **Echo is Blue Arrow's own story**: a girl escaping the facility by sound. There is no fish in Echo.
+- **Puff is Blue Arrow's best friend and fighting buddy.**
+- **Puff is "he".**
 
-Options: keep the girl (and drop the fish lines here), make the player a fish whose goal is reaching its school,
-or keep the girl and add the fish as a symbol (for example in the ending or the memory shards).
+## Open
 
-## Names in the game
-
-- Echo calls her **Subject 7** (her facility number), and names the facility's operator **the Directorate**.
-  The story names her **Blue Angel** and doesn't name the subordinate organization. Should Subject 7 stay as her
-  number in the facility, with Blue Angel as the name she takes later?
-- The advanced civilization has no name yet. The game only refers to it indirectly ("a civilization far older
-  than ours").
-- **Earth Vanguard** is marked as a temporary name.
-
-## The player's jet and callsign
-
-The shooter currently calls the pilot by a callsign (default LANCE) flying the XF-9 Starlance from the carrier
-Halcyon, with a crew listed in `docs/GDD.md`. Is the pilot Blue Angel (with LANCE as her callsign), or someone else?
-
-## Puff
-
-- The draft switched between "he" and "she" for Puff. These files use **he** throughout, which matches most of the
-  draft and the game's code (`src/25_puffstory.js`).
-- Puff's Ocean's intro and the black-hole memory in Mission 1 (`src/25_puffstory.js`) already place the trials on
-  his home ocean world. The game-over "ocean facts" are real facts about **Earth's** oceans; keep them as a link
-  to the real world, or reframe them?
-
-## Decisions and trust
-
-"The relationship develops based on the player's decisions and actions." The game already has radio choices in
-missions. Which choices and actions raise Puff's trust, and what does each level of trust unlock (memories,
-lines, endings)?
+- **The pilot's callsign.** The shooter calls the player by a callsign (default LANCE) flying the XF-9 Starlance
+  from the carrier Halcyon, and radio lines use it ("Try not to fly into anything this time, {callsign}"). Since the
+  pilot is Blue Arrow, should the default callsign become BLUE ARROW, or is LANCE her callsign?
+- **Names still to pick.** Echo and Puff's memory call the subordinate organization **the Directorate**; the story
+  doesn't name it. The advanced civilization has no name yet. **Earth Vanguard** is marked as a temporary name.
+- **Wingmates.** `docs/GDD.md` and the website list Sparrow (Lt. Juno Park) as "your wingmate". With Puff as her
+  fighting buddy, is Sparrow still a wingmate, or another crew role?
+- **Ocean facts.** Puff's Ocean's intro and the black-hole memory in Mission 1 (`src/25_puffstory.js`) place the
+  trials on his home ocean world, but the game-over "ocean facts" are real facts about **Earth's** oceans. Keep them
+  as a link to the real world, or reframe them?
+- **Trust.** "The relationship develops based on the player's decisions and actions." The game already has radio
+  choices in missions. Which choices and actions raise Puff's trust, and what does each level unlock (memories,
+  lines, endings)?

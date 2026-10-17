@@ -90,8 +90,8 @@ nothing is recorded or sent.
   storms, solar flares, mine fields and wormholes.
 - **Rescue:** pull survivors out of escape pods drifting through the crossfire.
 - **Local co-op** for two players on one keyboard, two gamepads, or a mix.
-- **Echo:** a stealth minigame about the protagonist's escape. She grew up as a test subject inside a sealed
-  facility, and the experiments left her able to see with sound. With the power out, every echo she sends lights
+- **Echo:** a stealth minigame about the escape of Blue Arrow, the main character. She grew up as a test subject
+  inside a sealed facility, and the experiments left her able to see with sound. With the power out, every echo she sends lights
   up the walls for a moment, but security drones hear it too. Three floors to the surface, each behind a keycard
   door. Open from the title screen for now (no story trigger yet).
 - **The black hole (Mission 1):** Puff's tether snaps and he's pulled in. Inside, his memory of the first

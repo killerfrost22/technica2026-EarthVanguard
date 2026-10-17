@@ -1,7 +1,8 @@
 /* 24_echo.js (echo)
    Provides: SL.echo = { unlocked(), unlock(), titleButton() -> <button>, open(), state, run, reveal, tick(dt),
    sim(seconds) } and the 'echo' screen: Echo, a stealth minigame about one escape.
-   She was a test subject, Subject 7, raised inside a sealed facility run by the Directorate, an arm of a
+   Blue Arrow, the main character, before Earth Vanguard and before she met Puff: a test subject the facility only
+   called Subject 7, raised inside a sealed facility run by the Directorate, an arm of a
    civilization far older than ours. The experiments left her one gift: she can see with sound. Tonight the power
    failed. The facility is dark; each echo she sends out lights the walls for a few seconds as the ring passes, then
    they fade. Security drones carry their own red light and hear every echo, so seeing the way means being heard.
@@ -152,7 +153,7 @@
     'They never told me what I was for. Only that I was improving.',
     'A screen was left on in the lab once. Blue, with white shapes drifting across it. I think it was the sky.',
     'The reactor floors hum all night. I learned the shape of every hall from that hum.',
-    'Somewhere out there is the name I had before. I am going to find it.',
+    'They gave me a number so I would forget my name. I never did. My name is Blue Arrow.',
   ];
   // shard ids: two per sector, in reading order of the map
   const SHARD_BASE = [0, 2, 4];
@@ -1215,7 +1216,7 @@
     ctx.fill();
     ctx.restore();
   }
-  // Subject 7, seen from above: pale gown, dark hair, a faint glow
+  // Blue Arrow, seen from above: pale gown, dark hair, a faint glow
   function drawGirl(ctx, x, y, face, walk, s) {
     ctx.save();
     ctx.translate(x, y);
@@ -1428,8 +1429,8 @@
     p.append(el('div', 'sl-label', 'Minigame · Echo'), el('h2', 'sl-title sl-title--md sl-echo__title', 'Echo'));
     const [a, b] = cols(p);
     a.appendChild(el('p', 'sl-echo__story',
-      'She has never seen the sky. All she remembers is Cell 7, deep inside a facility run by the Directorate, an arm of a ' +
-      'civilization far older than ours, and the experiments. They left her one gift: she can see with sound. ' +
+      'Blue Arrow has never seen the sky. All she remembers is Cell 7, deep inside a facility run by the Directorate, an ' +
+      'arm of a civilization far older than ours, and the experiments. They left her one gift: she can see with sound. ' +
       'Tonight the power failed. The doors are dead, the halls are dark, and this is her chance.'));
     const how = el('ul', 'sl-echo__how');
     [['Echo', 'Space, Z or tap. Walls light up as the ring passes, then fade.'],
@@ -1519,7 +1520,7 @@
     const [a, b] = cols(p);
     a.appendChild(el('p', 'sl-echo__story',
       'The hatch gives way to cold air and more sky than she has words for. Behind her the alarms fade into the hum ' +
-      'of the facility. She doesn\'t look back. Somewhere out there is the name she had before.'));
+      'of the facility. She doesn\'t look back. Her name is Blue Arrow, and she is free.'));
     const dl = el('dl', 'sl-ui-stats sl-echo__stats');
     const add = (k, v) => dl.append(el('dt', '', k), el('dd', 'sl-num', v));
     add('Time', U.fmtTime ? U.fmtTime(R.t) : Math.round(R.t) + ' s');
@@ -1542,7 +1543,7 @@
     build(root) {
       root.classList.add('sl-echo');
       const canvas = el('canvas', 'sl-echo__canvas');
-      canvas.setAttribute('aria-label', 'Echo: a girl escaping a dark facility by sound');
+      canvas.setAttribute('aria-label', 'Echo: Blue Arrow escaping a dark facility by sound');
       canvas.setAttribute('role', 'img');
       root.appendChild(canvas);
       ui = { root, canvas, ctx: canvas.getContext('2d'), panel: null };
