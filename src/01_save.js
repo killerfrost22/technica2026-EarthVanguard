@@ -3,14 +3,14 @@
    defaultSettings(), exportCode(), importCode(str), sample(name), useSample(name), setSetting(key, value),
    mission(id), samples, memoryOnly, storageAvailable }.
    Every storage access is wrapped in try/catch with an in-memory fallback, so the game works with no
-   storage at all. Keys: starlance.save.v1 and starlance.settings.v1. Emits 'settingsChanged', 'saveLoaded',
+   storage at all. Keys: earthvanguard.save.v1 and earthvanguard.settings.v1. Emits 'settingsChanged', 'saveLoaded',
    'saveImported', 'saveReset'. */
 (function (SL) {
   'use strict';
 
   const U = SL.util;
-  const KEY = 'starlance.save.v1';
-  const SKEY = 'starlance.settings.v1';
+  const KEY = 'earthvanguard.save.v1';
+  const SKEY = 'earthvanguard.settings.v1';
   const DIFFS = ['cadet', 'pilot', 'ace'];
   const QUALITIES = ['auto', 'high', 'medium', 'low'];
   const memory = Object.create(null);
@@ -41,8 +41,8 @@
     try {
       const s = storage();
       if (!s) return false;
-      s.setItem('starlance.probe', '1');
-      s.removeItem('starlance.probe');
+      s.setItem('earthvanguard.probe', '1');
+      s.removeItem('earthvanguard.probe');
       return true;
     } catch (e) { return false; }
   }

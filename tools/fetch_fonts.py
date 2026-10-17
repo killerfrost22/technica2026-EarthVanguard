@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Fetch the Starlance web fonts once and embed them as base64 woff2 data URIs.
+"""Fetch the Earth Vanguard web fonts once and embed them as base64 woff2 data URIs.
 
 Writes src/00_fonts.css (the game makes no runtime network requests, so fonts ship inline).
   Oxanium                 500, 700, 800                      display face (--sl-display)

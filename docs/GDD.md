@@ -1,4 +1,4 @@
-# STARLANCE: Game Design Document (final)
+# EARTH VANGUARD: Game Design Document (final)
 
 This document decides content and numbers. `docs/ARCHITECTURE.md` decides structure and APIs and wins on any
 API question; `docs/api/core.md` describes the engine as built. Every id, name and line of player-facing copy
@@ -1693,7 +1693,7 @@ callsign and coop; `mus_menu` elsewhere; `mus_victory` on results; `mus_fail` on
 
 ### 18.2 Screens (final copy)
 
-- **`title`:** logo `STARLANCE` (Oxanium 800, white-to-cyan gradient, slow glint), tagline "Fly low. Shoot
+- **`title`:** logo `EARTH VANGUARD` (Oxanium 800, white-to-cyan gradient, slow glint), tagline "Fly low. Shoot
   straight. Bring them home." Buttons: `CONTINUE` (save has progress) or `START`, `2 PLAYERS`, `SETTINGS`,
   `CONTROLS`, and a small `NEW GAME` link when a save exists (in-page confirm: "Erase your progress and start
   over?" `YES, ERASE` / `CANCEL`). Footer: "Press Enter or tap START". The `ACE OF THE HALCYON` badge shows when

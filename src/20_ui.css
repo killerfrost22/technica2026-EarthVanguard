@@ -12,7 +12,7 @@
   padding-bottom: 9cqw;
 }
 .sl-ui-title__head { display: flex; flex-direction: column; align-items: center; gap: 2.4cqw; }
-.sl-ui-title .sl-title { font-size: 15cqw; }
+.sl-ui-title .sl-title { font-size: 13cqw; }
 .sl-ui-title__tag { margin: 0; max-width: 70cqw; font-size: 3.9cqw; line-height: 1.35; color: var(--sl-text-dim); text-wrap: balance; }
 .sl-ui-title__btns { width: 62cqw; margin-top: auto; }
 .sl-ui-title__hint { margin: 0; font-size: 3cqw; color: var(--sl-text-faint); letter-spacing: 0.02em; }

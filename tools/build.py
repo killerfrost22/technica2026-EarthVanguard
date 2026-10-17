@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-"""Build Starlance into single self-contained HTML files.
+"""Build Earth Vanguard into single self-contained HTML files.
 
-  dist/starlance.html       full document: double-click to play; used by all tests
+  dist/earthvanguard.html       full document: double-click to play; used by all tests
   dist/publish/index.html   claude.ai artifact page: same content without the doctype/html/head/body
                             wrapper (the artifact host adds its own skeleton)
 
@@ -13,7 +13,7 @@ are inlined, each in its own <script> ending with //# sourceURL=src/<name>, so s
 test harness name the real source file and line.
 
 Options:
-  --out PATH         where to write the full document (default dist/starlance.html)
+  --out PATH         where to write the full document (default dist/earthvanguard.html)
   --exclude a.js,b   leave files out (isolated testing)
   --no-publish       skip dist/publish/index.html
 """
@@ -59,7 +59,7 @@ def region(text, name):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument('--out', default=str(ROOT / 'dist' / 'starlance.html'))
+    ap.add_argument('--out', default=str(ROOT / 'dist' / 'earthvanguard.html'))
     ap.add_argument('--exclude', default='')
     ap.add_argument('--no-publish', action='store_true')
     a = ap.parse_args()

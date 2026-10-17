@@ -6,7 +6,7 @@
 // (<mission>_<mode>_10s, _60s, _boss, _results). Prints a table; exits 1 when anything failed.
 // The in-page suite (?test=smoke, window.__TEST__) runs first unless --no-suite.
 //
-// Options: --page dist/starlance.html  --only m1,s2  --modes solo,coop  --chunk 2 (sim seconds per eval)
+// Options: --page dist/earthvanguard.html  --only m1,s2  --modes solo,coop  --chunk 2 (sim seconds per eval)
 //          --max 900 (sim seconds allowed to reach the boss)  --boss-time 240  --no-suite  --no-shots
 //          --limits enemies=150,ebullets=1000  --gpu default|swiftshader  --size 720x1280
 import { launch } from './cdp.mjs';
@@ -18,7 +18,7 @@ const argv = process.argv.slice(2);
 const opt = (name, def) => { const i = argv.indexOf('--' + name); return i >= 0 && argv[i + 1] != null ? argv[i + 1] : def; };
 const flag = (name) => argv.includes('--' + name);
 
-const PAGE = opt('page', 'dist/starlance.html').split('?')[0];
+const PAGE = opt('page', 'dist/earthvanguard.html').split('?')[0];
 const ONLY = opt('only', '').split(',').map((s) => s.trim()).filter(Boolean);
 const MODES = opt('modes', 'solo,coop').split(',').map((s) => s.trim()).filter((m) => m === 'solo' || m === 'coop');
 const CHUNK = Math.max(0.5, Number(opt('chunk', '2')) || 2);

@@ -109,7 +109,7 @@
     build(root) {
       root.classList.add('sl-ui-title');
       const head = el('div', 'sl-ui-title__head');
-      head.append(el('div', 'sl-label', 'XF-9 Starlance · Deep Patrol'), el('h1', 'sl-title', 'Starlance'),
+      head.append(el('div', 'sl-label', 'XF-9 Starlance · Deep Patrol'), el('h1', 'sl-title', 'Earth Vanguard'),
         el('p', 'sl-ui-title__tag', 'Laser dogfights, giant dreadnoughts, black holes and the crews you pull out of them.'));
       const btns = el('div', 'sl-stack sl-ui-title__btns');
       btns.append(

@@ -5,7 +5,7 @@
 #   bash tools/smoke.sh --page dist/dev-me.html    build to your own file (no publish) and test that
 #   bash tools/smoke.sh --no-build                 test the current build as is
 cd "$(dirname "$0")/.." || exit 1
-page="dist/starlance.html"
+page="dist/earthvanguard.html"
 build=1
 args=("$@")
 for ((i = 0; i < ${#args[@]}; i++)); do
@@ -15,7 +15,7 @@ for ((i = 0; i < ${#args[@]}; i++)); do
   esac
 done
 if [ "$build" = 1 ]; then
-  if [ "$page" = "dist/starlance.html" ]; then
+  if [ "$page" = "dist/earthvanguard.html" ]; then
     python3 tools/build.py || exit 1
   else
     python3 tools/build.py --out "$page" --no-publish || exit 1

@@ -418,7 +418,7 @@ running with only the failing hook disabled.
 - `python3 tools/build.py [--out dist/dev-me.html --no-publish] [--exclude a.js,b.js]`. The output is pure ASCII
   (non-ASCII becomes `\uXXXX` in JS, `\XXXXXX` in CSS, `&#x..;` in HTML), so text renders correctly even when the
   artifact host serves the page without a charset. Write source files in UTF-8 as usual.
-- `bash tools/run.sh --page "dist/starlance.html?..." --steps '[...]' [--size WxH] [--gpu default|swiftshader]
+- `bash tools/run.sh --page "dist/earthvanguard.html?..." --steps '[...]' [--size WxH] [--gpu default|swiftshader]
   [--allow-errors]`. Steps: `wait, eval, shot (+ "clip": [x, y, w, h, scale] for zoomed crops), key, down, up, click,
   touch ["touchStart"|"touchMove"|"touchEnd", x, y], mouse ["down"|"move"|"up"|"right", x, y], viewport [w, h, dpr=1,
   mobile=false]` (coordinates in CSS px of the page; `viewport` resizes the page mid-run for resize / DPR / orientation

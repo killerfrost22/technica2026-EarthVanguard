@@ -1,6 +1,6 @@
 // Drive the game in headless Chrome.
-// Usage (from the starlance folder, using Windows node):
-//   node.exe tools/run.mjs --page "dist/starlance.html?debug=1" --steps '[{"wait":1500},{"shot":"shots/title.png"}]'
+// Usage (from the repo root, using Windows node):
+//   node.exe tools/run.mjs --page "dist/earthvanguard.html?debug=1" --steps '[{"wait":1500},{"shot":"shots/title.png"}]'
 // Steps: {"wait":ms} {"eval":"js expr"} {"shot":"path.png"} {"key":"Space"} {"down":"KeyW"} {"up":"KeyW"}
 //        {"click":[x,y]} {"touch":["touchStart"|"touchMove"|"touchEnd",x,y]} {"mouse":["down"|"move"|"up"|"right",x,y]}
 //        A shot may add "clip":[x,y,w,h,scale] (CSS px) for a zoomed close-up.
@@ -18,7 +18,7 @@ const argv = process.argv.slice(2);
 const opt = (name, def) => { const i = argv.indexOf('--' + name); return i >= 0 ? argv[i + 1] : def; };
 const flag = (name) => argv.includes('--' + name);
 
-const pageArg = opt('page', 'dist/starlance.html');
+const pageArg = opt('page', 'dist/earthvanguard.html');
 const [file, query = ''] = pageArg.split('?');
 const url = /^(https?|file):/.test(pageArg) ? pageArg : pathToFileURL(resolve(file)).href + (query ? '?' + query : '');
 const [w, h] = opt('size', '720x1280').split('x').map(Number);
