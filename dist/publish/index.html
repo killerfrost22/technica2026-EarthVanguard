@@ -574,6 +574,37 @@ body {
 
 .sl-ui-best { font: 700 calc(3.4 * var(--f))/1 var(--sl-display); letter-spacing: 0.16em; text-transform: uppercase; color: var(--sl-gold); }
 
+/* Mission complete: a compact panel. Score is the headline; the other stats are small tiles, label over value. */
+.sl-ui-complete { max-width: calc(70 * var(--u)); gap: calc(2.6 * var(--u)); padding: calc(3.6 * var(--u)) calc(4.2 * var(--u)); }
+.sl-ui-complete .sl-title--md { font-size: calc(6 * var(--u)); }
+.sl-ui-complete .sl-ui-rank { width: calc(13 * var(--u)); height: calc(13 * var(--u)); font-size: calc(7.6 * var(--u)); border-width: calc(0.4 * var(--u)); }
+.sl-ui-results__score {
+  display: flex; flex-direction: column; gap: calc(0.8 * var(--u));
+  padding-top: calc(2.2 * var(--u));
+  border-top: calc(0.2 * var(--u)) solid var(--sl-line);
+}
+.sl-ui-results__score-head { display: flex; align-items: center; justify-content: space-between; gap: calc(2 * var(--u)); }
+.sl-ui-results__score-head .sl-ui-best { font-size: calc(2.7 * var(--f)); }
+.sl-ui-results__score-val { font: 800 calc(7.4 * var(--f))/1 var(--sl-display); letter-spacing: 0.02em; color: var(--sl-text); }
+.sl-ui-results__grid {
+  display: grid; grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: calc(1.4 * var(--u)); margin: 0;
+}
+.sl-ui-results__tile {
+  display: flex; flex-direction: column; gap: calc(0.8 * var(--u)); min-width: 0;
+  padding: calc(1.6 * var(--u)) calc(1.8 * var(--u));
+  border-radius: calc(1.4 * var(--u));
+  background: rgba(255, 255, 255, 0.045);
+  border: calc(0.15 * var(--u)) solid var(--sl-line);
+}
+.sl-ui-results__tile dt {
+  font: 600 calc(2.5 * var(--f))/1.1 var(--sl-display);
+  letter-spacing: 0.06em; text-transform: uppercase; color: var(--sl-text-dim);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.sl-ui-results__tile dd { margin: 0; font: 700 calc(4 * var(--f))/1 var(--sl-display); color: var(--sl-text); white-space: nowrap; }
+.sl-ui-complete > .sl-row { margin-top: calc(0.6 * var(--u)); }
+
 .sl-toast {
   position: absolute;
   left: 50%;
@@ -31249,15 +31280,35 @@ body {
   SL.screens.define('results', {
     build(root, params) {
       const r = params.result || SL.debug.sampleResult(true);
-      const panel = el('div', 'sl-panel sl-ui-panel');
+      const panel = el('div', 'sl-panel sl-ui-panel sl-ui-complete');
       const top = el('div', 'sl-ui-results__top');
       const name = el('div', 'sl-ui-results__name');
       name.append(el('div', 'sl-label', 'Mission complete'), el('h2', 'sl-title sl-title--md', r.name || r.missionId));
       top.append(name, el('div', 'sl-ui-rank sl-ui-rank--' + (r.rank || 'D'), r.rank || '-'));
-      panel.append(top, statRows(r));
-      if (r.newBest) panel.appendChild(el('div', 'sl-ui-best', 'New best score'));
+
+      // Score is the headline number; everything else sits in a compact grid of small tiles.
+      const score = el('div', 'sl-ui-results__score');
+      const scoreHead = el('div', 'sl-ui-results__score-head');
+      scoreHead.appendChild(el('span', 'sl-label', 'Score'));
+      if (r.newBest) scoreHead.appendChild(el('span', 'sl-ui-best', 'New best'));
+      score.append(scoreHead, el('div', 'sl-ui-results__score-val sl-num', U.fmtInt(r.score)));
+
+      const grid = el('dl', 'sl-ui-results__grid');
+      const tile = (k, v) => {
+        const d = el('div', 'sl-ui-results__tile');
+        d.append(el('dt', '', k), el('dd', 'sl-num', v));
+        grid.appendChild(d);
+      };
+      tile('Credits', U.fmtInt(r.creditsKept));
+      tile('Kills', r.kills + '/' + r.enemiesSpawned);
+      tile('Rescued', String(r.rescued));
+      tile('Hits', String(r.hitsTaken));
+      tile('Time', U.fmtTime(r.time));
+      if (r.timeBonus) tile('Bonus', U.fmtInt(r.timeBonus));
+
+      panel.append(top, score, grid);
       const btns = el('div', 'sl-row');
-      btns.append(button('Continue', 'sl-btn--primary', () => SL.game.toMenu()), button('Retry', '', () => SL.game.retry(false)));
+      btns.append(button('Continue', 'sl-btn--primary sl-btn--small', () => SL.game.toMenu()), button('Retry', 'sl-btn--small', () => SL.game.retry(false)));
       panel.appendChild(btns);
       root.appendChild(panel);
     },

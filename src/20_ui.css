@@ -62,6 +62,37 @@
 
 .sl-ui-best { font: 700 calc(3.4 * var(--f))/1 var(--sl-display); letter-spacing: 0.16em; text-transform: uppercase; color: var(--sl-gold); }
 
+/* Mission complete: a compact panel. Score is the headline; the other stats are small tiles, label over value. */
+.sl-ui-complete { max-width: calc(70 * var(--u)); gap: calc(2.6 * var(--u)); padding: calc(3.6 * var(--u)) calc(4.2 * var(--u)); }
+.sl-ui-complete .sl-title--md { font-size: calc(6 * var(--u)); }
+.sl-ui-complete .sl-ui-rank { width: calc(13 * var(--u)); height: calc(13 * var(--u)); font-size: calc(7.6 * var(--u)); border-width: calc(0.4 * var(--u)); }
+.sl-ui-results__score {
+  display: flex; flex-direction: column; gap: calc(0.8 * var(--u));
+  padding-top: calc(2.2 * var(--u));
+  border-top: calc(0.2 * var(--u)) solid var(--sl-line);
+}
+.sl-ui-results__score-head { display: flex; align-items: center; justify-content: space-between; gap: calc(2 * var(--u)); }
+.sl-ui-results__score-head .sl-ui-best { font-size: calc(2.7 * var(--f)); }
+.sl-ui-results__score-val { font: 800 calc(7.4 * var(--f))/1 var(--sl-display); letter-spacing: 0.02em; color: var(--sl-text); }
+.sl-ui-results__grid {
+  display: grid; grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: calc(1.4 * var(--u)); margin: 0;
+}
+.sl-ui-results__tile {
+  display: flex; flex-direction: column; gap: calc(0.8 * var(--u)); min-width: 0;
+  padding: calc(1.6 * var(--u)) calc(1.8 * var(--u));
+  border-radius: calc(1.4 * var(--u));
+  background: rgba(255, 255, 255, 0.045);
+  border: calc(0.15 * var(--u)) solid var(--sl-line);
+}
+.sl-ui-results__tile dt {
+  font: 600 calc(2.5 * var(--f))/1.1 var(--sl-display);
+  letter-spacing: 0.06em; text-transform: uppercase; color: var(--sl-text-dim);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.sl-ui-results__tile dd { margin: 0; font: 700 calc(4 * var(--f))/1 var(--sl-display); color: var(--sl-text); white-space: nowrap; }
+.sl-ui-complete > .sl-row { margin-top: calc(0.6 * var(--u)); }
+
 .sl-toast {
   position: absolute;
   left: 50%;

@@ -174,15 +174,35 @@
   SL.screens.define('results', {
     build(root, params) {
       const r = params.result || SL.debug.sampleResult(true);
-      const panel = el('div', 'sl-panel sl-ui-panel');
+      const panel = el('div', 'sl-panel sl-ui-panel sl-ui-complete');
       const top = el('div', 'sl-ui-results__top');
       const name = el('div', 'sl-ui-results__name');
       name.append(el('div', 'sl-label', 'Mission complete'), el('h2', 'sl-title sl-title--md', r.name || r.missionId));
       top.append(name, el('div', 'sl-ui-rank sl-ui-rank--' + (r.rank || 'D'), r.rank || '-'));
-      panel.append(top, statRows(r));
-      if (r.newBest) panel.appendChild(el('div', 'sl-ui-best', 'New best score'));
+
+      // Score is the headline number; everything else sits in a compact grid of small tiles.
+      const score = el('div', 'sl-ui-results__score');
+      const scoreHead = el('div', 'sl-ui-results__score-head');
+      scoreHead.appendChild(el('span', 'sl-label', 'Score'));
+      if (r.newBest) scoreHead.appendChild(el('span', 'sl-ui-best', 'New best'));
+      score.append(scoreHead, el('div', 'sl-ui-results__score-val sl-num', U.fmtInt(r.score)));
+
+      const grid = el('dl', 'sl-ui-results__grid');
+      const tile = (k, v) => {
+        const d = el('div', 'sl-ui-results__tile');
+        d.append(el('dt', '', k), el('dd', 'sl-num', v));
+        grid.appendChild(d);
+      };
+      tile('Credits', U.fmtInt(r.creditsKept));
+      tile('Kills', r.kills + '/' + r.enemiesSpawned);
+      tile('Rescued', String(r.rescued));
+      tile('Hits', String(r.hitsTaken));
+      tile('Time', U.fmtTime(r.time));
+      if (r.timeBonus) tile('Bonus', U.fmtInt(r.timeBonus));
+
+      panel.append(top, score, grid);
       const btns = el('div', 'sl-row');
-      btns.append(button('Continue', 'sl-btn--primary', () => SL.game.toMenu()), button('Retry', '', () => SL.game.retry(false)));
+      btns.append(button('Continue', 'sl-btn--primary sl-btn--small', () => SL.game.toMenu()), button('Retry', 'sl-btn--small', () => SL.game.retry(false)));
       panel.appendChild(btns);
       root.appendChild(panel);
     },
