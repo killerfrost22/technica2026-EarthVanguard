@@ -743,14 +743,6 @@
     "chars": 60,
     "text": "Spears lock on, then ram. When the nose glows red, sidestep!"
   },
-  "radio_sparrow_snipers_see_the_red": {
-    "role": "Sparrow",
-    "voice": "0luPAj5RsdhmnkZaiYcb",
-    "model": "eleven_multilingual_v2",
-    "seconds": 4.52,
-    "chars": 70,
-    "text": "Snipers. See the red line? That's where the shot goes. Don't be there."
-  },
   "radio_sparrow_weaver_spiral_guns_circle": {
     "role": "Sparrow",
     "voice": "0luPAj5RsdhmnkZaiYcb",
@@ -774,22 +766,6 @@
     "seconds": 2.43,
     "chars": 41,
     "text": "It isn't singing. Good. Keep it that way."
-  },
-  "radio_anvil_lance_cell_a_beam": {
-    "role": "Anvil",
-    "voice": "507tTFX0IPtqFzGd1CAL",
-    "model": "eleven_multilingual_v2",
-    "seconds": 4.94,
-    "chars": 66,
-    "text": "Lance cell! A beam that cuts through everything in a line. Try it."
-  },
-  "radio_anvil_gravity_well_it_pulls": {
-    "role": "Anvil",
-    "voice": "507tTFX0IPtqFzGd1CAL",
-    "model": "eleven_multilingual_v2",
-    "seconds": 6.2,
-    "chars": 74,
-    "text": "Gravity well! It pulls you in. Don't use focus near it, you'll lose speed."
   },
   "radio_sparrow_ha_it_ate_their": {
     "role": "Sparrow",
@@ -847,14 +823,6 @@
     "chars": 70,
     "text": "Big signature on the end of the leash. The siege engine. Cut it loose."
   },
-  "radio_anvil_its_pull_is_climbing": {
-    "role": "Anvil",
-    "voice": "507tTFX0IPtqFzGd1CAL",
-    "model": "eleven_multilingual_v2",
-    "seconds": 5.6,
-    "chars": 68,
-    "text": "Its pull is climbing! Stay fast. It can't hold a ship at full speed."
-  },
   "radio_sparrow_containment_s_failing_and": {
     "role": "Sparrow",
     "voice": "0luPAj5RsdhmnkZaiYcb",
@@ -878,5 +846,197 @@
     "seconds": 2.67,
     "chars": 51,
     "text": "...Still here. Thanks for keeping the tether short."
+  },
+  "radio_patch_snipers_see_the_red": {
+    "role": "Patch",
+    "voice": "XrExE9yKIg1WjnnlVkGX",
+    "model": "eleven_multilingual_v2",
+    "seconds": 4.89,
+    "chars": 70,
+    "text": "Snipers. See the red line? That's where the shot goes. Don't be there."
+  },
+  "radio_patch_lance_cell_a_beam": {
+    "role": "Patch",
+    "voice": "XrExE9yKIg1WjnnlVkGX",
+    "model": "eleven_multilingual_v2",
+    "seconds": 4.52,
+    "chars": 66,
+    "text": "Lance cell! A beam that cuts through everything in a line. Try it."
+  },
+  "radio_patch_gravity_well_it_pulls": {
+    "role": "Patch",
+    "voice": "XrExE9yKIg1WjnnlVkGX",
+    "model": "eleven_multilingual_v2",
+    "seconds": 4.94,
+    "chars": 74,
+    "text": "Gravity well! It pulls you in. Don't use focus near it, you'll lose speed."
+  },
+  "radio_vael_lodestar_holds_a_dying": {
+    "role": "Vael",
+    "voice": "N2lVS1w4EtoT3dr4eOWO",
+    "model": "eleven_multilingual_v2",
+    "seconds": 4.99,
+    "chars": 49,
+    "text": "LODESTAR holds a dying star. Let it hold you too."
+  },
+  "radio_patch_its_pull_is_climbing": {
+    "role": "Patch",
+    "voice": "XrExE9yKIg1WjnnlVkGX",
+    "model": "eleven_multilingual_v2",
+    "seconds": 4.52,
+    "chars": 68,
+    "text": "Its pull is climbing! Stay fast. It can't hold a ship at full speed."
+  },
+  "radio_anvil_their_fleet_is_hiding": {
+    "role": "Anvil",
+    "voice": "507tTFX0IPtqFzGd1CAL",
+    "model": "eleven_multilingual_v2",
+    "seconds": 4.34,
+    "chars": 56,
+    "text": "Their fleet is hiding in the storm. We go in after them."
+  },
+  "radio_puff_storms_at_home_sounded": {
+    "role": "Puff",
+    "voice": "QzTKubutNn9TjrB7Xb2Q",
+    "model": "eleven_multilingual_v2",
+    "seconds": 4.21,
+    "chars": 73,
+    "text": "Storms at home sounded like this. We'd dive under and listen to them hum."
+  },
+  "radio_sparrow_skimmers_crossing_low_they": {
+    "role": "Sparrow",
+    "voice": "0luPAj5RsdhmnkZaiYcb",
+    "model": "eleven_multilingual_v2",
+    "seconds": 4.39,
+    "chars": 75,
+    "text": "Skimmers crossing low! They drop mines behind them. Don't follow the trail."
+  },
+  "radio_patch_missile_boat_its_missiles": {
+    "role": "Patch",
+    "voice": "XrExE9yKIg1WjnnlVkGX",
+    "model": "eleven_multilingual_v2",
+    "seconds": 4.16,
+    "chars": 72,
+    "text": "Missile boat. Its missiles can be shot down. Clip them before they bite."
+  },
+  "radio_patch_ion_cell_inside_it": {
+    "role": "Patch",
+    "voice": "XrExE9yKIg1WjnnlVkGX",
+    "model": "eleven_multilingual_v2",
+    "seconds": 5.28,
+    "chars": 72,
+    "text": "Ion cell! Inside it your guns fire at half rate. Watch for strike rings."
+  },
+  "radio_sparrow_stormcallers_lightning_jumps_between": {
+    "role": "Sparrow",
+    "voice": "0luPAj5RsdhmnkZaiYcb",
+    "model": "eleven_multilingual_v2",
+    "seconds": 5.91,
+    "chars": 71,
+    "text": "Stormcallers! Lightning jumps between them. Don't fly between the pair!"
+  },
+  "radio_anvil_we_re_in_the": {
+    "role": "Anvil",
+    "voice": "507tTFX0IPtqFzGd1CAL",
+    "model": "eleven_multilingual_v2",
+    "seconds": 4.29,
+    "chars": 54,
+    "text": "We're in the eye. Quiet for a moment. Grab those pods."
+  },
+  "radio_anvil_prison_barge_armored_nose": {
+    "role": "Anvil",
+    "voice": "507tTFX0IPtqFzGd1CAL",
+    "model": "eleven_multilingual_v2",
+    "seconds": 6.25,
+    "chars": 73,
+    "text": "Prison barge. Armored nose. Hit it from the sides and the cells pop open."
+  },
+  "radio_puff_people_in_cages_hauled": {
+    "role": "Puff",
+    "voice": "QzTKubutNn9TjrB7Xb2Q",
+    "model": "eleven_multilingual_v2",
+    "seconds": 3.38,
+    "chars": 65,
+    "text": "People in cages, hauled off like cargo. Get them out, Blue Arrow."
+  },
+  "radio_sparrow_second_barge_that_one": {
+    "role": "Sparrow",
+    "voice": "0luPAj5RsdhmnkZaiYcb",
+    "model": "eleven_multilingual_v2",
+    "seconds": 3.64,
+    "chars": 60,
+    "text": "Second barge! That one's carrying our pilots. Crack it open!"
+  },
+  "radio_rook_captain_holt_here_if": {
+    "role": "Rook",
+    "voice": "pFZP5JQG7iQjIQuC4Bku",
+    "model": "eleven_multilingual_v2",
+    "seconds": 3.56,
+    "chars": 58,
+    "text": "Captain Holt here. If anyone's out there, I'd love a lift."
+  },
+  "radio_rook_thanks_kid_i_taught": {
+    "role": "Rook",
+    "voice": "pFZP5JQG7iQjIQuC4Bku",
+    "model": "eleven_multilingual_v2",
+    "seconds": 5.28,
+    "chars": 77,
+    "text": "Thanks, kid. I taught Sparrow to fly, you know. She still flies like a goose."
+  },
+  "radio_anvil_convoy_s_clear_storm": {
+    "role": "Anvil",
+    "voice": "507tTFX0IPtqFzGd1CAL",
+    "model": "eleven_multilingual_v2",
+    "seconds": 5.31,
+    "chars": 65,
+    "text": "Convoy's clear. Storm wall ahead. Something big is waiting in it."
+  },
+  "radio_anvil_dreadnought_in_the_storm": {
+    "role": "Anvil",
+    "voice": "507tTFX0IPtqFzGd1CAL",
+    "model": "eleven_multilingual_v2",
+    "seconds": 4.81,
+    "chars": 58,
+    "text": "Dreadnought in the storm wall. Big as a city. Light it up."
+  },
+  "radio_vael_tempest_was_born_in": {
+    "role": "Vael",
+    "voice": "N2lVS1w4EtoT3dr4eOWO",
+    "model": "eleven_multilingual_v2",
+    "seconds": 4.21,
+    "chars": 51,
+    "text": "TEMPEST was born in this storm. You will end in it."
+  },
+  "radio_patch_lightning_fences_find_the": {
+    "role": "Patch",
+    "voice": "XrExE9yKIg1WjnnlVkGX",
+    "model": "eleven_multilingual_v2",
+    "seconds": 3.69,
+    "chars": 61,
+    "text": "Lightning fences! Find the gap in the wall and slide through!"
+  },
+  "radio_sparrow_the_eye_s_open": {
+    "role": "Sparrow",
+    "voice": "0luPAj5RsdhmnkZaiYcb",
+    "model": "eleven_multilingual_v2",
+    "seconds": 3.4,
+    "chars": 55,
+    "text": "The eye's open! That's the core. Everything you've got!"
+  },
+  "radio_anvil_tempest_is_falling_and": {
+    "role": "Anvil",
+    "voice": "507tTFX0IPtqFzGd1CAL",
+    "model": "eleven_multilingual_v2",
+    "seconds": 5.07,
+    "chars": 71,
+    "text": "TEMPEST is falling and the storm is breaking. Good hunting, Blue Arrow."
+  },
+  "radio_puff_the_storm_s_gone": {
+    "role": "Puff",
+    "voice": "QzTKubutNn9TjrB7Xb2Q",
+    "model": "eleven_multilingual_v2",
+    "seconds": 3.74,
+    "chars": 63,
+    "text": "The storm's gone quiet. ...I'd forgotten what that sounds like."
   }
 }

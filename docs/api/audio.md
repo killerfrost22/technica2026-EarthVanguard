@@ -49,9 +49,10 @@ feedback, mix, lp}`), and its fader (`def.gain`). `def.steps` sets the bar lengt
 | `mus_hope` | `echo_complete`'s ending, Vanguard cutscenes (`theme_hope`) | Resolve: the title theme in major | 84, D major | |
 | `mus_puff` | `puff_intro` (`theme_puff`) | Gentle, wistful music-box waltz | 104 (3/4), F major | |
 | `mus_m1` | Mission 1 | Bright, heroic | 140, E minor | |
-| `mus_m2` (`blackhole`) | Mission 1 while the black hole is near | Eerie: the song the black hole sings | 128, C minor | |
+| `mus_m2` (`blackhole`) | Mission 2; Mission 1 while the black hole is near | Eerie: the song the black hole sings | 128, C minor | |
+| `mus_m3` | Mission 3 | Urgent, stormy: distorted bass, stabbing chords, rolling toms, thunder swells | 150, A minor | |
 | `mus_memory` | Puff's memory, The First Trial | Underwater sorrow, the Directorate watching | 92, C minor | `progress`, `urgency`, `done` |
-| `mus_boss`, `mus_miniboss`, `mus_boss_heavy` | Bosses | Menacing | 155 / 150 / 150 | |
+| `mus_boss`, `mus_miniboss`, `mus_boss_heavy` | Bosses (`mus_boss_heavy`: Mission 3's TEMPEST) | Menacing | 155 / 150 / 150 | |
 | `mus_victory` | Results | Triumphant fanfare, then calm | 120, C major | |
 | `mus_fail` | Failed screen, after the fail sting | Somber | 70, A minor | |
 | `mus_grief` | `puff_complete` (`theme_grief`) | Grief: Puff's theme turned minor | 64, D minor | |
@@ -72,7 +73,7 @@ Puff's memory start their own tracks and set their moods.
 Add a `{bpm, play(m, step, t)}` entry to `TRACKS` (note data as midi lists next to the others). `play` runs once per
 16th, slightly ahead of the audio clock: schedule notes at time `t` with the voices (`lead`, `horn`, `strings`, `warm`,
 `celesta`, `epiano`, `marimba`, `vibes`, `glass`, `choir`, `bass`, `round`, `kick`, `snare`, `hat`, `timp`, `heart`,
-...). Read moods from `m.mood`. Then check its level against `mus_m1` with `SL.audio.render(id, 40)` and set
+and the storm kit `grit`, `stab`, `tom`, `thunder`, ...). Read moods from `m.mood`. Then check its level against `mus_m1` with `SL.audio.render(id, 40)` and set
 `def.gain`: action tracks sit near `mus_m1`, cutscene themes about 5 dB under it so narration sits on top, and
 `mus_echo` lowest so Echo's own pings stay the loudest thing. The developer panel's Music section plays any track
 and drives the mood values with its slider.
