@@ -78,7 +78,7 @@
         skill: { id: (save.skills && save.skills.equipped && save.skills.equipped[index]) || null, cooldown: 0, active: false, t: 0 },
         age: 0, flash: 0, hitT: 0, shieldHitT: 0, contT: 0, lowHullArmed: true, respawnT: 0, reviveT: 0, pod: null,
         novaT: 0, state: 'fly', control: true, entering: 0, data: {},
-        callsign: index === 0 ? save.callsign || 'LANCE' : save.p2callsign || 'P2',
+        callsign: index === 0 ? save.callsign || 'Blue Arrow' : save.p2callsign || 'P2',
         palette: index === 0 ? SL.pal.player : SL.pal.player2,
         fireT: 0, gun: 0,
       };

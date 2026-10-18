@@ -12,7 +12,7 @@ tools/cutscene_lines.js (needs Node), use the role voices, and are written at 64
 them into the game file. --prune deletes cs_ clips whose line is no longer in the script.
 Radio lines (ids radio_<who>_<first words>) are read straight from the game source (src/*.js: lines written as
 { who: 'anvil', text: '...' } or say('anvil', '...')) for the speakers in RADIO_ROLES. {callsign} is spoken as the
-default callsign (Lance) and the clip is keyed to the on-screen text with LANCE, so a renamed callsign plays silent.
+default callsign (Blue Arrow) and the clip is keyed to the on-screen text with it, so a renamed callsign plays silent.
 Clips with a time limit (the script's "keep each under N seconds" notes and "(hard limit)" lengths) are checked
 after generation and reported if they run long.
 
@@ -46,7 +46,7 @@ API = 'https://api.elevenlabs.io/v1'
 ROLES = ['Narrator', 'Blue Arrow', 'Puff', 'The Directorate', 'Commander Kade', 'Anvil', 'Robot', 'Sparrow', 'Decision']
 RADIO_ROLES = {'anvil': 'Anvil', 'puff': 'Puff', 'sparrow': 'Sparrow'}  # radio speaker id in the game -> voice role in voices.json
 RADIO_SKIP = {'22_debug.js'}            # test-only lines
-DEFAULT_CALLSIGN = 'LANCE'              # src/01_save.js
+DEFAULT_CALLSIGN = 'Blue Arrow'         # src/01_save.js
 OUTPUT_FORMAT = 'mp3_44100_128'     # constant 128 kbps, so duration = bytes * 8 / 128000
 CUTSCENE_FORMAT = 'mp3_44100_64'    # inlined into the game, so half the size
 

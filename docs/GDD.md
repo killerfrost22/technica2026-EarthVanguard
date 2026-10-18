@@ -76,7 +76,7 @@ hold) and the headset LED blinks. Every line starts with 120 ms of horizontal te
 | `osei` | Dr. Halima Osei | DOC | Gravity physicist of Lagrange Deep station; m2 VIP, lead of s2 | `#5dffb0` |
 | `rook` | Captain Petra Holt | ROOK | Veteran ace, first XF-9 test pilot, Nyx prisoner; m3 VIP, lead of s3 | `#d8dde8` |
 | `ixa` | Ixa | IXA | Nyx foundry engineer who defects; m4 VIP, lead of s4 | `#ff6fae` |
-| `p1` | {callsign} | LANCE (default) | Pilot of the XF-9 *Starlance* | `#7fe3ff` |
+| `p1` | {callsign} | Blue Arrow (default) | Pilot of the XF-9 *Starlance* | `#7fe3ff` |
 | `p2` | {callsign2} | EMBER (default) | Pilot of the XF-9B *Sunlance* (co-op) | `#ffd27a` |
 
 **`anvil`, Commander Maren Kade.** Calm, clipped, decisive. Short orders, rare dry jokes, never shouts; goes
@@ -1698,9 +1698,9 @@ callsign and coop; `mus_menu` elsewhere; `mus_victory` on results; `mus_fail` on
   `CONTROLS`, and a small `NEW GAME` link when a save exists (in-page confirm: "Erase your progress and start
   over?" `YES, ERASE` / `CANCEL`). Footer: "Press Enter or tap START". The `ACE OF THE HALCYON` badge shows when
   earned.
-- **`callsign`:** title `PILOT CALLSIGN`, text "Your crew will call you this on the radio." Input (A-Z and 0-9,
-  1-10 characters, uppercased, default `LANCE`); suggestion chips `LANCE NOVA COMET VIPER ORBIT BLAZE`; error
-  "Use 1 to 10 letters or numbers." Buttons `CONFIRM`, `BACK`.
+- **`callsign`:** title `PILOT CALLSIGN`, text "Your crew will call you this on the radio." Input (letters, numbers and
+  spaces, 1-12 characters, kept as typed, default `Blue Arrow`); suggestion chips `Blue Arrow` `Nova` `Comet` `Viper`
+  `Orbit` `Blaze`; error "Use 1 to 12 letters, numbers or spaces." Buttons `CONFIRM`, `BACK`.
 - **`coop`:** title `2 PLAYERS`. Panel `PLAYER 1` (cyan): "WASD move · SPACE fire · Q bomb · E skill · LEFT
   SHIFT focus". Panel `PLAYER 2` (amber): "ARROWS move · / fire · ENTER bomb · RIGHT SHIFT skill · RIGHT CTRL
   focus", a `P2 CALLSIGN` input (default `EMBER`). Gamepad line: "Gamepads connected: {n}" and "One gamepad

@@ -212,7 +212,7 @@ the game runs end to end before content lands. Content modules (6.10) replace th
   storage the game still works (in memory).
 - Save schema v1 (read fields with defaults, e.g. `SL.save.data.upgrades.hull || 0`; progress may add fields):
   ```
-  { v:1, callsign:'LANCE', p2callsign:'', credits:0, sp:0, difficulty:'pilot',
+  { v:1, callsign:'Blue Arrow', p2callsign:'', credits:0, sp:0, difficulty:'pilot',
     missions:{ [id]:{ done, best, rank, rescued, plays } },
     choices:{ [sideId]:[optionIds ever chosen] }, flags:{},
     upgrades:{ [upgradeId]:level }, skills:{ owned:[skillId], equipped:[p1SkillId|null, p2SkillId|null] },

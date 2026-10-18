@@ -70,8 +70,7 @@ second, so aim for under 10 seconds each. **Voice: Blue Arrow** (first person).
 
 The start screen of the Puff's Ocean minigame. **Voice: Narrator.**
 
-The on-screen version says "Puff flies with LANCE"; the recording avoids the pilot's name because players can
-change it. We'll update the on-screen text to match this recording.
+The on-screen text matches this recording word for word.
 
 | Clip | Text | Length |
 |---|---|---|

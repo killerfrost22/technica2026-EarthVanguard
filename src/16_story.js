@@ -79,7 +79,7 @@
 
   function format(text) {
     const save = SL.save && SL.save.data;
-    return String(text || '').replace(/\{callsign\}/g, (save && save.callsign) || 'LANCE');
+    return String(text || '').replace(/\{callsign\}/g, (save && save.callsign) || 'Blue Arrow');
   }
 
   function ensureBox() {
