@@ -129,9 +129,9 @@
   },
   "memory1_puff_1": {
     "role": "Puff",
-    "voice": "9yzdeviXkFddZ4Oz8Mok",
+    "voice": "QzTKubutNn9TjrB7Xb2Q",
     "model": "eleven_multilingual_v2",
-    "seconds": 2.67,
+    "seconds": 1.96,
     "chars": 31,
     "text": "I never said yes. Nobody asked."
   },
@@ -153,9 +153,9 @@
   },
   "memory1_puff_2": {
     "role": "Puff",
-    "voice": "9yzdeviXkFddZ4Oz8Mok",
+    "voice": "QzTKubutNn9TjrB7Xb2Q",
     "model": "eleven_multilingual_v2",
-    "seconds": 3.14,
+    "seconds": 2.38,
     "chars": 42,
     "text": "Keep swimming. For the reef. For everyone."
   },
@@ -401,9 +401,9 @@
   },
   "cs_puff_intro_02": {
     "role": "Puff",
-    "voice": "IKne3meq5aSn9XLyUdCD",
+    "voice": "QzTKubutNn9TjrB7Xb2Q",
     "model": "eleven_multilingual_v2",
-    "seconds": 1.13,
+    "seconds": 0.95,
     "chars": 4,
     "text": "\u2026Hi."
   },
@@ -417,25 +417,25 @@
   },
   "cs_puff_intro_04": {
     "role": "Puff",
-    "voice": "IKne3meq5aSn9XLyUdCD",
+    "voice": "QzTKubutNn9TjrB7Xb2Q",
     "model": "eleven_multilingual_v2",
-    "seconds": 2.36,
+    "seconds": 2.3,
     "chars": 36,
     "text": "Far away. \u2026It doesn't exist anymore."
   },
   "cs_puff_intro_05": {
     "role": "Puff",
-    "voice": "IKne3meq5aSn9XLyUdCD",
+    "voice": "QzTKubutNn9TjrB7Xb2Q",
     "model": "eleven_multilingual_v2",
-    "seconds": 1.29,
+    "seconds": 1.31,
     "chars": 14,
     "text": "\u2026Yeah. Me too."
   },
   "cs_puff_complete_01": {
     "role": "Puff",
-    "voice": "IKne3meq5aSn9XLyUdCD",
+    "voice": "QzTKubutNn9TjrB7Xb2Q",
     "model": "eleven_multilingual_v2",
-    "seconds": 3.09,
+    "seconds": 2.54,
     "chars": 50,
     "text": "I passed every trial. I did everything they asked."
   },
@@ -465,17 +465,17 @@
   },
   "cs_puff_complete_05": {
     "role": "Puff",
-    "voice": "IKne3meq5aSn9XLyUdCD",
+    "voice": "QzTKubutNn9TjrB7Xb2Q",
     "model": "eleven_multilingual_v2",
-    "seconds": 3.19,
+    "seconds": 2.96,
     "chars": 58,
     "text": "They were never going to keep that promise. They never do."
   },
   "cs_puff_complete_06": {
     "role": "Puff",
-    "voice": "IKne3meq5aSn9XLyUdCD",
+    "voice": "QzTKubutNn9TjrB7Xb2Q",
     "model": "eleven_multilingual_v2",
-    "seconds": 2.38,
+    "seconds": 2.3,
     "chars": 41,
     "text": "Thanks for not pushing. Back when we met."
   },
@@ -521,9 +521,9 @@
   },
   "cs_vanguard_intro_04": {
     "role": "Puff",
-    "voice": "IKne3meq5aSn9XLyUdCD",
+    "voice": "QzTKubutNn9TjrB7Xb2Q",
     "model": "eleven_multilingual_v2",
-    "seconds": 1.29,
+    "seconds": 1.42,
     "chars": 20,
     "text": "You sure about this?"
   },
@@ -609,49 +609,49 @@
   },
   "radio_puff_bubble_sealed_tether_locked": {
     "role": "Puff",
-    "voice": "9yzdeviXkFddZ4Oz8Mok",
+    "voice": "QzTKubutNn9TjrB7Xb2Q",
     "model": "eleven_multilingual_v2",
-    "seconds": 5.07,
+    "seconds": 4.21,
     "chars": 76,
     "text": "Bubble sealed, tether locked. Try not to fly into anything this time, LANCE."
   },
   "radio_puff_that_thing_is_singing": {
     "role": "Puff",
-    "voice": "9yzdeviXkFddZ4Oz8Mok",
+    "voice": "QzTKubutNn9TjrB7Xb2Q",
     "model": "eleven_multilingual_v2",
-    "seconds": 2.25,
+    "seconds": 1.96,
     "chars": 40,
     "text": "That thing is singing. I know that song."
   },
   "radio_puff_no_no_not_again": {
     "role": "Puff",
-    "voice": "9yzdeviXkFddZ4Oz8Mok",
+    "voice": "QzTKubutNn9TjrB7Xb2Q",
     "model": "eleven_multilingual_v2",
-    "seconds": 2.72,
+    "seconds": 1.7,
     "chars": 25,
     "text": "No. No, not again! LANCE!"
   },
   "radio_puff_i_m_okay_don": {
     "role": "Puff",
-    "voice": "9yzdeviXkFddZ4Oz8Mok",
+    "voice": "QzTKubutNn9TjrB7Xb2Q",
     "model": "eleven_multilingual_v2",
-    "seconds": 3.45,
+    "seconds": 1.6,
     "chars": 32,
     "text": "...I'm okay. Don't ask. Not yet."
   },
   "radio_puff_thanks_i_owe_you": {
     "role": "Puff",
-    "voice": "9yzdeviXkFddZ4Oz8Mok",
+    "voice": "QzTKubutNn9TjrB7Xb2Q",
     "model": "eleven_multilingual_v2",
-    "seconds": 2.85,
+    "seconds": 1.65,
     "chars": 32,
     "text": "...Thanks, LANCE. I owe you one."
   },
   "radio_puff_not_now_please": {
     "role": "Puff",
-    "voice": "9yzdeviXkFddZ4Oz8Mok",
+    "voice": "QzTKubutNn9TjrB7Xb2Q",
     "model": "eleven_multilingual_v2",
-    "seconds": 1.42,
+    "seconds": 1.0,
     "chars": 16,
     "text": "Not now. Please."
   },
