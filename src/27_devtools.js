@@ -2,8 +2,9 @@
    Provides: SL.devtools = { open(), close(), toggle() } and the developer panel: a small floating panel for testing
    the story without playing all of it.
    Open it with the ` (backquote) key, or add ?dev=1 to the URL (that also shows a DEV button, for touch screens).
-   - Jump to: Prologue, Echo, After Echo, Mission 1, After Mission 1 (SL.cutscenes.jump: rewrites the story flags as if
-     everything before that point had been played, then goes there).
+   - Jump to: Prologue, Echo, After Echo, Mission 1, After Mission 1, Mission 2, Mission 3, Mission 4
+     (SL.cutscenes.jump: rewrites the story flags as if everything before that point had been played, marks the
+     missions before it cleared, then goes there).
    - Skip now: the cutscene, Echo, Puff's memory, to the boss, or win the mission. Each button is enabled only when
      that thing is running.
    - Skip minigames (remembered in this browser): the story passes through Echo and Puff's memory without playing them.

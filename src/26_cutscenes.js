@@ -146,14 +146,25 @@
 
   // ------------------------------------------------------------------ developer jumps (27_devtools.js)
   const STORY_FLAGS = ['echo_escaped', 'puff_memory1', 'puff_trust'];
-  /** Story points to jump to, in order: each one sets the save as if everything before it had been played. */
+  /** Story points to jump to, in order: each one sets the save as if everything before it had been played.
+      cleared: missions marked done (later missions unlock only after the one before is cleared); mission: start it. */
+  const AFTER_M1 = ['cs_intro', 'echo_escaped', 'cs_echo_complete', 'cs_puff_intro', 'puff_memory1', 'cs_puff_complete'];
   const STAGES = [
     { id: 'prologue', label: 'Prologue', done: [] },
     { id: 'echo', label: 'Echo', done: ['cs_intro'] },
     { id: 'after_echo', label: 'After Echo', done: ['cs_intro', 'echo_escaped'] },
-    { id: 'mission1', label: 'Mission 1', done: ['cs_intro', 'echo_escaped', 'cs_echo_complete', 'cs_puff_intro'] },
-    { id: 'after_mission1', label: 'After Mission 1', done: ['cs_intro', 'echo_escaped', 'cs_echo_complete', 'cs_puff_intro', 'puff_memory1'] },
+    { id: 'mission1', label: 'Mission 1', done: ['cs_intro', 'echo_escaped', 'cs_echo_complete', 'cs_puff_intro'], mission: STORY_MISSION },
+    { id: 'after_mission1', label: 'After Mission 1', done: ['cs_intro', 'echo_escaped', 'cs_echo_complete', 'cs_puff_intro', 'puff_memory1'], cleared: ['m1'] },
+    { id: 'mission2', label: 'Mission 2', done: AFTER_M1, cleared: ['m1'], mission: 'm2' },
+    { id: 'mission3', label: 'Mission 3', done: AFTER_M1, cleared: ['m1', 'm2'], mission: 'm3' },
+    { id: 'mission4', label: 'Mission 4', done: AFTER_M1, cleared: ['m1', 'm2', 'm3'], mission: 'm4' },
   ];
+
+  /** Marks missions cleared, keeping any best score or rank already saved. */
+  function markCleared(ids) {
+    const all = SL.save.data.missions;
+    for (const id of ids || []) all[id] = Object.assign(SL.save.mission(id), all[id] || {}, { done: true });
+  }
 
   /** Forgets the story: every cutscene unseen, Echo not escaped, Puff's memory and trust cleared. */
   function resetStory() {
@@ -171,6 +182,7 @@
     const g = gen;
     const f = flags();
     for (const k of stage.done) f[k] = true;
+    markCleared(stage.cleared);
     SL.save.commit();
     const wait = current || Promise.resolve();
     if (playing && window.Cutscene) window.Cutscene.skip();
@@ -181,7 +193,7 @@
       if (stage.id === 'prologue') start();
       else if (stage.id === 'echo') toEcho();
       else if (stage.id === 'after_echo') afterEcho();
-      else if (stage.id === 'mission1') SL.game.startMission(STORY_MISSION, { coop: false });
+      else if (stage.mission) SL.game.startMission(stage.mission, { coop: false });
       else if (stage.id === 'after_mission1') play('puff_complete');
     });
   }

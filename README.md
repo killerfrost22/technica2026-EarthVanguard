@@ -158,10 +158,11 @@ This inlines every `src/*.css` and `src/*.js` file, in name order, into `dist/ea
 
 **Developer panel:** press the `` ` `` (backquote) key in the game, or add `?dev=1` to the URL (that also adds a DEV
 button for touch screens). It jumps to any point in the story (Prologue, Echo, After Echo, Mission 1, After
-Mission 1), skips whatever is running (a cutscene, Echo, Puff's memory, to the boss, or wins the mission), and has
-a **Skip minigames** switch (remembered in your browser) so the story passes through Echo and Puff's memory without
-playing them. **Reset story** starts the story over, and the **Music** section plays any track (its Mood slider drives
-the layers some tracks add, like Echo's heartbeat).
+Mission 1, Mission 2, Mission 3, Mission 4; a mission jump marks the missions before it cleared), skips whatever is
+running (a cutscene, Echo, Puff's memory, to the boss, or wins the mission), and has a **Skip minigames** switch
+(remembered in your browser) so the story passes through Echo and Puff's memory without playing them. **Reset
+story** starts the story over, and the **Music** section plays any track (its Mood slider drives the layers some
+tracks add, like Echo's heartbeat).
 
 Handy URL parameters for testing (add them to the end of the file URL):
 
