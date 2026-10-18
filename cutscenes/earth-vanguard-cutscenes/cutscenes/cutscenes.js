@@ -12,7 +12,8 @@
  *   });
  *
  * Optional hooks: onMusic(name) and onSfx(name) for the script's music / sfx cues, onVoice(speaking) while a
- * narration clip is sounding (to lower the music under it).
+ * narration clip is sounding (to lower the music under it). The text scales with the host page's --ts (the game's
+ * Text size setting; 1.15 is normal).
  *
  * Controls: click / Space / Enter / → = advance (first press finishes the
  * typing), Esc = skip the whole cutscene.
@@ -21,7 +22,7 @@
   'use strict';
 
   const CSS = `
-  .cs-root{position:fixed;inset:0;z-index:9999;overflow:hidden;background:#000;color:#eef2ff;
+  .cs-root{--cs-ts:calc(var(--ts, 1.15) / 1.15);position:fixed;inset:0;z-index:9999;overflow:hidden;background:#000;color:#eef2ff;
     font-family:"Barlow Semi Condensed","Trebuchet MS","Segoe UI",system-ui,sans-serif;user-select:none;cursor:pointer;
     opacity:0;transition:opacity .5s ease}
   .cs-root.cs-in{opacity:1}
@@ -58,15 +59,15 @@
     border:1px solid rgba(140,180,255,.28);box-shadow:0 10px 40px rgba(0,0,0,.6),inset 0 1px 0 rgba(255,255,255,.06);
     opacity:0;transition:opacity .35s ease}
   .cs-box.cs-show{opacity:1}
-  .cs-who{font-family:"Oxanium","Trebuchet MS",system-ui,sans-serif;font-size:13px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:#7fb2ff;margin-bottom:6px;min-height:1em}
-  .cs-text{font-size:clamp(16px,2.1vw,22px);line-height:1.5;white-space:pre-wrap}
+  .cs-who{font-family:"Oxanium","Trebuchet MS",system-ui,sans-serif;font-size:calc(13px * var(--cs-ts));font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:#7fb2ff;margin-bottom:6px;min-height:1em}
+  .cs-text{font-size:calc(clamp(16px,2.1vw,22px) * var(--cs-ts));line-height:1.5;white-space:pre-wrap}
   .cs-text.cs-terminal{font-family:"Courier New",ui-monospace,monospace;color:#ff6b6b;letter-spacing:.04em}
   .cs-text.cs-quiet{font-style:italic;color:#c9d4ee}
   .cs-next{position:absolute;right:18px;bottom:10px;font-size:14px;color:#7fb2ff;opacity:0;animation:cs-bob 1s ease-in-out infinite}
   .cs-next.cs-show{opacity:1}
   @keyframes cs-bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
   .cs-choices{display:flex;flex-direction:column;gap:8px;margin-top:12px}
-  .cs-choices button{all:unset;cursor:pointer;padding:10px 14px;border-radius:7px;font-size:17px;
+  .cs-choices button{all:unset;cursor:pointer;padding:10px 14px;border-radius:7px;font-size:calc(17px * var(--cs-ts));
     background:rgba(127,178,255,.1);border:1px solid rgba(127,178,255,.35);color:#eef2ff}
   .cs-choices button:hover,.cs-choices button:focus-visible{background:rgba(127,178,255,.25);border-color:#7fb2ff}
   .cs-skip{all:unset;position:absolute;top:14px;right:16px;padding:7px 12px;border-radius:6px;cursor:pointer;

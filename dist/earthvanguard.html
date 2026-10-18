@@ -608,6 +608,7 @@ body {
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 .sl-ui-results__tile dd { margin: 0; font: 700 calc(4 * var(--f))/1 var(--sl-display); color: var(--sl-text); white-space: nowrap; }
+.sl-ui-results__tile dd small { margin-left: 0.06em; font-size: 0.6em; color: var(--sl-text-dim); }
 .sl-ui-complete > .sl-row { margin-top: calc(0.6 * var(--u)); }
 
 .sl-toast {
@@ -32891,7 +32892,37 @@ body {
       const hint = el('p', 'sl-ui-title__hint', 'Move: WASD or arrows \u00b7 drag on touch \u00b7 auto-fire \u00b7 Bomb: X \u00b7 Pause: Esc');
       root.append(head, btns, hint);
     },
+    onShow(root) {
+      // keep the idle jet in the gap above the buttons as the layout changes (text size, fonts, window size, turning
+      // the phone); a frame later, once the renderer has resized
+      const place = () => requestAnimationFrame(() => placeTitleJet(root));
+      place();
+      const ro = typeof ResizeObserver === 'function' ? new ResizeObserver(place) : null;
+      if (ro) ro.observe(root.querySelector('.sl-ui-title__head'));
+      window.addEventListener('resize', place);
+      const offOrient = SL.bus.on('orient', place);
+      root.unplace = () => {
+        if (ro) ro.disconnect();
+        window.removeEventListener('resize', place);
+        offOrient();
+      };
+    },
+    onHide(root) { if (root.unplace) root.unplace(); },
   });
+  /** Portrait title: the attract-scene jet flies in the gap between the tagline and the buttons rather than behind them,
+      or above the title when larger text closes that gap. */
+  function placeTitleJet(root) {
+    const m = SL.game && SL.game.menuScene, R = SL.render;
+    if (!m || !m.player || !R || R.land || !R.toLogical) return;
+    const head = root.querySelector('.sl-ui-title__head'), tag = root.querySelector('.sl-ui-title__tag');
+    const btns = root.querySelector('.sl-ui-title__btns');
+    if (!head || !tag || !btns) return;
+    const need = 100 * (R.cssH || SL.H) / SL.H; // the jet and its plume, in CSS px
+    const a = tag.getBoundingClientRect().bottom, b = btns.getBoundingClientRect().top;
+    const top = R.top || 0, h0 = head.getBoundingClientRect().top;
+    const y = b - a >= need ? (a + b) / 2 : h0 - top >= need ? (top + h0) / 2 : null;
+    m.y = y != null ? R.toLogical(0, y).y : SL.H * 0.5;
+  }
 
   SL.screens.define('pause', {
     build(root, params) {
@@ -32937,13 +32968,15 @@ body {
       score.append(scoreHead, el('div', 'sl-ui-results__score-val sl-num', U.fmtInt(r.score)));
 
       const grid = el('dl', 'sl-ui-results__grid');
-      const tile = (k, v) => {
+      const tile = (k, v, of) => {
         const d = el('div', 'sl-ui-results__tile');
-        d.append(el('dt', '', k), el('dd', 'sl-num', v));
+        const dd = el('dd', 'sl-num', v);
+        if (of) dd.appendChild(el('small', '', of)); // "/236" smaller, so big counts still fit the tile
+        d.append(el('dt', '', k), dd);
         grid.appendChild(d);
       };
       tile('Credits', U.fmtInt(r.creditsKept));
-      tile('Kills', r.kills + '/' + r.enemiesSpawned);
+      tile('Kills', String(r.kills), '/' + r.enemiesSpawned);
       tile('Rescued', String(r.rescued));
       tile('Hits', String(r.hitsTaken));
       tile('Time', U.fmtTime(r.time));
@@ -33102,12 +33135,25 @@ body {
     ctx.globalAlpha = 1;
   }
 
+  /** The largest font size (up to `size`) at which str fits in maxW. */
+  function fitSize(ctx, str, weight, size, family, maxW) {
+    ctx.font = weight + ' ' + size + 'px ' + family;
+    const w = ctx.measureText(str).width;
+    return w > maxW ? Math.max(12, Math.floor(size * maxW / w)) : size;
+  }
+
   function drawBanner(ctx, dt) {
     if (!banner && banners.length) banner = banners.shift();
     if (!banner) return;
     banner.t += dt;
     const t = banner.t, d = banner.dur;
     if (t >= d) { banner = null; return; }
+    // long hazard names shrink to fit the screen (measured once per banner and screen width)
+    if (banner.fitW !== VW) {
+      banner.fitW = VW;
+      banner.size = fitSize(ctx, banner.text, 800, 46, 'Oxanium, sans-serif', VW - 72);
+      banner.subSize = fitSize(ctx, banner.sub, 600, 18, '"Barlow Semi Condensed", sans-serif', VW - 72);
+    }
     const a = Math.min(1, t / 0.18, (d - t) / 0.35);
     const sc = 1 + 0.08 * Math.max(0, 1 - t / 0.25);
     const y = Math.round(VH * 0.367);
@@ -33120,9 +33166,9 @@ body {
     ctx.save();
     ctx.translate(VW / 2, y);
     ctx.scale(sc, sc);
-    text(ctx, banner.text, 0, 12, '800 46px Oxanium, sans-serif', '#ffffff', 'center');
+    text(ctx, banner.text, 0, 12 + (46 - banner.size) * 0.3, '800 ' + banner.size + 'px Oxanium, sans-serif', '#ffffff', 'center');
     ctx.restore();
-    if (banner.sub) text(ctx, banner.sub, VW / 2, y + 42, '600 18px "Barlow Semi Condensed", sans-serif', C.rgba(banner.color, 0.95), 'center');
+    if (banner.sub) text(ctx, banner.sub, VW / 2, y + 42, '600 ' + banner.subSize + 'px "Barlow Semi Condensed", sans-serif', C.rgba(banner.color, 0.95), 'center');
     ctx.globalAlpha = 1;
   }
 
@@ -34090,7 +34136,8 @@ body {
     registerHot();
     SL.bus.on('orient', () => { if (G.menuScene && menuOpts.y == null) G.menuScene.y = menuY(); });
     G.state = 'menu';
-    G.setMenuScene({});
+    // GDD 18.1: the menus fly over Vesta (bg_vesta's slow 'menu' drift)
+    G.setMenuScene(SL.backgrounds.has('bg_vesta') ? { bg: 'bg_vesta', bgOpts: { phase: 'menu' } } : {});
     if (has(SL.ui, 'show') && SL.screens.has('title')) safe('ui.show title', () => SL.ui.show('title'));
     requestAnimationFrame(loop);
   });
@@ -36668,7 +36715,8 @@ body {
     }
     if (G.state === 'play' && G.bot) {
       ctx.globalAlpha = 0.75 + 0.25 * Math.sin(R.scroll * 3);
-      anchored(ctx, W / 2, SURFACE + 46, () => label(ctx, 'BOT SWIMMING \u00b7 Esc or tap for menu', 0, 0, '700 18px Oxanium, sans-serif', '#ffe27a', 'center'));
+      // under the hearts and the score, which share the top row
+      anchored(ctx, W / 2, SURFACE + 116 * hudK(), () => label(ctx, 'BOT SWIMMING \u00b7 Esc or tap for menu', 0, 0, '700 18px Oxanium, sans-serif', '#ffe27a', 'center'));
       ctx.globalAlpha = 1;
     } else if (G.state === 'ready' || (G.state === 'play' && (R.t < 6 || !R.everUp))) {
       drawTip(ctx, R);
@@ -40271,7 +40319,8 @@ window.PUFF_VO = {"memory1_intro_1":["data:audio/mpeg;base64,SUQzBAAAAAAAIlRTU0U
  *   });
  *
  * Optional hooks: onMusic(name) and onSfx(name) for the script's music / sfx cues, onVoice(speaking) while a
- * narration clip is sounding (to lower the music under it).
+ * narration clip is sounding (to lower the music under it). The text scales with the host page's --ts (the game's
+ * Text size setting; 1.15 is normal).
  *
  * Controls: click / Space / Enter / \u2192 = advance (first press finishes the
  * typing), Esc = skip the whole cutscene.
@@ -40280,7 +40329,7 @@ window.PUFF_VO = {"memory1_intro_1":["data:audio/mpeg;base64,SUQzBAAAAAAAIlRTU0U
   'use strict';
 
   const CSS = `
-  .cs-root{position:fixed;inset:0;z-index:9999;overflow:hidden;background:#000;color:#eef2ff;
+  .cs-root{--cs-ts:calc(var(--ts, 1.15) / 1.15);position:fixed;inset:0;z-index:9999;overflow:hidden;background:#000;color:#eef2ff;
     font-family:"Barlow Semi Condensed","Trebuchet MS","Segoe UI",system-ui,sans-serif;user-select:none;cursor:pointer;
     opacity:0;transition:opacity .5s ease}
   .cs-root.cs-in{opacity:1}
@@ -40317,15 +40366,15 @@ window.PUFF_VO = {"memory1_intro_1":["data:audio/mpeg;base64,SUQzBAAAAAAAIlRTU0U
     border:1px solid rgba(140,180,255,.28);box-shadow:0 10px 40px rgba(0,0,0,.6),inset 0 1px 0 rgba(255,255,255,.06);
     opacity:0;transition:opacity .35s ease}
   .cs-box.cs-show{opacity:1}
-  .cs-who{font-family:"Oxanium","Trebuchet MS",system-ui,sans-serif;font-size:13px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:#7fb2ff;margin-bottom:6px;min-height:1em}
-  .cs-text{font-size:clamp(16px,2.1vw,22px);line-height:1.5;white-space:pre-wrap}
+  .cs-who{font-family:"Oxanium","Trebuchet MS",system-ui,sans-serif;font-size:calc(13px * var(--cs-ts));font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:#7fb2ff;margin-bottom:6px;min-height:1em}
+  .cs-text{font-size:calc(clamp(16px,2.1vw,22px) * var(--cs-ts));line-height:1.5;white-space:pre-wrap}
   .cs-text.cs-terminal{font-family:"Courier New",ui-monospace,monospace;color:#ff6b6b;letter-spacing:.04em}
   .cs-text.cs-quiet{font-style:italic;color:#c9d4ee}
   .cs-next{position:absolute;right:18px;bottom:10px;font-size:14px;color:#7fb2ff;opacity:0;animation:cs-bob 1s ease-in-out infinite}
   .cs-next.cs-show{opacity:1}
   @keyframes cs-bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
   .cs-choices{display:flex;flex-direction:column;gap:8px;margin-top:12px}
-  .cs-choices button{all:unset;cursor:pointer;padding:10px 14px;border-radius:7px;font-size:17px;
+  .cs-choices button{all:unset;cursor:pointer;padding:10px 14px;border-radius:7px;font-size:calc(17px * var(--cs-ts));
     background:rgba(127,178,255,.1);border:1px solid rgba(127,178,255,.35);color:#eef2ff}
   .cs-choices button:hover,.cs-choices button:focus-visible{background:rgba(127,178,255,.25);border-color:#7fb2ff}
   .cs-skip{all:unset;position:absolute;top:14px;right:16px;padding:7px 12px;border-radius:6px;cursor:pointer;

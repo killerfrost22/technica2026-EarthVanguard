@@ -1777,7 +1777,8 @@
     }
     if (G.state === 'play' && G.bot) {
       ctx.globalAlpha = 0.75 + 0.25 * Math.sin(R.scroll * 3);
-      anchored(ctx, W / 2, SURFACE + 46, () => label(ctx, 'BOT SWIMMING · Esc or tap for menu', 0, 0, '700 18px Oxanium, sans-serif', '#ffe27a', 'center'));
+      // under the hearts and the score, which share the top row
+      anchored(ctx, W / 2, SURFACE + 116 * hudK(), () => label(ctx, 'BOT SWIMMING · Esc or tap for menu', 0, 0, '700 18px Oxanium, sans-serif', '#ffe27a', 'center'));
       ctx.globalAlpha = 1;
     } else if (G.state === 'ready' || (G.state === 'play' && (R.t < 6 || !R.everUp))) {
       drawTip(ctx, R);
