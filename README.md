@@ -1,6 +1,6 @@
 # Earth Vanguard
 
-A vertical-scrolling space shooter that runs in the browser, built for **Technica 2026**.
+A vertical-scrolling space shooter that runs in the browser, built for **Technica 2026**.1
 
 The Nyx Armada has come out of the Tartarus Rift towing captive black holes and is dropping them on human
 worlds. You are the test pilot of the XF-9 *Starlance*, flying from the carrier UNS *Halcyon*, the last
