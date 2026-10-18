@@ -7,10 +7,8 @@
     "echo_caught_": "n1PvBOwxb8X6m7tahp2h",
     "echo_memory_": "GV0xwb2daa6wTpBCpuhM",
     "puff_intro": "eCGXfCpGinKGrwYNoBuo",
-    "radio_puff_": "9yzdeviXkFddZ4Oz8Mok",
     "memory1_intro_": "GsjQ0ydx7QzhDLqInGtT",
-    "memory1_end_2": "GsjQ0ydx7QzhDLqInGtT",
-    "memory1_puff_": "9yzdeviXkFddZ4Oz8Mok"
+    "memory1_end_2": "GsjQ0ydx7QzhDLqInGtT"
   },
   "Narrator": {
     "voice": "hnFidmF05jrIKH0LAjEc",
@@ -29,7 +27,7 @@
     "speed": 1.0
   },
   "Puff": {
-    "voice": "IKne3meq5aSn9XLyUdCD",
+    "voice": "QzTKubutNn9TjrB7Xb2Q",
     "stability": 0.4,
     "similarity_boost": 0.7,
     "style": 0.35,
