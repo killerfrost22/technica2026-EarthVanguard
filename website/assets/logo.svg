@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128">
+  <title>Earth Vanguard</title>
+  <rect width="128" height="128" rx="28" fill="#0a1022"/>
+  <g transform="translate(64,66)" fill="none" stroke="#4fc3ff">
+    <path d="M0,-50 L43,-32 L38,18 Q25,42 0,53 Q-25,42 -38,18 L-43,-32 Z" stroke-width="7" stroke-linejoin="round"/>
+    <path d="M-21,-16 L0,28 L21,-16" stroke-width="10" stroke-linejoin="round" stroke-linecap="round"/>
+    <circle cx="0" cy="-29" r="6" fill="#a6ecff" stroke="none"/>
+  </g>
+</svg>

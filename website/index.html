@@ -6,6 +6,12 @@
 <meta name="description" content="Earth Vanguard is a browser space shooter built at Technica 2026. Fly the XF-9 Starlance against the Nyx Armada, rescue survivors, and help Puff swim home.">
 <!--ARTIFACT-START-->
 <title>Earth Vanguard</title>
+<link rel="icon" href="assets/logo.svg" type="image/svg+xml">
+<meta property="og:title" content="Earth Vanguard">
+<meta property="og:description" content="Blue Arrow and her best friend Puff, a pufferfish, take on an empire in a browser space shooter built at Technica 2026.">
+<meta property="og:image" content="https://earthvanguard.us/assets/thumbnail.png">
+<meta property="og:url" content="https://earthvanguard.us/">
+<meta name="twitter:card" content="summary_large_image">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Oxanium:wght@500;600;700;800&family=Barlow+Semi+Condensed:ital,wght@0,400;0,500;0,600;1,400&display=swap">
@@ -94,6 +100,8 @@ section { padding-block: clamp(64px, 9vw, 120px); }
 .nav .wrap { display: flex; align-items: center; justify-content: space-between; gap: 16px; min-height: 56px; flex-wrap: wrap; }
 .brand { font-family: var(--f-display); font-weight: 800; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink); text-decoration: none; font-size: 0.95rem; }
 .brand span { color: var(--lance); }
+.brand { display: inline-flex; align-items: center; gap: 10px; }
+.brand img { width: 30px; height: 30px; display: block; }
 .nav ul { list-style: none; display: flex; gap: clamp(12px, 2.4vw, 28px); margin: 0; padding: 0; flex-wrap: wrap; }
 .nav ul a { font-family: var(--f-display); font-size: 0.78rem; letter-spacing: 0.16em; text-transform: uppercase; color: var(--ink-dim); text-decoration: none; }
 .nav ul a:hover { color: var(--lance); }
@@ -345,7 +353,7 @@ footer .wrap { display: flex; justify-content: space-between; gap: 12px; flex-wr
 <div class="page">
   <nav class="nav" aria-label="Sections">
     <div class="wrap">
-      <a class="brand" href="#top">Earth <span>Vanguard</span></a>
+      <a class="brand" href="#top"><img src="assets/logo.svg" alt="" width="30" height="30">Earth <span>Vanguard</span></a>
       <ul>
         <li><a href="#story">Story</a></li>
         <li><a href="#campaign">Campaign</a></li>
@@ -377,8 +385,8 @@ footer .wrap { display: flex; justify-content: space-between; gap: 12px; flex-wr
         </div>
       </div>
       <figure class="screen" style="margin:0">
-        <img src="assets/coop-blackhole.jpg" alt="Two jets in co-op flying toward a black hole that bends the starfield around it" width="720" height="1280">
-        <figcaption>Co-op: the Starlance and Sunlance near a black hole.</figcaption>
+        <img src="assets/blackhole.jpg" alt="Blue Arrow's Starlance firing spread shots below a black hole in Mission 1" width="720" height="1280">
+        <figcaption>Mission 1: a black hole opens over the carrier wreck.</figcaption>
       </figure>
     </div>
   </header>
@@ -583,10 +591,10 @@ footer .wrap { display: flex; justify-content: space-between; gap: 12px; flex-wr
         <h2 id="gameplay-h">Power you can see</h2>
       </div>
       <div class="shots">
-        <figure class="shot"><img src="assets/boss.jpg" alt="Boss warning banner with a radio message from Anvil" width="720" height="1280" loading="lazy"><figcaption>Boss warning with a radio call from Anvil.</figcaption></figure>
-        <figure class="shot"><img src="assets/coop-blackhole.jpg" alt="Two jets flying near a black hole" width="720" height="1280" loading="lazy"><figcaption>Black holes bend lasers and the screen.</figcaption></figure>
-        <figure class="shot"><img src="assets/puff-nets.jpg" alt="Puff the pufferfish between two ghost nets" width="540" height="960" loading="lazy"><figcaption>Puff's Ocean, the voice minigame.</figcaption></figure>
-        <figure class="shot wide"><img src="assets/title.jpg" alt="Earth Vanguard title screen with Start and 2 Players buttons" width="1280" height="800" loading="lazy"><figcaption>Title screen. Start solo, or press 2 Players for local co-op.</figcaption></figure>
+        <figure class="shot"><img src="assets/boss-suneater.jpg" alt="The SUNEATER harvester firing pink lasers while the Overseers taunt over the radio" width="720" height="1280" loading="lazy"><figcaption>Mission 4: SUNEATER, the star harvester.</figcaption></figure>
+        <figure class="shot"><img src="assets/sunbreak.jpg" alt="The Starlance weaving through asteroids and enemy formations near a solar array" width="720" height="1280" loading="lazy"><figcaption>Sunbreak: asteroids, formations and the harvester array.</figcaption></figure>
+        <figure class="shot"><img src="assets/echo.jpg" alt="Echo: a dark facility floor outlined by an echo, with drones and their red vision cones" width="720" height="1280" loading="lazy"><figcaption>Echo: Blue Arrow sees the facility by sound.</figcaption></figure>
+        <figure class="shot wide"><img src="assets/title.jpg" alt="Earth Vanguard title screen with Start, 2 Players, Missions, Puff's Ocean and Echo buttons" width="1280" height="800" loading="lazy"><figcaption>Title screen. Start the story, play with a friend, or jump into Puff's Ocean and Echo.</figcaption></figure>
       </div>
       <div class="features">
         <div class="feature"><h3>Weapons that change the screen</h3><p>Twin pulse lasers become a wall of light, the spread fan widens to nine rays, and the lance beam swells from a needle to a pillar across five levels. Homing missiles and bombs on top.</p></div>
@@ -613,8 +621,8 @@ footer .wrap { display: flex; justify-content: space-between; gap: 12px; flex-wr
         </div>
       </div>
       <div class="puff-shots">
-        <figure class="shot"><img src="assets/puff.jpg" alt="Puff shrinking to slip under a floating garbage patch" width="540" height="960" loading="lazy"></figure>
-        <figure class="shot"><img src="assets/puff-nets.jpg" alt="Puff swimming between two ghost fishing nets" width="540" height="960" loading="lazy"></figure>
+        <figure class="shot"><img src="assets/puff-sunset.jpg" alt="Puff puffed up under a sunset sky, past a plastic bag and an oil spill" width="720" height="1280" loading="lazy"></figure>
+        <figure class="shot"><img src="assets/puff-aurora.jpg" alt="Puff collecting pearls at the surface under the northern lights" width="720" height="1280" loading="lazy"></figure>
       </div>
     </div>
   </section>
