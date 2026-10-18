@@ -1,6 +1,6 @@
 /* STUB: replaced by ui
    20_ui.js provides: SL.ui = { show(id, params), hide(), current, toast(text), update(realDt) }, screens title
-   (Start, 2 Players), pause, results and failed via SL.screens.define(id, {build(root, params), onShow, onHide,
+   (Start, 2 Players, Missions once a second mission is open), missions (mission select), pause, results and failed via SL.screens.define(id, {build(root, params), onShow, onHide,
    onInput(menu)}), and SL.hud = { draw(ctx), banner(text, {sub, color, duration}), touchButtons(show) }: hull and
    shield bars, lives, bombs, weapon, score, multiplier, credits, boss bar with phase marks, banners (also for
    bus 'bossWarning' and 'hazardWarning'), and DOM BOMB / SKILL touch buttons.
@@ -49,10 +49,9 @@
     return b;
   }
 
+  /** Where Start and 2 Players go: the next mission to clear (19_progress.js). */
   function firstMission() {
-    const ids = SL.missions.ids().filter((id) => !SL.missions.get(id).dev && SL.missions.get(id).kind !== 'side');
-    ids.sort((a, b) => (SL.missions.get(a).order || 0) - (SL.missions.get(b).order || 0));
-    return ids[0] || SL.missions.ids()[0];
+    return SL.progress.nextMission() || SL.missions.ids()[0];
   }
 
   let uiEl = null, cur = null, toastEl = null, toastTimer = 0;
@@ -136,6 +135,10 @@
       btns.append(
         button('Start', 'sl-btn--primary', () => (SL.cutscenes ? SL.cutscenes.start() : SL.game.startMission(firstMission(), { coop: false }))),
         button('2 Players', '', () => SL.game.startMission(firstMission(), { coop: true })));
+      // once a second mission is open, any open mission can be replayed
+      if (SL.progress.mainMissions().filter((id) => SL.progress.missionUnlocked(id)).length > 1) {
+        btns.appendChild(button('Missions', '', () => UI.show('missions')));
+      }
       if (SL.puff && SL.puff.titleButton) btns.appendChild(SL.puff.titleButton());
       if (SL.echo && SL.echo.titleButton) btns.appendChild(SL.echo.titleButton());
       btns.appendChild(textSizeButton());
@@ -173,6 +176,31 @@
     const y = b - a >= need ? (a + b) / 2 : h0 - top >= need ? (top + h0) / 2 : null;
     m.y = y != null ? R.toLogical(0, y).y : SL.H * 0.5;
   }
+
+  // Mission select: every main mission in order, locked ones disabled until the one before is cleared.
+  SL.screens.define('missions', {
+    build(root) {
+      const panel = el('div', 'sl-panel sl-ui-panel');
+      panel.append(el('div', 'sl-label', 'Campaign'), el('h2', 'sl-title sl-title--md', 'Missions'));
+      const list = el('div', 'sl-stack');
+      SL.progress.mainMissions().forEach((id, i) => {
+        const def = SL.missions.get(id), rec = SL.save.mission(id), open = SL.progress.missionUnlocked(id);
+        const label = (i + 1) + '. ' + (open ? def.name : 'Locked') + (rec.done && rec.rank ? '  ·  ' + rec.rank : '');
+        const b = button(label, id === SL.progress.nextMission() ? 'sl-btn--primary' : '', () => SL.game.startMission(id, { coop: false }));
+        b.disabled = !open;
+        if (open && def.location) b.title = def.location;
+        list.appendChild(b);
+      });
+      list.appendChild(button('Back', 'sl-btn--ghost', () => UI.show('title')));
+      panel.appendChild(list);
+      root.appendChild(panel);
+    },
+    onInput(m) {
+      if (!m.back) return false;
+      UI.show('title');
+      return true;
+    },
+  });
 
   SL.screens.define('pause', {
     build(root, params) {

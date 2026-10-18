@@ -7,8 +7,8 @@
      Start -> 'intro' -> Echo (Blue Arrow's escape)
      Echo escaped -> Continue -> 'echo_complete' -> 'puff_intro' -> Mission 1
      Mission 1 cleared -> back at the menu -> 'puff_complete'
-   Once the story has reached Mission 1, Start goes straight to Mission 1. 2 Players always goes straight to
-   Mission 1. Each cutscene plays once per save (save.flags.cs_<id>); Esc skips one.
+   Once the story has reached Mission 1, Start goes straight to the next mission to clear (SL.progress.nextMission:
+   Mission 1, then Mission 2 and on). 2 Players goes there too. Each cutscene plays once per save (save.flags.cs_<id>); Esc skips one.
    Choices in cutscenes read and write Puff's trust in save.flags.puff_trust, the same count Mission 1's
    puff_trust1 radio choice adds to.
    Developer tools (27_devtools.js) use stages + jump(stageId) to go to any story point and resetStory() to forget
@@ -101,7 +101,10 @@
   let gen = 0;
   const still = (g) => g === gen;
 
-  function toMission() { SL.game.startMission(STORY_MISSION, { coop: false }); }
+  function toMission() {
+    const next = seen('puff_intro') && SL.progress && SL.progress.nextMission ? SL.progress.nextMission() : STORY_MISSION;
+    SL.game.startMission(next || STORY_MISSION, { coop: false });
+  }
   function skipMinigames() { return !!(SL.debug && SL.debug.skipMinigames); }
 
   /** Opens Echo, or with the developer "skip minigames" switch on, counts it as escaped and carries on. */
@@ -178,7 +181,7 @@
       if (stage.id === 'prologue') start();
       else if (stage.id === 'echo') toEcho();
       else if (stage.id === 'after_echo') afterEcho();
-      else if (stage.id === 'mission1') toMission();
+      else if (stage.id === 'mission1') SL.game.startMission(STORY_MISSION, { coop: false });
       else if (stage.id === 'after_mission1') play('puff_complete');
     });
   }

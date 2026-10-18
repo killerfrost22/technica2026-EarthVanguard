@@ -718,5 +718,165 @@
     "seconds": 5.05,
     "chars": 82,
     "text": "Puff is curled up tight in his bubble, spines out, staring back at the black hole."
+  },
+  "radio_anvil_kerr_station_is_breaking": {
+    "role": "Anvil",
+    "voice": "507tTFX0IPtqFzGd1CAL",
+    "model": "eleven_multilingual_v2",
+    "seconds": 4.45,
+    "chars": 60,
+    "text": "Kerr Station is breaking up. Clear a path for the lifeboats."
+  },
+  "radio_puff_another_black_hole_keep": {
+    "role": "Puff",
+    "voice": "QzTKubutNn9TjrB7Xb2Q",
+    "model": "eleven_multilingual_v2",
+    "seconds": 2.98,
+    "chars": 49,
+    "text": "Another black hole. Keep the tether short, LANCE."
+  },
+  "radio_sparrow_spears_lock_on_then": {
+    "role": "Sparrow",
+    "voice": "0luPAj5RsdhmnkZaiYcb",
+    "model": "eleven_multilingual_v2",
+    "seconds": 4.99,
+    "chars": 60,
+    "text": "Spears lock on, then ram. When the nose glows red, sidestep!"
+  },
+  "radio_sparrow_snipers_see_the_red": {
+    "role": "Sparrow",
+    "voice": "0luPAj5RsdhmnkZaiYcb",
+    "model": "eleven_multilingual_v2",
+    "seconds": 4.52,
+    "chars": 70,
+    "text": "Snipers. See the red line? That's where the shot goes. Don't be there."
+  },
+  "radio_sparrow_weaver_spiral_guns_circle": {
+    "role": "Sparrow",
+    "voice": "0luPAj5RsdhmnkZaiYcb",
+    "model": "eleven_multilingual_v2",
+    "seconds": 4.81,
+    "chars": 60,
+    "text": "Weaver! Spiral guns. Circle with the spiral, not against it."
+  },
+  "radio_anvil_that_s_kerr_s": {
+    "role": "Anvil",
+    "voice": "507tTFX0IPtqFzGd1CAL",
+    "model": "eleven_multilingual_v2",
+    "seconds": 4.94,
+    "chars": 61,
+    "text": "That's Kerr's Eye ahead. A black hole on a leash. Stay sharp."
+  },
+  "radio_puff_it_isn_t_singing": {
+    "role": "Puff",
+    "voice": "QzTKubutNn9TjrB7Xb2Q",
+    "model": "eleven_multilingual_v2",
+    "seconds": 2.43,
+    "chars": 41,
+    "text": "It isn't singing. Good. Keep it that way."
+  },
+  "radio_anvil_lance_cell_a_beam": {
+    "role": "Anvil",
+    "voice": "507tTFX0IPtqFzGd1CAL",
+    "model": "eleven_multilingual_v2",
+    "seconds": 4.94,
+    "chars": 66,
+    "text": "Lance cell! A beam that cuts through everything in a line. Try it."
+  },
+  "radio_anvil_gravity_well_it_pulls": {
+    "role": "Anvil",
+    "voice": "507tTFX0IPtqFzGd1CAL",
+    "model": "eleven_multilingual_v2",
+    "seconds": 6.2,
+    "chars": 74,
+    "text": "Gravity well! It pulls you in. Don't use focus near it, you'll lose speed."
+  },
+  "radio_sparrow_ha_it_ate_their": {
+    "role": "Sparrow",
+    "voice": "0luPAj5RsdhmnkZaiYcb",
+    "model": "eleven_multilingual_v2",
+    "seconds": 4.89,
+    "chars": 65,
+    "text": "Ha! It ate their drones. Your shots bend around it too. Use that."
+  },
+  "radio_anvil_tug_ship_towing_a": {
+    "role": "Anvil",
+    "voice": "507tTFX0IPtqFzGd1CAL",
+    "model": "eleven_multilingual_v2",
+    "seconds": 4.76,
+    "chars": 64,
+    "text": "Tug ship towing a black hole. Kill it and the hole drifts loose."
+  },
+  "radio_puff_they_tow_them_around": {
+    "role": "Puff",
+    "voice": "QzTKubutNn9TjrB7Xb2Q",
+    "model": "eleven_multilingual_v2",
+    "seconds": 2.77,
+    "chars": 51,
+    "text": "They tow them around like cargo. Like it's nothing."
+  },
+  "radio_anvil_vip_pod_falling_toward": {
+    "role": "Anvil",
+    "voice": "507tTFX0IPtqFzGd1CAL",
+    "model": "eleven_multilingual_v2",
+    "seconds": 5.73,
+    "chars": 66,
+    "text": "VIP pod falling toward that hole. Grab it before the horizon does!"
+  },
+  "radio_sparrow_got_her_dr_osei": {
+    "role": "Sparrow",
+    "voice": "0luPAj5RsdhmnkZaiYcb",
+    "model": "eleven_multilingual_v2",
+    "seconds": 6.38,
+    "chars": 78,
+    "text": "Got her! Dr. Osei, Lagrange Deep. She says you're crazy, LANCE. In a good way."
+  },
+  "radio_sparrow_lifeboats_are_clear_of": {
+    "role": "Sparrow",
+    "voice": "0luPAj5RsdhmnkZaiYcb",
+    "model": "eleven_multilingual_v2",
+    "seconds": 3.09,
+    "chars": 55,
+    "text": "Lifeboats are clear of the station. Nice flying, LANCE!"
+  },
+  "radio_anvil_big_signature_on_the": {
+    "role": "Anvil",
+    "voice": "507tTFX0IPtqFzGd1CAL",
+    "model": "eleven_multilingual_v2",
+    "seconds": 5.28,
+    "chars": 70,
+    "text": "Big signature on the end of the leash. The siege engine. Cut it loose."
+  },
+  "radio_anvil_its_pull_is_climbing": {
+    "role": "Anvil",
+    "voice": "507tTFX0IPtqFzGd1CAL",
+    "model": "eleven_multilingual_v2",
+    "seconds": 5.6,
+    "chars": 68,
+    "text": "Its pull is climbing! Stay fast. It can't hold a ship at full speed."
+  },
+  "radio_sparrow_containment_s_failing_and": {
+    "role": "Sparrow",
+    "voice": "0luPAj5RsdhmnkZaiYcb",
+    "model": "eleven_multilingual_v2",
+    "seconds": 3.69,
+    "chars": 62,
+    "text": "Containment's failing and the hole is growing. Finish it fast!"
+  },
+  "radio_anvil_the_leash_is_cut": {
+    "role": "Anvil",
+    "voice": "507tTFX0IPtqFzGd1CAL",
+    "model": "eleven_multilingual_v2",
+    "seconds": 4.94,
+    "chars": 64,
+    "text": "The leash is cut and the Eye is fading. Outstanding work, LANCE."
+  },
+  "radio_puff_still_here_thanks_for": {
+    "role": "Puff",
+    "voice": "QzTKubutNn9TjrB7Xb2Q",
+    "model": "eleven_multilingual_v2",
+    "seconds": 2.67,
+    "chars": 51,
+    "text": "...Still here. Thanks for keeping the tether short."
   }
 }
