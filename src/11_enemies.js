@@ -50,6 +50,8 @@
   /** Cooldown helper: counts e.data[key] down at the enemy's fire rate; true (and re-armed by `every`) when due. */
   function ready(e, key, every, dt) {
     const d = e.data;
+    // a timer an enemy never set would count down from NaN and fire every frame: start it at one full period instead
+    if (!(d[key] > -Infinity)) d[key] = every;
     d[key] -= dt * rate(e);
     if (d[key] > 0) return false;
     d[key] = Math.max(d[key] + every, every * 0.25);

@@ -1038,5 +1038,221 @@
     "seconds": 3.74,
     "chars": 63,
     "text": "The storm's gone quiet. ...I'd forgotten what that sounds like."
+  },
+  "radio_ixa_pilot_i_am_ixa": {
+    "role": "Ixa",
+    "voice": "XB0fDUnXU5powFXDhCwa",
+    "model": "eleven_multilingual_v2",
+    "seconds": 5.65,
+    "chars": 80,
+    "text": "Pilot! I am Ixa. I built their harvesters. I have their codes. Please, catch me."
+  },
+  "radio_overseer_suneater_drinks_a_star": {
+    "role": "Overseer",
+    "voice": "nPczCjzI2devNBz1zQrb",
+    "model": "eleven_multilingual_v2",
+    "seconds": 5.91,
+    "chars": 77,
+    "text": "SUNEATER drinks a star. You are a smaller meal. We remember you, little fish."
+  },
+  "radio_anvil_tarsis_is_bleeding_light": {
+    "role": "Anvil",
+    "voice": "507tTFX0IPtqFzGd1CAL",
+    "model": "eleven_multilingual_v2",
+    "seconds": 4.21,
+    "chars": 60,
+    "text": "Tarsis is bleeding light and they're bottling it. Stop them."
+  },
+  "radio_puff_that_light_is_wrong": {
+    "role": "Puff",
+    "voice": "QzTKubutNn9TjrB7Xb2Q",
+    "model": "eleven_multilingual_v2",
+    "seconds": 3.04,
+    "chars": 51,
+    "text": "That light is wrong. Stars don't flicker like that."
+  },
+  "radio_sparrow_phantoms_they_cloak_shoot": {
+    "role": "Sparrow",
+    "voice": "0luPAj5RsdhmnkZaiYcb",
+    "model": "eleven_multilingual_v2",
+    "seconds": 4.71,
+    "chars": 65,
+    "text": "Phantoms! They cloak. Shoot when you see the shimmer, not before."
+  },
+  "radio_sparrow_flare_coming_when_the": {
+    "role": "Sparrow",
+    "voice": "0luPAj5RsdhmnkZaiYcb",
+    "model": "eleven_multilingual_v2",
+    "seconds": 4.21,
+    "chars": 68,
+    "text": "Flare coming! When the edge goes white, get in a rock's shadow. Now!"
+  },
+  "radio_anvil_a_moon_is_crossing": {
+    "role": "Anvil",
+    "voice": "507tTFX0IPtqFzGd1CAL",
+    "model": "eleven_multilingual_v2",
+    "seconds": 5.07,
+    "chars": 61,
+    "text": "A moon is crossing the star. No flares for a moment. Breathe."
+  },
+  "radio_puff_i_know_that_ship": {
+    "role": "Puff",
+    "voice": "QzTKubutNn9TjrB7Xb2Q",
+    "model": "eleven_multilingual_v2",
+    "seconds": 3.14,
+    "chars": 58,
+    "text": "...I know that ship. The dark one at the end of the light."
+  },
+  "radio_puff_one_like_it_hung": {
+    "role": "Puff",
+    "voice": "QzTKubutNn9TjrB7Xb2Q",
+    "model": "eleven_multilingual_v2",
+    "seconds": 3.87,
+    "chars": 65,
+    "text": "One like it hung over our sun for a year. Then our sea went cold."
+  },
+  "radio_puff_together_okay_i_can": {
+    "role": "Puff",
+    "voice": "QzTKubutNn9TjrB7Xb2Q",
+    "model": "eleven_multilingual_v2",
+    "seconds": 1.96,
+    "chars": 37,
+    "text": "...Together. Okay. I can do together."
+  },
+  "radio_puff_right_eyes_forward": {
+    "role": "Puff",
+    "voice": "QzTKubutNn9TjrB7Xb2Q",
+    "model": "eleven_multilingual_v2",
+    "seconds": 1.47,
+    "chars": 23,
+    "text": "...Right. Eyes forward."
+  },
+  "radio_sparrow_mine_field_shoot_one": {
+    "role": "Sparrow",
+    "voice": "0luPAj5RsdhmnkZaiYcb",
+    "model": "eleven_multilingual_v2",
+    "seconds": 5.05,
+    "chars": 71,
+    "text": "Mine field. Shoot one and it blows its neighbors. Chain them into jets."
+  },
+  "radio_anvil_directorate_pod_on_our": {
+    "role": "Anvil",
+    "voice": "507tTFX0IPtqFzGd1CAL",
+    "model": "eleven_multilingual_v2",
+    "seconds": 7.03,
+    "chars": 82,
+    "text": "Directorate pod on our band, sending surrender codes. Their own jets want it dead."
+  },
+  "radio_ixa_you_caught_me_i": {
+    "role": "Ixa",
+    "voice": "XB0fDUnXU5powFXDhCwa",
+    "model": "eleven_multilingual_v2",
+    "seconds": 3.87,
+    "chars": 66,
+    "text": "You caught me. I am grateful in advance for not shooting me later."
+  },
+  "radio_puff_she_built_them_fine": {
+    "role": "Puff",
+    "voice": "QzTKubutNn9TjrB7Xb2Q",
+    "model": "eleven_multilingual_v2",
+    "seconds": 3.45,
+    "chars": 64,
+    "text": "She built them? ...Fine. She rides in the back. Way in the back."
+  },
+  "radio_sparrow_harvester_dead_ahead_that": {
+    "role": "Sparrow",
+    "voice": "0luPAj5RsdhmnkZaiYcb",
+    "model": "eleven_multilingual_v2",
+    "seconds": 3.38,
+    "chars": 53,
+    "text": "Harvester dead ahead. That thing is drinking the sun."
+  },
+  "radio_puff_our_sun_was_small": {
+    "role": "Puff",
+    "voice": "QzTKubutNn9TjrB7Xb2Q",
+    "model": "eleven_multilingual_v2",
+    "seconds": 4.86,
+    "chars": 76,
+    "text": "Our sun was small and gold. They drank it in a year. Burn that thing for me?"
+  },
+  "radio_puff_just_burn_it_don": {
+    "role": "Puff",
+    "voice": "QzTKubutNn9TjrB7Xb2Q",
+    "model": "eleven_multilingual_v2",
+    "seconds": 1.89,
+    "chars": 31,
+    "text": "Just burn it. Don't ask me why."
+  },
+  "radio_anvil_stellar_harvester_dead_ahead": {
+    "role": "Anvil",
+    "voice": "507tTFX0IPtqFzGd1CAL",
+    "model": "eleven_multilingual_v2",
+    "seconds": 6.67,
+    "chars": 72,
+    "text": "Stellar harvester, dead ahead. Its mirrors bounce beams. Read the lines."
+  },
+  "radio_puff_they_remember_me_good": {
+    "role": "Puff",
+    "voice": "QzTKubutNn9TjrB7Xb2Q",
+    "model": "eleven_multilingual_v2",
+    "seconds": 3.19,
+    "chars": 51,
+    "text": "They remember me. Good. Then they'll remember this."
+  },
+  "radio_sparrow_beams_bounce_off_those": {
+    "role": "Sparrow",
+    "voice": "0luPAj5RsdhmnkZaiYcb",
+    "model": "eleven_multilingual_v2",
+    "seconds": 4.03,
+    "chars": 67,
+    "text": "Beams bounce off those mirrors. Follow the warning line to the end!"
+  },
+  "radio_ixa_break_the_mirrors_i": {
+    "role": "Ixa",
+    "voice": "XB0fDUnXU5powFXDhCwa",
+    "model": "eleven_multilingual_v2",
+    "seconds": 4.99,
+    "chars": 81,
+    "text": "Break the mirrors! I built them weak on purpose. Every broken one is a beam gone."
+  },
+  "radio_anvil_it_s_going_nova": {
+    "role": "Anvil",
+    "voice": "507tTFX0IPtqFzGd1CAL",
+    "model": "eleven_multilingual_v2",
+    "seconds": 5.07,
+    "chars": 69,
+    "text": "It's going nova! Get behind the falling mirrors when the white comes!"
+  },
+  "radio_anvil_suneater_is_dark_and": {
+    "role": "Anvil",
+    "voice": "507tTFX0IPtqFzGd1CAL",
+    "model": "eleven_multilingual_v2",
+    "seconds": 5.78,
+    "chars": 65,
+    "text": "SUNEATER is dark and Tarsis is safe. Next stop, their front door."
+  },
+  "radio_puff_tarsis_keeps_its_light": {
+    "role": "Puff",
+    "voice": "QzTKubutNn9TjrB7Xb2Q",
+    "model": "eleven_multilingual_v2",
+    "seconds": 3.22,
+    "chars": 62,
+    "text": "Tarsis keeps its light. Mine didn't. ...Thank you, Blue Arrow."
+  },
+  "radio_puff_one_harvester_down_however": {
+    "role": "Puff",
+    "voice": "QzTKubutNn9TjrB7Xb2Q",
+    "model": "eleven_multilingual_v2",
+    "seconds": 2.25,
+    "chars": 39,
+    "text": "One harvester down. However many to go."
+  },
+  "prompt_puff_trust2": {
+    "role": "Decision",
+    "voice": "dXtC3XhB9GtPusIpNtQx",
+    "model": "eleven_multilingual_v2",
+    "seconds": 5.36,
+    "chars": 85,
+    "text": "Puff has gone quiet. He is pressed to the side of his bubble, watching the harvester."
   }
 }

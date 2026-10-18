@@ -51,6 +51,7 @@ feedback, mix, lp}`), and its fader (`def.gain`). `def.steps` sets the bar lengt
 | `mus_m1` | Mission 1 | Bright, heroic | 140, E minor | |
 | `mus_m2` (`blackhole`) | Mission 2; Mission 1 while the black hole is near | Eerie: the song the black hole sings | 128, C minor | |
 | `mus_m3` | Mission 3 | Urgent, stormy: distorted bass, stabbing chords, rolling toms, thunder swells | 150, A minor | |
+| `mus_m4` | Mission 4, Sunbreak | The blue giant's light: a square arpeggio, a climbing horn, a choir chorus, mirror glints | 132, B minor | `eclipse`: drums out, a heartbeat, Puff's theme on the celesta |
 | `mus_memory` | Puff's memory, The First Trial | Underwater sorrow, the Directorate watching | 92, C minor | `progress`, `urgency`, `done` |
 | `mus_boss`, `mus_miniboss`, `mus_boss_heavy` | Bosses (`mus_boss_heavy`: Mission 3's TEMPEST) | Menacing | 155 / 150 / 150 | |
 | `mus_victory` | Results | Triumphant fanfare, then calm | 120, C major | |

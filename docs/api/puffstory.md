@@ -37,3 +37,22 @@ straight back, so smoke runs never stall.
   `docs/api/puff.md`).
 - Radio character `puff` (`SL.story.characters.puff`), portrait drawn with `SL.puff.drawBuddy`.
 - Mission def flag `puffBuddy: true`; pause reason `'story'` in `21_game.js` (pauses without the pause menu).
+
+## Mission 4: Puff knows the ship
+
+In Sunbreak (`m4`, `src/18_missions.js`) the Directorate's harvester SUNEATER is draining the blue giant Tarsis. No
+memory sequence this time: Puff tells it himself, as far as he trusts the pilot.
+
+| Beat | What happens |
+|---|---|
+| Open | Puff: "That light is wrong. Stars don't flicker like that." |
+| Eclipse (about 56 s) | The breather. In the dark Puff sees the harvester at the end of the plasma stream: "...I know that ship." / "One like it hung over our sun for a year. Then our sea went cold." The music drops to a heartbeat and Puff's theme (`mus_m4`'s `eclipse` mood). |
+| Trust choice `puff_trust2` | Waits until he has finished speaking (`SL.story.idle()`), then: **We stop this one. Together.** (+1 trust, he brightens) or **Eyes forward. Grieve later.** (no change). Before the checkpoint, so a retry doesn't ask again. |
+| Ixa | If her pod is caught, Puff: "She built them? ...Fine. She rides in the back. Way in the back." During the boss she explains its weak point (the mirrors). |
+| Regroup | Trust 2 or more: "Our sun was small and gold. They drank it in a year. Burn that thing for me?" Otherwise: "Just burn it. Don't ask me why." |
+| Boss intro | The Overseers: "SUNEATER drinks a star. You are a smaller meal. We remember you, little fish." Puff: "They remember me. Good. Then they'll remember this." |
+| Win | Trust 2 or more: "Tarsis keeps its light. Mine didn't. ...Thank you, {callsign}." Otherwise: "One harvester down. However many to go." |
+
+Trust can reach 3 by here: the warm answer in `puff_intro`, giving him space in Mission 1, and staying with him in
+Mission 4. The helpers `SL.puffStory.trust()`, `addTrust(n)` and `react(mood, seconds)` are there for later
+missions' beats.

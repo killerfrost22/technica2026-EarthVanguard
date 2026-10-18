@@ -1,14 +1,16 @@
 /* STUB: replaced by story
    16_story.js provides: SL.story = { characters, briefings, lines, choices, radio(idOrObj, opts), say(who, text,
-   opts), choice(id) -> Promise<optionId>, autoChoose(), clear(), update(realDt) }.
+   opts), choice(id) -> Promise<optionId>, autoChoose(), clear(), idle(), update(realDt) }.
    Radio lines queue (max 4, per-line cooldown 12 s, opts.priority jumps the queue, opts.force skips the
    cooldown) and play in a DOM box in #ui with a typewriter, an animated portrait canvas and music ducking.
    choice(id) pauses with SL.game.pause('choice'), shows two buttons, writes session.flags[id] and save.choices,
    resumes with SL.game.resume('choice') and resolves; autoChoose() picks the first option (autopilot).
    {callsign} in text becomes the player's callsign. 21_game.js calls update(realDt) every unpaused frame.
-   Radio cast: anvil, sparrow, patch, rook and vael here (puff in 25_puffstory.js); a character with glitch: true (Vael)
-   turns the box violet and torn while it speaks. Missions' _vip, _vip_saved, _boss_intro and _boss_p<N> lines play on
-   their game events. */
+   Radio cast: anvil, sparrow, patch, rook, vael, ixa and overseer (the Overseers) here (puff in 25_puffstory.js); a
+   character with glitch: true (Vael) turns the box violet and torn while it speaks. Missions' _vip, _vip_saved,
+   _boss_intro and _boss_p<N> lines play on their game events.
+   idle() is true once nothing is playing or queued, so a timeline can wait for a line to finish before a choice
+   (`{ until: () => SL.story.idle() }`): a choice pauses the game, which cuts off any voice still speaking. */
 (function (SL) {
   'use strict';
 
@@ -232,6 +234,37 @@
     }
   }
 
+  // The Overseers speak as one cold voice from everywhere: no face, a single eye in a field of slow rings.
+  function overseerPortrait(ctx, w, h, t, talking) {
+    const cx = w / 2, cy = h / 2;
+    ctx.fillStyle = '#05040c';
+    ctx.fillRect(0, 0, w, h);
+    ctx.strokeStyle = 'rgba(185,166,255,0.22)';
+    ctx.lineWidth = 1;
+    for (let i = 0; i < 5; i++) {
+      const r = ((t * 6 + i * w * 0.12) % (w * 0.6)) + w * 0.08;
+      ctx.beginPath();
+      ctx.arc(cx, cy, r, 0, TAU);
+      ctx.stroke();
+    }
+    const open = talking ? 0.55 + 0.45 * Math.abs(Math.sin(t * 9)) : 0.35;
+    ctx.save();
+    ctx.beginPath();
+    ctx.ellipse(cx, cy, w * 0.3, h * 0.13 * open + h * 0.02, 0, 0, TAU);
+    const g = ctx.createRadialGradient(cx, cy, 1, cx, cy, w * 0.3);
+    g.addColorStop(0, '#f4f8ff');
+    g.addColorStop(0.5, '#b9a6ff');
+    g.addColorStop(1, '#3a2a6a');
+    ctx.fillStyle = g;
+    ctx.fill();
+    ctx.clip();
+    ctx.fillStyle = '#05040c';
+    ctx.beginPath();
+    ctx.ellipse(cx + Math.sin(t * 0.7) * w * 0.04, cy, w * 0.03, h * 0.12, 0, 0, TAU);
+    ctx.fill();
+    ctx.restore();
+  }
+
   const S = SL.story = {
     characters: {
       anvil: { name: 'ANVIL', role: 'Command', color: '#ffb53f', portrait: portrait('#ffb53f', '#ffd27a') },
@@ -240,6 +273,9 @@
       rook: { name: 'ROOK', role: 'Capt. Holt', color: '#d8dde8', portrait: rookPortrait },
       // glitch: the line hijacks the channel (violet, torn radio box; 16_story.css)
       vael: { name: 'VAEL', role: 'Hierarch', color: '#b26bff', portrait: vaelPortrait, glitch: true },
+      // Mission 4: a Directorate engineer who defects, and the voice of the Overseers themselves
+      ixa: { name: 'IXA', role: 'Defector', color: '#ff6fae', portrait: portrait('#ff6fae', '#ffc2d6') },
+      overseer: { name: 'THE OVERSEERS', role: '', color: '#b9a6ff', portrait: overseerPortrait },
     },
     briefings: {
       test: { title: 'Test Range', text: 'Core systems check: waves, a gravity well, rescues and the Calibrator.' },
@@ -292,11 +328,43 @@
       m3_boss_p3: { who: 'sparrow', text: 'The eye\'s open! That\'s the core. Everything you\'ve got!' },
       m3_win: { who: 'anvil', text: 'TEMPEST is falling and the storm is breaking. Good hunting, {callsign}.' },
       m3_puff_win: { who: 'puff', text: 'The storm\'s gone quiet. ...I\'d forgotten what that sounds like.' },
+      // m4, Sunbreak (18_missions.js): the Directorate's harvester drinking the blue giant Tarsis. Puff knows the ship.
+      m4_open: { who: 'anvil', text: 'Tarsis is bleeding light and they\'re bottling it. Stop them.' },
+      m4_puff_open: { who: 'puff', text: 'That light is wrong. Stars don\'t flicker like that.' },
+      m4_phantom: { who: 'sparrow', text: 'Phantoms! They cloak. Shoot when you see the shimmer, not before.' },
+      m4_flare: { who: 'sparrow', text: 'Flare coming! When the edge goes white, get in a rock\'s shadow. Now!' },
+      m4_eclipse: { who: 'anvil', text: 'A moon is crossing the star. No flares for a moment. Breathe.' },
+      m4_puff_know: { who: 'puff', text: '...I know that ship. The dark one at the end of the light.' },
+      m4_puff_sun: { who: 'puff', text: 'One like it hung over our sun for a year. Then our sea went cold.' },
+      m4_puff_together: { who: 'puff', text: '...Together. Okay. I can do together.' },
+      m4_puff_focus: { who: 'puff', text: '...Right. Eyes forward.' },
+      m4_mines: { who: 'sparrow', text: 'Mine field. Shoot one and it blows its neighbors. Chain them into jets.' },
+      m4_defector: { who: 'anvil', text: 'Directorate pod on our band, sending surrender codes. Their own jets want it dead.' },
+      m4_vip: { who: 'ixa', text: 'Pilot! I am Ixa. I built their harvesters. I have their codes. Please, catch me.' },
+      m4_vip_saved: { who: 'ixa', text: 'You caught me. I am grateful in advance for not shooting me later.' },
+      m4_puff_ixa: { who: 'puff', text: 'She built them? ...Fine. She rides in the back. Way in the back.' },
+      m4_regroup: { who: 'sparrow', text: 'Harvester dead ahead. That thing is drinking the sun.' },
+      m4_puff_open_up: { who: 'puff', text: 'Our sun was small and gold. They drank it in a year. Burn that thing for me?' },
+      m4_puff_closed: { who: 'puff', text: 'Just burn it. Don\'t ask me why.' },
+      m4_boss_warn: { who: 'anvil', text: 'Stellar harvester, dead ahead. Its mirrors bounce beams. Read the lines.' },
+      m4_boss_intro: { who: 'overseer', text: 'SUNEATER drinks a star. You are a smaller meal. We remember you, little fish.' },
+      m4_puff_remember: { who: 'puff', text: 'They remember me. Good. Then they\'ll remember this.' },
+      m4_boss_p2: { who: 'sparrow', text: 'Beams bounce off those mirrors. Follow the warning line to the end!' },
+      m4_ixa_tip: { who: 'ixa', text: 'Break the mirrors! I built them weak on purpose. Every broken one is a beam gone.' },
+      m4_boss_p3: { who: 'anvil', text: 'It\'s going nova! Get behind the falling mirrors when the white comes!' },
+      m4_win: { who: 'anvil', text: 'SUNEATER is dark and Tarsis is safe. Next stop, their front door.' },
+      m4_puff_win_open: { who: 'puff', text: 'Tarsis keeps its light. Mine didn\'t. ...Thank you, {callsign}.' },
+      m4_puff_win_closed: { who: 'puff', text: 'One harvester down. However many to go.' },
     },
     choices: {
       test_choice: {
         prompt: 'A distress beacon is pinging off the flight path. Divert to cover the pod?',
         options: [{ id: 'a', text: 'Divert and cover' }, { id: 'b', text: 'Hold formation' }],
+      },
+      // m4: after Puff recognizes the harvester. Comforting him earns his trust (25_puffstory.js, PS.addTrust).
+      puff_trust2: {
+        prompt: 'Puff has gone quiet. He is pressed to the side of his bubble, watching the harvester.',
+        options: [{ id: 'together', text: 'We stop this one. Together.' }, { id: 'focus', text: 'Eyes forward. Grieve later.' }],
       },
     },
   };
@@ -408,6 +476,9 @@
     endLine();
     gap = 0;
   };
+
+  /** True when no line is playing, waiting in the queue, or in the short gap after one. */
+  S.idle = function () { return !cur && !queue.length && !(gap > 0); };
 
   S.update = function (dt) {
     if (box) {

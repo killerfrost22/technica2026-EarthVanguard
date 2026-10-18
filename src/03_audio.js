@@ -12,9 +12,11 @@
    mus_boss; mus_miniboss and mus_boss_heavy are the boss track at their own tempo and key.
    Every stage has a track for its mood (docs/api/audio.md has the list): the title theme, the cutscene themes
    (src/26_cutscenes.js maps scenes.js cues onto them), Echo, Puff's Ocean, Puff's memory, the black hole in Mission 1
-   (and Mission 2), the storm of Mission 3 (mus_m3: distorted bass, stabs, toms, thunder), victory and failure. Tracks can read live mood values (A.mood): Echo's alarm sets 'tension', Puff's memory sets
-   'progress' and 'urgency', the prologue's fire sets 'intensity'. A.hush(key, amount) holds the music down while
-   something else needs the room: a voice line, a minigame pause, or Puff's Ocean's microphone (music off).
+   (and Mission 2), the storm of Mission 3 (mus_m3: distorted bass, stabs, toms, thunder), Mission 4's blue giant
+   (mus_m4), victory and failure. Tracks can read live mood values (A.mood): Echo's alarm sets 'tension', Puff's
+   memory sets 'progress' and 'urgency', the prologue's fire sets 'intensity', Mission 4's eclipse sets 'eclipse'.
+   A.hush(key, amount) holds the music down while something else needs the room: a voice line, a minigame pause, or
+   Puff's Ocean's microphone (music off).
    Also reacts to bus events: the title screen (title theme), boss warning, checkpoint, low hull, shield break, player
    down, pause (music ducks), boss defeated (music fades out), mission end (victory track, or a fail sting into the
    fail track) and menu (music stops unless the title is up). Echo and Puff's Ocean keep their own sound effects.
@@ -1000,6 +1002,45 @@
     if (b < 16) return { name: 'B', i: b - 8 };
     return { name: 'C', i: b - 16 };
   }
+  // mus_m4: Bm G D A in the verses, lifting to G A Bm D in the chorus. The horn climbs like a sunrise; the chorus tune
+  // is sung by the choir an octave under the lead.
+  const M4 = {
+    ch: [[59, 62, 66], [55, 59, 62], [57, 62, 66], [57, 61, 64]],
+    root: [47, 43, 38, 45],
+    lift: [[55, 59, 62], [57, 61, 64], [59, 62, 66], [57, 62, 66]],
+    liftRoot: [43, 45, 47, 38],
+    horn: [
+      [[0, 78, 6], [6, 76, 2], [8, 74, 4], [12, 71, 4]],
+      [[0, 74, 4], [4, 76, 4], [8, 79, 8]],
+      [[0, 78, 6], [6, 79, 2], [8, 81, 4], [12, 78, 4]],
+      [[0, 76, 12], [12, 73, 4]],
+      [[0, 78, 4], [4, 83, 4], [8, 81, 6], [14, 79, 2]],
+      [[0, 79, 6], [6, 78, 2], [8, 76, 8]],
+      [[0, 74, 4], [4, 78, 4], [8, 81, 4], [12, 86, 4]],
+      [[0, 85, 8], [8, 81, 8]],
+    ],
+    chorus: [
+      [[0, 83, 6], [6, 81, 2], [8, 79, 8]],
+      [[0, 81, 6], [6, 79, 2], [8, 76, 8]],
+      [[0, 78, 4], [4, 81, 4], [8, 83, 8]],
+      [[0, 86, 12], [12, 85, 4]],
+      [[0, 83, 6], [6, 81, 2], [8, 79, 4], [12, 83, 4]],
+      [[0, 85, 6], [6, 83, 2], [8, 81, 8]],
+      [[0, 78, 4], [4, 83, 4], [8, 86, 8]],
+      [[0, 85, 8, 83], [8, 81, 8]],
+    ],
+  };
+  // The eclipse in mus_m4: the light goes out, a slow heartbeat under a dark pad, and Puff's theme (mus_ocean's tune,
+  // moved down to D major) on the celesta, very quietly, while he recognizes the harvester.
+  function m4Eclipse(m, bar, s, t) {
+    const k = bar % 4, ch = M4.ch[k], root = M4.root[k];
+    if (s === 0) {
+      warm(m, t, ch, m.bar * 1.05, 0.9, { type: 'sawtooth', lp: 650, a: 0.8, r: 0.9 });
+      heart(m, t, 0.28);
+      round(m, t, root, m.bar * 0.9, 0.35);
+    }
+    playBars(m, OCEAN.tuneA, bar, s, (n, len) => celesta(m, t, n - 3, len, 0.45, 0.4));
+  }
   // mus_fail: Am F Dm E, two bars each.
   const FAIL = {
     ch: [[57, 60, 64], [57, 60, 65], [57, 62, 65], [56, 59, 64]],
@@ -1388,6 +1429,57 @@
         if (n === 'C') {
           playBars(m, M3.hook, i % 8, s, (x, len, from) => lead(m, t, x, len * 0.95, 1, from));
           if (i >= 8) playBars(m, M3.hook, i % 8, s, (x, len) => horn(m, t, x - 12, len * 0.95, 0.8));
+        }
+      },
+    },
+    // mus_m4: Sunbreak, the blue giant Tarsis (Mission 4). 132 BPM, B minor. A 16th square arpeggio for the light, a horn
+    // that climbs in B, a lifted chorus (strings, lead and choir) in C, glass glints for the mirror array, and a
+    // breakdown with timpani and a riser. intro4 | A8 B8 C8 D4 (loops from A). mood.eclipse (set by the m4 timeline
+    // while the moon crosses the star) turns it into m4Eclipse until the light comes back.
+    mus_m4: {
+      bpm: 132, gain: 1.15, padVerb: 0.5, leadVerb: 0.5, echo: { steps: 3, feedback: 0.4, mix: 0.45, lp: 3000 },
+      play(m, step, t) {
+        const bar = Math.floor(step / 16), s = step % 16;
+        if ((m.mood.eclipse || 0) > 0.5) { m4Eclipse(m, bar, s, t); return; }
+        const intro = bar < 4, b = intro ? 0 : (bar - 4) % 28;
+        const sec = intro ? 'intro' : b < 8 ? 'A' : b < 16 ? 'B' : b < 24 ? 'C' : 'D';
+        const i = intro ? bar : b < 24 ? b % 8 : b - 24, k = i % 4, lift = sec === 'C';
+        const ch = (lift ? M4.lift : M4.ch)[k], root = (lift ? M4.liftRoot : M4.root)[k];
+        if (s === 0 && !intro && (b === 0 || b === 16)) crash(m, t);
+        // drums
+        if (sec === 'D') {
+          if (s === 0 || s === 10) timp(m, t, root, s === 0 ? 0.7 : 0.45);
+          if (i === 3 && s === 0) riser(m, t, m.bar);
+          if (i === 3 && s >= 8 && s % 2 === 0) snare(m, t, 0.2 + 0.07 * (s - 8));
+        } else if (intro) {
+          if (bar >= 2 && s % 4 === 0) kick(m, t, 0.6);
+          if (bar === 3 && s >= 8 && s % 2 === 0) snare(m, t, 0.2 + s * 0.03);
+        } else {
+          if (s % 4 === 0) kick(m, t, 0.9);
+          if (s === 4 || s === 12) snare(m, t, sec === 'A' ? 0.6 : 0.9);
+          if (s % 4 === 2) hat(m, t, lift, 0.8);
+          else if (sec !== 'A') hat(m, t, false, 0.4);
+        }
+        // bass: driving 8ths; the chorus jumps an octave on the off-beats
+        if (!intro && sec !== 'D' && s % 2 === 0) bass(m, t, root + (lift && s % 4 === 2 ? 12 : 0), m.sixteenth * 1.8, 0.95, lift ? 2200 : 1300);
+        if (sec === 'D' && s === 0) bass(m, t, root, m.bar * 0.95, 0.6, 600);
+        // pad, or strings in the chorus
+        if (s === 0) {
+          if (lift) strings(m, t, ch.concat(ch[0] + 12), m.bar * 1.02, 0.9, { lp: 2200 });
+          else pad(m, t, ch, m.bar, intro ? 0.7 : 1);
+        }
+        // the light: a 16th arpeggio over the chord
+        if (sec !== 'D' && (!intro || bar >= 1)) {
+          pluck(m, t, [ch[0] + 12, ch[1] + 12, ch[2] + 12, ch[0] + 24][[0, 1, 2, 3, 2, 1, 2, 3][s % 8]], lift ? 0.6 : intro ? 0.5 : 0.85);
+        }
+        // the mirror array glints
+        if (s === 6 && bar % 2 === 1 && !lift) glass(m, t, ch[2] + 24, 0.5, bar % 4 === 1 ? -0.4 : 0.4);
+        if (sec === 'B') playBars(m, M4.horn, i, s, (n, len) => horn(m, t, n - 12, len * 0.97, 1.1));
+        if (lift) {
+          playBars(m, M4.chorus, i, s, (n, len, from) => {
+            lead(m, t, n, len * 0.95, 0.75, from);
+            choir(m, m.lead, t, n - 12, len * 1.02, 0.03, { a: 0.15, r: 0.4, echo: 0.3 });
+          });
         }
       },
     },

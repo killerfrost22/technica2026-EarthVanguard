@@ -1,8 +1,8 @@
 /* STUB: replaced by story
-   17_rescue.js provides: SL.rescue = { spawnPod(x, y, {people, vip, kind, vx, vy, drift}), spawnPilotPod(p) }.
+   17_rescue.js provides: SL.rescue = { spawnPod(x, y, {people, vip, kind, vx, vy, drift, maxHits}), spawnPilotPod(p) }.
    Escape pods drift and bob with a blinking beacon and an SOS ring. Touch rescues them (25 credits x people,
    500 x multiplier score, session.rescued / podsRescued, save.rescuedTotal, bus 'podRescued', sometimes a
-   radio thank-you); VIP pods set save.flags['unlock_' + vip]. Three enemy-bullet hits destroy a pod and leaving
+   radio thank-you); VIP pods set save.flags['unlock_' + vip]. Three enemy-bullet hits (maxHits) destroy a pod and leaving
    the bottom loses it (bus 'podLost'). Pilot pods (co-op) revive their owner when the partner flies over them,
    ignore bullets, and show the revive timer as a ring. Sandbox: 'rescue'. */
 (function (SL) {
@@ -110,7 +110,7 @@
       pod.data.hits++;
       pod.flash = 0.1;
       SL.fx.hit(pod.x, pod.y, '#ffffff');
-      if (pod.data.hits >= 3) lose(pod, 'destroyed');
+      if (pod.data.hits >= pod.data.maxHits) lose(pod, 'destroyed');
       return true;
     },
     onExit(pod) { lose(pod, 'escaped'); },
@@ -157,6 +157,7 @@
       pod.data.vip = o.vip || null;
       pod.data.kind = o.kind || 'civilian';
       pod.data.hits = 0;
+      pod.data.maxHits = Math.max(1, o.maxHits || 3); // a hunted VIP pod can be made tougher
       pod.data.drift = o.drift || 55;
       pod.data.bob = SL.rng.next() * TAU;
       const s = session();

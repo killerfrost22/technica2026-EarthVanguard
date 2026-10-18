@@ -185,7 +185,8 @@
       const list = el('div', 'sl-stack');
       SL.progress.mainMissions().forEach((id, i) => {
         const def = SL.missions.get(id), rec = SL.save.mission(id), open = SL.progress.missionUnlocked(id);
-        const label = (i + 1) + '. ' + (open ? def.name : 'Locked') + (rec.done && rec.rank ? '  ·  ' + rec.rank : '');
+        // numbered by campaign order, so a mission keeps its number while one before it is still unbuilt
+        const label = (def.order || i + 1) + '. ' + (open ? def.name : 'Locked') + (rec.done && rec.rank ? '  ·  ' + rec.rank : '');
         const b = button(label, id === SL.progress.nextMission() ? 'sl-btn--primary' : '', () => SL.game.startMission(id, { coop: false }));
         b.disabled = !open;
         if (open && def.location) b.title = def.location;

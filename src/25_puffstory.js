@@ -1,6 +1,6 @@
 /* 25_puffstory.js (puffstory)
-   Provides: SL.puffStory = { buddy, spawnBuddy(), blackHole(), memoryScenario(onDone), state } and the radio
-   character 'puff'.
+   Provides: SL.puffStory = { buddy, spawnBuddy(), blackHole(), memoryScenario(onDone), state, trust(), addTrust(n),
+   react(mood, seconds) } and the radio character 'puff'.
    Puff is a pufferfish from an ocean world the corporations poisoned and the Directorate later chose for one of its
    games: survive the trials and win the power to heal your home. He won; his world was destroyed anyway. Now he flies
    with Earth Vanguard in a water bubble tethered to the jet, and he does not talk about it. His past comes out in
@@ -15,6 +15,8 @@
    puff_trust1: Ask what he saw (he shuts down) or Give him space (+1 trust). Later memories can build on it.
    Flags: save.flags.puff_memory1 (seen; Skip memory is offered on replays), unlock_puff (Puff's Ocean) and
    puff_trust (how much Puff trusts the pilot, a count).
+   Later missions script their own Puff beats with trust() / addTrust(n) / react(mood, seconds): in m4 he recognizes
+   the Directorate's harvester (puff_trust2 in 16_story.js, timeline in 18_missions.js).
    Music: the memory plays mus_memory (03_audio.js), the song the black hole was singing, built up by mood.progress
    through the trial, double-time at "FASTER." (mood.urgency) and resolved when he survives (mood.done); it sinks under
    the voices. Waking up hands the mission's track back. */
@@ -288,6 +290,21 @@
       say('puff', 'Not now. Please.', { priority: true });
       SL.after(2, () => { if (b && !b.dead) b.data.mood = ''; });
     }
+  };
+
+  /** How much Puff trusts the pilot so far (cutscene choices plus mission choices). */
+  PS.trust = function () { return +flags().puff_trust || 0; };
+  PS.addTrust = function (n) {
+    const f = flags();
+    f.puff_trust = Math.max(0, (+f.puff_trust || 0) + (n == null ? 1 : n));
+    SL.save.commit();
+  };
+  /** Puff's face in his bubble for a moment: 'happy', 'ouch', or '' for his usual look. */
+  PS.react = function (mood, seconds) {
+    const b = PS.buddy;
+    if (!b || b.dead) return;
+    b.data.mood = mood || '';
+    if (seconds > 0) SL.after(seconds, () => { if (!b.dead && b.data.mood === mood) b.data.mood = ''; });
   };
 
   // ------------------------------------------------------------------ the memory: The First Trial

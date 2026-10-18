@@ -11,7 +11,11 @@
    returns to mus_m1 once Puff has answered.
    'm2', Deep Pull, follows GDD 4.2 over Kerr Station (bg_kerr) with the LODESTAR boss; it unlocks when m1 is cleared
    (unlock lists the missions that must be done first; 19_progress.js). 'm3', Stormwall, follows GDD 4.3 through the
-   Tantalus Nebula's ion storm (bg_tantalus) to TEMPEST, with mus_m3 and mus_boss_heavy; it unlocks when m2 is cleared. */
+   Tantalus Nebula's ion storm (bg_tantalus) to TEMPEST, with mus_m3 and mus_boss_heavy; it unlocks when m2 is cleared.
+   'm4', Sunbreak, follows GDD 4.4 at the blue giant Tarsis (bg_tarsis) with the SUNEATER boss, adapted to the story
+   (storyline/): the harvester belongs to the Directorate, Ixa is a Directorate engineer who defects, and the boss is
+   introduced by the Overseers themselves. Puff recognizes the harvester (one like it drained his sun) and the pilot
+   answers him (puff_trust2); his later lines depend on how much he trusts her. It unlocks when m3 is cleared. */
 (function (SL) {
   'use strict';
 
@@ -322,6 +326,149 @@
       { id: 'boss', text: 'Destroy TEMPEST', check: (s) => (s.bossesDefeated || 0) > 0 },
       { id: 'rescue', text: 'Rescue 16 people', bonus: true, check: (s) => s.rescued >= 16 },
       { id: 'vip', text: 'Free Captain Holt', bonus: true, check: (s) => !!s.flags.vip_s3 },
+    ],
+  }));
+
+  // m4, Sunbreak (GDD 4.4): the Directorate's harvester array drinking the blue giant Tarsis. Solar flares from 26 s
+  // (hide in the shade rocks), an eclipse breather where Puff recognizes the harvester and the pilot answers him, a mine
+  // field, a second flare run while two phantoms hunt Ixa's pod, then SUNEATER.
+  const PS = () => SL.puffStory || {};
+  const trust = () => (PS().trust ? PS().trust() : 0);
+  const TRUSTED = 2; // Puff opens up from here (the warm cutscene answer, giving him space, and staying with him)
+  function puffSays(id, opts) { if (SL.story) SL.story.radio(id, opts); }
+  function m4Answer(choice) {
+    const P = PS();
+    if (choice === 'together') {
+      if (P.addTrust) P.addTrust(1);
+      if (P.react) P.react('happy', 3);
+      puffSays('m4_puff_together', { priority: true, force: true });
+    } else {
+      if (P.react) P.react('', 0);
+      puffSays('m4_puff_focus', { priority: true, force: true });
+    }
+  }
+  function eclipseMood(v) { if (SL.audio && SL.audio.mood) SL.audio.mood('eclipse', v); }
+
+  function m4Timeline() {
+    const coop = (s) => !!s.coop;
+    return [
+      { at: 0, banner: 'SUNBREAK', sub: 'Blue giant Tarsis', music: 'mus_m4', scroll: 110, bg: 'corona', call: () => eclipseMood(0) },
+      { at: 1.5, radio: 'm4_open' },
+      { at: 4.5, radio: 'm4_puff_open' },
+      { at: 3, formation: 'pincer', enemy: 'dart', count: 12 },
+      { at: 6, formation: 'vee', enemy: 'wasp', count: 5, x: 360 },
+      { at: 9, spawn: 'phantom', x: 200 },
+      { at: 9, spawn: 'phantom', x: 520, radio: 'm4_phantom' },
+      { at: 13, formation: 'arc_sweep', enemy: 'dart', count: 10, opts: { side: 'left' } },
+      { at: 15, formation: 'arc_sweep', enemy: 'dart', count: 10, opts: { side: 'right' } },
+      { at: 18, spawn: 'hornet', x: 360 },
+      { at: 20, formation: 'staircase', enemy: 'gnat', count: 8, opts: { side: 'left' } },
+      { at: 22, waitClear: true, timeout: 10 },
+
+      // the first flares, from the left: the shade rocks drift in before each burn
+      { at: 24, pickup: 'weapon_up', x: 360 },
+      { at: 26, hazard: 'solar_flare', opts: { from: 'left', count: 3, every: 9, first: 4, cover: 2 }, radio: 'm4_flare' },
+      { at: 33, formation: 'snake', enemy: 'dart', count: 8, x: 160 },
+      { at: 36, formation: 'snake', enemy: 'dart', count: 8, x: 560 },
+      { at: 41, spawn: 'manta', x: 360, opts: { elite: true } },
+      { at: 44, pod: { x: 300, y: -40, people: 3, kind: 'civilian' } },
+      { at: 46, formation: 'side_stream', enemy: 'gnat', count: 10, opts: { side: 'left' } },
+      { at: 50, spawn: 'needler', x: 200, opts: { hoverY: 220 } },
+      { at: 50, spawn: 'needler', x: 520, opts: { hoverY: 220 } },
+      { at: 54, waitClear: true, timeout: 12 },
+
+      // BREATHER: the eclipse. In the dark Puff sees the harvester at the end of the plasma stream, and knows it.
+      { at: 56, bg: 'eclipse', scroll: 80, radio: 'm4_eclipse', call: () => eclipseMood(1) },
+      { at: 58, pod: { x: 360, y: -40, people: 6, kind: 'medical' } },
+      { at: 58, pod: { x: 560, y: -40, people: 2, kind: 'crew' } },
+      { at: 59, radio: 'm4_puff_know' },
+      { at: 60, pickup: 'shield', x: 300 },
+      { at: 61, radio: 'm4_puff_sun', call: () => PS().react && PS().react('ouch', 6) },
+      // the choice waits for Puff to finish: opening it pauses the game, which would cut him off
+      { at: 62, until: () => !SL.story || SL.story.idle(), timeout: 16 },
+      { at: 62.1, choice: 'puff_trust2' },
+      { at: 62.2, call: (s) => m4Answer(s.flags.puff_trust2) },
+      { at: 63, checkpoint: true, banner: 'CHECKPOINT', sub: 'Mine field ahead' },
+
+      // PEAK: the mirror array and a drifting mine field
+      { at: 64, bg: 'mirrors', scroll: 100, call: () => eclipseMood(0) },
+      { at: 65, hazard: 'mine_field', opts: { count: 18, duration: 30, drift: 50 }, radio: 'm4_mines' },
+      { at: 70, formation: 'pincer', enemy: 'dart', count: 12 },
+      { at: 74, spawn: 'bastion', x: 360, opts: { elite: true } },
+      { at: 78, spawn: 'skimmer', opts: { side: 'left' } },
+      { at: 78, spawn: 'skimmer', opts: { side: 'right' } },
+      { at: 82, spawn: 'phantom', x: 180 },
+      { at: 82, spawn: 'phantom', x: 360 },
+      { at: 82, spawn: 'phantom', x: 540 },
+      { at: 86, spawn: 'weaver', x: 200 },
+      { at: 86, spawn: 'weaver', x: 520 },
+      { at: 90, pickup: 'weapon_up', x: 360 },
+      { at: 92, formation: 'rain', enemy: 'gnat', count: 16 },
+      { at: 96, pod: { x: 260, y: -40, people: 3, kind: 'civilian' } },
+      { at: 96, pod: { x: 460, y: -40, people: 2, kind: 'civilian' } },
+      { at: 100, spawn: 'hornet', x: 220 },
+      { at: 100, spawn: 'hornet', x: 500 },
+      { at: 106, waitClear: true, timeout: 16 },
+
+      // the second flare run, from the right, and the defector: two phantoms hunt Ixa's pod
+      { at: 109, hazard: 'solar_flare', opts: { from: 'right', count: 4, every: 7, first: 3, cover: 3 }, radio: 'm4_defector' },
+      { at: 112, formation: 'arc_sweep', enemy: 'wasp', count: 6, opts: { side: 'left', elite: true } },
+      { at: 116, formation: 'arc_sweep', enemy: 'wasp', count: 6, opts: { side: 'right', elite: true } },
+      // Ixa's pod falls faster than most and takes 9 hits (a normal pod takes 3), and its hunters arrive just after it:
+      // a pilot who goes for it saves it in a couple of seconds; ignored, it is shot down just before it reaches the jet
+      { at: 120, pod: { x: 300, y: -40, people: 1, kind: 'vip', vip: 's4', maxHits: 9, vy: 85, drift: 85 } },
+      { at: 121.5, spawn: 'phantom', x: 160, opts: { target: 'vip' } },
+      { at: 122.5, spawn: 'phantom', x: 560, opts: { target: 'vip' } },
+      { at: 126, spawn: 'stormcaller', x: 200 },
+      { at: 126, spawn: 'stormcaller', x: 520 },
+      { at: 130, formation: 'column', enemy: 'dart', count: 6, x: 120, repeat: { every: 4, count: 3 } },
+      { at: 132, formation: 'column', enemy: 'dart', count: 6, x: 600, repeat: { every: 4, count: 3 } },
+      { at: 136, pickup: 'bomb', x: 360 },
+      { at: 140, spawn: 'tug', x: 360, opts: { hole: 'small' } },
+      { at: 144, pod: { x: 520, y: -40, people: 3, kind: 'civilian' } },
+      { at: 148, waitClear: true, timeout: 16 },
+
+      // regroup in front of the harvester: whether Puff says why depends on how much he trusts her
+      { at: 150, pickup: 'missile', x: 360, radio: 'm4_regroup' },
+      { at: 152, formation: 'escort_box', x: 360, opts: { leader: 'bastion', escort: 'phantom', count: 4 } },
+      { at: 153, call: () => puffSays(trust() >= TRUSTED ? 'm4_puff_open_up' : 'm4_puff_closed') },
+      { at: 158, formation: 'pincer', enemy: 'dart', count: 14 },
+      { at: 162, if: coop, pod: { x: 360, y: -40, people: 3, kind: 'civilian' } },
+      { at: 166, waitClear: true, timeout: 12 },
+
+      { at: 168, pickup: 'repair', x: 360, bg: 'boss', scroll: 40 },
+      { at: 169, radio: 'm4_boss_warn' },
+      { at: 170.5, banner: 'WARNING', sub: 'Stellar harvester SUNEATER', color: '#ff5c8a' },
+      // 85% of GDD 8.4's 33,000 HP: at full HP the fight runs past its 110 s par (about 125 s on autopilot), while
+      // RAZORBACK, LODESTAR and TEMPEST all finish well under theirs
+      { at: 172, boss: 'boss_suneater', opts: { hpMul: 0.85 } },
+      { at: 173, afterBoss: true, bg: 'calm', scroll: 60, radio: 'm4_win' },
+      { at: 173.1, afterBoss: true, call: () => puffSays(trust() >= TRUSTED ? 'm4_puff_win_open' : 'm4_puff_win_closed') },
+      // nothing to fire: holds the 3 s outro back until both voiced lines have finished
+      { at: 182, afterBoss: true },
+    ];
+  }
+
+  SL.missions.define('m4', Object.assign({}, base, {
+    name: 'Sunbreak', order: 4, location: 'Blue giant Tarsis', bg: 'bg_tarsis', music: 'mus_m4', boss: 'boss_suneater', unlock: ['m3'],
+    tune: { bulletSpeed: 1.05, fireRate: 1.1 }, puffBuddy: true, timeline: m4Timeline,
+    rewards: { credits: 850, sp: 2 },
+    onStart(s) {
+      // Ixa's pod is the VIP: remember the catch in the session flags (they survive checkpoints), and let Puff react
+      SL.bus.onMission('podRescued', (e) => {
+        if (!e || e.vip !== 's4') return;
+        s.flags.vip_s4 = true;
+        puffSays('m4_puff_ixa');
+      });
+      // the Overseers greet SUNEATER's arrival (m4_boss_intro, played by 16_story.js); Puff answers them
+      SL.bus.onMission('bossIntroDone', () => puffSays('m4_puff_remember'));
+      // Ixa knows the harvester's weak point, if she is aboard
+      SL.bus.onMission('bossPhase', (e) => { if (e && e.phase === 1 && s.flags.vip_s4) puffSays('m4_ixa_tip'); });
+    },
+    objectives: [
+      { id: 'boss', text: 'Destroy SUNEATER', check: (s) => (s.bossesDefeated || 0) > 0 },
+      { id: 'rescue', text: 'Rescue 16 people', bonus: true, check: (s) => s.rescued >= 16 },
+      { id: 'vip', text: "Catch the defector's pod", bonus: true, check: (s) => !!s.flags.vip_s4 },
     ],
   }));
 })(window.SL = window.SL || {});

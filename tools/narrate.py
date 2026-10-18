@@ -44,8 +44,10 @@ VOICES = ROOT / 'narration' / 'voices.json'
 OUT = ROOT / 'narration' / 'audio'
 API = 'https://api.elevenlabs.io/v1'
 ROLES = ['Narrator', 'Blue Arrow', 'Puff', 'The Directorate', 'Commander Kade', 'Anvil', 'Robot', 'Sparrow', 'Decision',
-         'Patch', 'Rook', 'Vael']
-RADIO_ROLES = {'anvil': 'Anvil', 'puff': 'Puff', 'sparrow': 'Sparrow', 'patch': 'Patch', 'rook': 'Rook', 'vael': 'Vael'}  # radio speaker id in the game -> voice role in voices.json
+         'Patch', 'Rook', 'Vael', 'Ixa', 'Overseer']
+# radio speaker id in the game -> voice role in voices.json
+RADIO_ROLES = {'anvil': 'Anvil', 'puff': 'Puff', 'sparrow': 'Sparrow', 'patch': 'Patch', 'rook': 'Rook', 'vael': 'Vael',
+               'ixa': 'Ixa', 'overseer': 'Overseer'}
 RADIO_SKIP = {'22_debug.js'}            # test-only lines
 DEFAULT_CALLSIGN = 'Blue Arrow'         # src/01_save.js
 OUTPUT_FORMAT = 'mp3_44100_128'     # constant 128 kbps, so duration = bytes * 8 / 128000
