@@ -43,8 +43,8 @@ SCRIPT = ROOT / 'narration' / 'SCRIPT.md'
 VOICES = ROOT / 'narration' / 'voices.json'
 OUT = ROOT / 'narration' / 'audio'
 API = 'https://api.elevenlabs.io/v1'
-ROLES = ['Narrator', 'Blue Arrow', 'Puff', 'The Directorate', 'Commander Kade', 'Anvil', 'Robot']
-RADIO_ROLES = {'anvil': 'Anvil', 'puff': 'Puff'}        # radio speaker id in the game -> voice role in voices.json
+ROLES = ['Narrator', 'Blue Arrow', 'Puff', 'The Directorate', 'Commander Kade', 'Anvil', 'Robot', 'Sparrow', 'Decision']
+RADIO_ROLES = {'anvil': 'Anvil', 'puff': 'Puff', 'sparrow': 'Sparrow'}  # radio speaker id in the game -> voice role in voices.json
 RADIO_SKIP = {'22_debug.js'}            # test-only lines
 DEFAULT_CALLSIGN = 'LANCE'              # src/01_save.js
 OUTPUT_FORMAT = 'mp3_44100_128'     # constant 128 kbps, so duration = bytes * 8 / 128000
@@ -77,6 +77,21 @@ def radio_clips():
             clips.append({'id': 'radio_%s_%s' % (who, slug), 'text': text, 'role': RADIO_ROLES[who], 'limit': None,
                           'format': CUTSCENE_FORMAT,
                           'speak': raw.replace('{callsign}', DEFAULT_CALLSIGN.title())})
+    return clips
+
+
+def prompt_clips():
+    """The Decision dialog prompts (choices defined as `<id>: { prompt: '...'` or `<id> = { prompt: '...'` in src/*.js),
+    read aloud by the 'Decision' voice. Ids prompt_<choice id>; built into window.RADIO_VO with the radio lines."""
+    pat = re.compile(r"(\w+)\s*[:=]\s*\{\s*prompt:\s*'((?:[^'\\]|\\.)*)'")
+    clips = []
+    for p in sorted((ROOT / 'src').glob('*.js')):
+        if p.name in RADIO_SKIP:
+            continue
+        for m in pat.finditer(p.read_text(encoding='utf-8')):
+            raw = re.sub(r"\\(.)", r"\1", m.group(2))
+            clips.append({'id': 'prompt_' + m.group(1), 'text': raw.replace('{callsign}', DEFAULT_CALLSIGN), 'role': 'Decision',
+                          'limit': None, 'format': CUTSCENE_FORMAT, 'speak': raw.replace('{callsign}', DEFAULT_CALLSIGN.title())})
     return clips
 
 
@@ -199,12 +214,12 @@ def main():
         return
 
     config = json.loads(VOICES.read_text(encoding='utf-8'))
-    clips = parse_script(SCRIPT.read_text(encoding='utf-8')) + cutscene_clips() + radio_clips()
+    clips = parse_script(SCRIPT.read_text(encoding='utf-8')) + cutscene_clips() + radio_clips() + prompt_clips()
     mpath = OUT / 'manifest.json'
     manifest = json.loads(mpath.read_text(encoding='utf-8')) if mpath.exists() else {}
     if a.prune:
         live = {c['id'] for c in clips}
-        for k in [k for k in manifest if k.startswith(('cs_', 'radio_')) and k not in live]:
+        for k in [k for k in manifest if k.startswith(('cs_', 'radio_', 'prompt_')) and k not in live]:
             (OUT / (k + '.mp3')).unlink(missing_ok=True)
             del manifest[k]
             print('pruned', k)

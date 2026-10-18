@@ -235,6 +235,7 @@
   };
 
   function endMemory() {
+    stopVO();
     // lines queued before the memory (the tether snapping) are stale now
     if (SL.story && SL.story.clear) SL.story.clear();
     const f = flags();
@@ -284,16 +285,79 @@
   };
 
   // ------------------------------------------------------------------ the memory: The First Trial
+  // [second, on-screen text, voice clip id]
   const VOICE = [
-    [1.2, 'SUBJECT ACCEPTED. THE FIRST TRIAL BEGINS.'],
-    [11, 'YOUR WORLD IS WATCHING, LITTLE FISH.'],
-    [22, 'SURVIVE OUR TRIALS AND YOUR SEA WILL BE HEALED. THAT IS OUR PROMISE.'],
-    [34, 'FASTER.'],
+    [1.2, 'SUBJECT ACCEPTED. THE FIRST TRIAL BEGINS.', 'memory1_voice_1'],
+    [11, 'YOUR WORLD IS WATCHING, LITTLE FISH.', 'memory1_voice_2'],
+    [22, 'SURVIVE OUR TRIALS AND YOUR SEA WILL BE HEALED. THAT IS OUR PROMISE.', 'memory1_voice_3'],
+    [34, 'FASTER.', 'memory1_voice_4'],
   ];
   const THOUGHTS = [
-    [6, 'I never said yes. Nobody asked.'],
-    [28, 'Keep swimming. For the reef. For everyone.'],
+    [6, 'I never said yes. Nobody asked.', 'memory1_puff_1'],
+    [28, 'Keep swimming. For the reef. For everyone.', 'memory1_puff_2'],
   ];
+  const INTRO = [
+    ['Past the horizon the stars go quiet, and Puff is home again.', 'memory1_intro_1'],
+    ['His ocean world was coral and light once, until the corporations bled it dark. Then the Directorate came, and they called it a game: survive our trials, and we will give you the power to heal your world.', 'memory1_intro_2'],
+    ['He was the only one who could breathe that water long enough. Nobody asked him if he wanted to play.', 'memory1_intro_3'],
+  ];
+  const ENDING = [
+    ['Subject survives. Proceed to trial two.', 'memory1_end_1'],
+    ['There were more trials. There was always one more.', 'memory1_end_2'],
+  ];
+
+  // ------------------------------------------------------------------ the memory's voices
+  // window.PUFF_VO (tools/build.py, from narration/audio/memory1_*.mp3) maps a clip id to [URL, seconds, text]. A clip
+  // plays only if its text still matches the screen (ignoring case), so a reworded line is silent, never wrong.
+  // Two players: the narration and the Directorate share one, Puff's thoughts have their own so lines can overlap.
+  const norm = (t) => String(t).toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
+  function clip(id, text) {
+    const c = window.PUFF_VO && window.PUFF_VO[id];
+    return c && norm(c[2]) === norm(text) ? c : null;
+  }
+  const players = {};
+  function player(ch) {
+    if (!players[ch] && typeof Audio === 'function') players[ch] = new Audio();
+    return players[ch] || null;
+  }
+  let seqToken = 0;
+  function stopVO() {
+    seqToken++;
+    for (const k in players) { try { players[k].pause(); } catch (e) { /* no audio */ } players[k].onended = null; }
+  }
+  /** Plays [text, id] pairs one after another on one channel. Moves on when a clip ends, or after its length if
+      the browser never says so; a newer sequence or stopVO() cancels this one. */
+  function playSeq(list, ch) {
+    const a = player(ch || 'main');
+    if (!a || (SL.audio && SL.audio.muted)) return;
+    const token = ++seqToken;
+    let i = 0, step = 0;
+    const next = (from) => {
+      if (token !== seqToken || from !== step) return;
+      step++;
+      while (i < list.length) {
+        const c = clip(list[i][1], list[i][0]);
+        i++;
+        if (!c) continue;
+        const me = step;
+        a.src = c[0];
+        a.currentTime = 0;
+        a.onended = () => next(me);
+        setTimeout(() => { if (!a.heldByPause) next(me); }, (+c[1] + 0.4) * 1000);
+        const p = a.play();
+        if (p && p.catch) p.catch(() => {});
+        return;
+      }
+      a.onended = null;
+    };
+    try { a.pause(); } catch (e) { /* no audio */ }
+    next(0);
+  }
+  /** How long a timed trial line stays on screen: 4.5 s, or until its voice ends. */
+  function lineDur(entry) {
+    const c = clip(entry[2], entry[1]);
+    return Math.max(4.5, c ? +c[1] + 0.6 : 0);
+  }
 
   PS.memoryScenario = function (onDone) {
     let done = false;
@@ -313,24 +377,37 @@
           'His ocean world was coral and light once, until the corporations bled it dark. Then the Directorate came, and they called it a game: survive our trials, and we will give you the power to heal your world.',
           'He was the only one who could breathe that water long enough. Nobody asked him if he wanted to play.',
         ].forEach((t) => p.appendChild(api.el('p', 'sl-puff__story', t)));
+        playSeq(INTRO);
         const b = api.el('div', 'sl-stack');
         b.append(
-          api.btn('Remember with your voice', 'sl-btn--primary', () => api.startVoice()),
-          api.btn('Remember with keys or touch', '', () => api.startKeys()));
-        if (flags().puff_memory1) b.append(api.btn('Skip memory', 'sl-btn--ghost', () => finish()));
+          api.btn('Remember with your voice', 'sl-btn--primary', () => { stopVO(); api.startVoice(); }),
+          api.btn('Remember with keys or touch', '', () => { stopVO(); api.startKeys(); }));
+        if (flags().puff_memory1) b.append(api.btn('Skip memory', 'sl-btn--ghost', () => { stopVO(); finish(); }));
         side.appendChild(b);
         side.appendChild(api.el('p', 'sl-puff__note', 'Voice: get loud to puff him up, go quiet to sink. Keys: hold Space to puff up, let go to sink. Survive ' + TRIAL_LEN + ' seconds.'));
         api.focusFirst();
       },
       step(R, dt, api) {
+        // the Directorate and Puff speak at their second marks (once per run; a replay starts over)
+        if (!R.voFired) R.voFired = {};
+        for (const [list, ch] of [[VOICE, 'main'], [THOUGHTS, 'puff']]) {
+          for (const e of list) {
+            if (R.t >= e[0] && !R.voFired[e[2]] && !R.over) {
+              R.voFired[e[2]] = true;
+              if (R.t - e[0] < 1) playSeq([[e[1], e[2]]], ch);
+            }
+          }
+        }
+        if (R.over) stopVO();
         if (R.t < TRIAL_LEN || R.over) return true;
         api.stopRun();
+        playSeq(ENDING);
         const [p, side] = api.cols(api.panel('sl-puff__overlay--memory'));
         p.append(api.el('div', 'sl-label', 'A memory'), api.el('h2', 'sl-title sl-title--md sl-puff__title', 'Trial one: survived'));
         p.appendChild(api.el('p', 'sl-puff__story', 'The water went still. A voice from everywhere at once: "Subject survives. Proceed to trial two."'));
         p.appendChild(api.el('p', 'sl-puff__story', 'There were more trials. There was always one more.'));
         const b = api.el('div', 'sl-stack');
-        b.append(api.btn('Wake up', 'sl-btn--primary', () => finish()));
+        b.append(api.btn('Wake up', 'sl-btn--primary', () => { stopVO(); finish(); }));
         side.appendChild(b);
         api.focusFirst();
         return false;
@@ -368,6 +445,12 @@
       },
       drawHud(ctx, R, api) {
         const s = SL.puff.state;
+        // the trial's voices hold while the minigame is paused
+        for (const k in players) {
+          const a = players[k];
+          if (s === 'paused' && !a.paused) { a.pause(); a.heldByPause = true; }
+          else if (s === 'play' && a.heldByPause) { a.heldByPause = false; const p = a.play(); if (p && p.catch) p.catch(() => {}); }
+        }
         if (s !== 'play' && s !== 'paused') return;
         const W = api.W(), k = api.hudK();
         ctx.save();
@@ -383,10 +466,11 @@
         api.label(ctx, 'TRIAL 1', 0, -12, '700 15px Oxanium, sans-serif', 'rgba(230,210,255,0.95)', 'center');
         // the Directorate speaks; Puff thinks
         const show = (list, y, font, color) => {
-          for (const [at, text] of list) {
+          for (const e of list) {
+            const [at, text] = e, dur = lineDur(e);
             const a = R.t - at;
-            if (a < 0 || a > 4.5) continue;
-            ctx.globalAlpha = Math.min(1, a / 0.4, (4.5 - a) / 0.8);
+            if (a < 0 || a > dur) continue;
+            ctx.globalAlpha = Math.min(1, a / 0.4, (dur - a) / 0.8);
             api.label(ctx, text, 0, y, font, color, 'center');
           }
           ctx.globalAlpha = 1;

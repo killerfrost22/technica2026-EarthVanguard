@@ -121,7 +121,7 @@
   },
   "memory1_voice_1": {
     "role": "The Directorate",
-    "voice": "GsjQ0ydx7QzhDLqInGtT",
+    "voice": "onwK4e9ZLuTAKqWW03F9",
     "model": "eleven_multilingual_v2",
     "seconds": 3.74,
     "chars": 41,
@@ -129,49 +129,49 @@
   },
   "memory1_puff_1": {
     "role": "Puff",
-    "voice": "GsjQ0ydx7QzhDLqInGtT",
+    "voice": "9yzdeviXkFddZ4Oz8Mok",
     "model": "eleven_multilingual_v2",
-    "seconds": 2.38,
+    "seconds": 2.67,
     "chars": 31,
     "text": "I never said yes. Nobody asked."
   },
   "memory1_voice_2": {
     "role": "The Directorate",
-    "voice": "GsjQ0ydx7QzhDLqInGtT",
+    "voice": "onwK4e9ZLuTAKqWW03F9",
     "model": "eleven_multilingual_v2",
-    "seconds": 2.56,
+    "seconds": 2.54,
     "chars": 36,
     "text": "Your world is watching, little fish."
   },
   "memory1_voice_3": {
     "role": "The Directorate",
-    "voice": "GsjQ0ydx7QzhDLqInGtT",
+    "voice": "onwK4e9ZLuTAKqWW03F9",
     "model": "eleven_multilingual_v2",
-    "seconds": 5.54,
+    "seconds": 6.01,
     "chars": 68,
     "text": "Survive our trials and your sea will be healed. That is our promise."
   },
   "memory1_puff_2": {
     "role": "Puff",
-    "voice": "GsjQ0ydx7QzhDLqInGtT",
+    "voice": "9yzdeviXkFddZ4Oz8Mok",
     "model": "eleven_multilingual_v2",
-    "seconds": 3.19,
+    "seconds": 3.14,
     "chars": 42,
     "text": "Keep swimming. For the reef. For everyone."
   },
   "memory1_voice_4": {
     "role": "The Directorate",
-    "voice": "GsjQ0ydx7QzhDLqInGtT",
+    "voice": "onwK4e9ZLuTAKqWW03F9",
     "model": "eleven_multilingual_v2",
-    "seconds": 1.1,
+    "seconds": 1.05,
     "chars": 7,
     "text": "Faster."
   },
   "memory1_end_1": {
     "role": "The Directorate",
-    "voice": "GsjQ0ydx7QzhDLqInGtT",
+    "voice": "onwK4e9ZLuTAKqWW03F9",
     "model": "eleven_multilingual_v2",
-    "seconds": 3.37,
+    "seconds": 3.56,
     "chars": 39,
     "text": "Subject survives. Proceed to trial two."
   },
@@ -678,5 +678,45 @@
     "seconds": 7.79,
     "chars": 54,
     "text": "> DISTRESS SIGNAL RECEIVED\n> ORIGIN: [her home system]"
+  },
+  "radio_sparrow_gravity_well_ahead_keep": {
+    "role": "Sparrow",
+    "voice": "0luPAj5RsdhmnkZaiYcb",
+    "model": "eleven_multilingual_v2",
+    "seconds": 3.61,
+    "chars": 61,
+    "text": "Gravity well ahead! Keep your thrust up and stay off the rim."
+  },
+  "radio_sparrow_pod_secured_they_say": {
+    "role": "Sparrow",
+    "voice": "0luPAj5RsdhmnkZaiYcb",
+    "model": "eleven_multilingual_v2",
+    "seconds": 2.36,
+    "chars": 36,
+    "text": "Pod secured. They say thanks, LANCE!"
+  },
+  "radio_sparrow_covering_the_pod_bring": {
+    "role": "Sparrow",
+    "voice": "0luPAj5RsdhmnkZaiYcb",
+    "model": "eleven_multilingual_v2",
+    "seconds": 1.6,
+    "chars": 30,
+    "text": "Covering the pod. Bring it in!"
+  },
+  "prompt_test_choice": {
+    "role": "Decision",
+    "voice": "dXtC3XhB9GtPusIpNtQx",
+    "model": "eleven_multilingual_v2",
+    "seconds": 4.58,
+    "chars": 74,
+    "text": "A distress beacon is pinging off the flight path. Divert to cover the pod?"
+  },
+  "prompt_puff_trust1": {
+    "role": "Decision",
+    "voice": "dXtC3XhB9GtPusIpNtQx",
+    "model": "eleven_multilingual_v2",
+    "seconds": 5.05,
+    "chars": 82,
+    "text": "Puff is curled up tight in his bubble, spines out, staring back at the black hole."
   }
 }

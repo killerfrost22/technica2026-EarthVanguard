@@ -224,6 +224,7 @@
       p.finish = (opt) => {
         if (pending !== p) return;
         pending = null;
+        stopVoice();
         wrap.remove();
         const s = SL.game.session;
         if (s) s.flags[id] = opt;
@@ -247,6 +248,7 @@
       pending = p;
       SL.game.pause('choice');
       if (ui) ui.appendChild(wrap);
+      playVoice(q.textContent); // after the pause, which stops any radio voice
       const first = row.querySelector('button');
       if (first) first.focus({ preventScroll: true });
     });

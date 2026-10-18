@@ -115,12 +115,24 @@ def main():
         js_parts.append('<script>\nwindow.CUTSCENE_VO = %s;\n</script>' % json.dumps(vo, separators=(',', ':')))
     # Radio voice lines (narration/audio/radio_*.mp3) for the radio box (src/16_story.js): text -> [data: URI, seconds].
     radio = voice_clips('radio_', with_seconds=True)
+    radio.update(voice_clips('prompt_', with_seconds=True))  # Decision prompts, read aloud in the choice dialog
     if radio:
         js_parts.append('<script>\nwindow.RADIO_VO = %s;\n</script>' % json.dumps(radio, separators=(',', ':')))
     # Blue Arrow's memory-shard lines in Echo (narration/audio/echo_memory_*.mp3) for src/24_echo.js, the same way.
     evo = voice_clips('echo_memory_', with_seconds=True)
     if evo:
         js_parts.append('<script>\nwindow.ECHO_VO = %s;\n</script>' % json.dumps(evo, separators=(',', ':')))
+    # Puff's memory in Mission 1 (narration/audio/memory1_*.mp3) for src/25_puffstory.js: clip id -> [data: URI,
+    # seconds, text]. The game checks the text against what it shows (ignoring case), so a reworded line plays silent.
+    pvo = {}
+    manifest = NARRATION / 'manifest.json'
+    for cid, m in (json.loads(manifest.read_text(encoding='utf-8')).items() if manifest.exists() else []):
+        mp3 = NARRATION / (cid + '.mp3')
+        if cid.startswith('memory1_') and mp3.exists():
+            pvo[cid] = ['data:audio/mpeg;base64,' + base64.b64encode(mp3.read_bytes()).decode('ascii'),
+                        m.get('seconds', 0), m.get('text', '')]
+    if pvo:
+        js_parts.append('<script>\nwindow.PUFF_VO = %s;\n</script>' % json.dumps(pvo, separators=(',', ':')))
     for name in CUTSCENE_JS:
         p = CUTSCENES / name
         if name in exclude:
