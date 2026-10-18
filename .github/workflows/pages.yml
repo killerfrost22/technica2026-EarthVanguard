@@ -32,7 +32,7 @@ jobs:
           mkdir -p _site/play
           cp -R website/. _site/
           cp dist/earthvanguard.html _site/play/index.html
-          cp CNAME _site/CNAME
+          if [ -f CNAME ]; then cp CNAME _site/CNAME; fi
           # The landing page links to the game by its repo path; on the site it lives at /play/.
           sed -i 's#\.\./dist/earthvanguard\.html#play/#g' _site/index.html
           if grep -q '\.\./dist/' _site/index.html; then echo 'landing page still links into ../dist/'; exit 1; fi
