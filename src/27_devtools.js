@@ -8,6 +8,8 @@
      that thing is running.
    - Skip minigames (remembered in this browser): the story passes through Echo and Puff's memory without playing them.
    - God mode, and Reset story (every cutscene unseen, Echo not escaped, Puff's memory and trust cleared).
+   - Music: play any track (03_audio.js), with a Mood slider for the layers some tracks build from it (Echo's
+     tension, the prologue's intensity, Puff's memory's progress).
    Works over cutscenes (the panel sits above them and the key is caught first). */
 (function (SL) {
   'use strict';
@@ -105,6 +107,40 @@
       if (window.Cutscene && window.Cutscene.isPlaying()) window.Cutscene.skip();
       SL.game.toMenu('title');
     });
+
+    const A = SL.audio;
+    if (A && A.tracks) {
+      const mus = section('Music');
+      const pick = el('select', 'ev-dev__select');
+      pick.setAttribute('aria-label', 'Music track');
+      for (const id of A.tracks()) {
+        const o = el('option', '', id);
+        o.value = id;
+        pick.appendChild(o);
+      }
+      if (A.current) pick.value = A.current;
+      const slider = el('input', 'ev-dev__range');
+      slider.type = 'range';
+      slider.min = '0';
+      slider.max = '1';
+      slider.step = '0.05';
+      slider.value = '0';
+      slider.setAttribute('aria-label', 'Mood');
+      const setMood = () => { for (const k of ['tension', 'intensity', 'progress']) A.mood(k, +slider.value); };
+      slider.addEventListener('input', setMood);
+      // arrows and Space on these controls stay with them, not the game
+      for (const c of [pick, slider]) c.addEventListener('keydown', (e) => e.stopPropagation());
+      mus.append(pick);
+      button(mus, 'Play', () => {
+        A.unlock();
+        A.music(pick.value, { fade: 0.5, restart: true });
+        setMood();
+      });
+      button(mus, 'Stop', () => A.stopMusic(0.5));
+      const lab = el('label', 'ev-dev__toggle', 'Mood ');
+      lab.appendChild(slider);
+      mus.append(lab);
+    }
 
     root.addEventListener('pointerdown', (e) => e.stopPropagation());
     document.body.appendChild(root);

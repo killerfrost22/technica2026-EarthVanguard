@@ -17,6 +17,12 @@ jet. Unlike the pilot, he remembers everything and won't talk about it; his past
 | Wake | Surviving 45 s: "Subject survives. Proceed to trial two. There were more trials. There was always one more." **Wake up** resumes the mission, clears stale radio lines, and the jet hauls the bubble back into formation. Anvil: "Got him!" Puff: "...I'm okay. Don't ask. Not yet." |
 | Trust | m1's old beacon choice is replaced: once Puff has said his piece (`talkReady`, about 6 s after waking), the pilot chooses: **Ask what he saw** ("Not now. Please.") or **Give him space** ("...Thanks, {callsign}. I owe you one.", `save.flags.puff_trust` +1). Only asked if the memory happened. |
 
+Music ([audio.md](audio.md)): while the black hole is near, Mission 1 plays `mus_m2`, a far-off choir singing the
+song Puff knows; inside, the memory plays `mus_memory`, the same song underwater, built up by `progress` through the
+trial, double-time at "FASTER." (`urgency`) and resolving to a major chord when he survives (`done`). It sinks under
+the narration and the Directorate's voice. Waking up hands the mission's track back, and m1 returns to `mus_m1` after
+the trust choice.
+
 **Skip memory** is offered in the pause menu, on a failed trial, and in the intro once the memory has been seen
 (`save.flags.puff_memory1`). Finishing or skipping sets `unlock_puff` (Puff's Ocean on the title screen).
 Autopilot, `SL.debug.sim` fast-forward and the in-page tests skip the memory: Puff is pulled in and comes

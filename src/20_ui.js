@@ -142,7 +142,37 @@
       const hint = el('p', 'sl-ui-title__hint', 'Move: WASD or arrows · drag on touch · auto-fire · Bomb: X · Pause: Esc');
       root.append(head, btns, hint);
     },
+    onShow(root) {
+      // keep the idle jet in the gap above the buttons as the layout changes (text size, fonts, window size, turning
+      // the phone); a frame later, once the renderer has resized
+      const place = () => requestAnimationFrame(() => placeTitleJet(root));
+      place();
+      const ro = typeof ResizeObserver === 'function' ? new ResizeObserver(place) : null;
+      if (ro) ro.observe(root.querySelector('.sl-ui-title__head'));
+      window.addEventListener('resize', place);
+      const offOrient = SL.bus.on('orient', place);
+      root.unplace = () => {
+        if (ro) ro.disconnect();
+        window.removeEventListener('resize', place);
+        offOrient();
+      };
+    },
+    onHide(root) { if (root.unplace) root.unplace(); },
   });
+  /** Portrait title: the attract-scene jet flies in the gap between the tagline and the buttons rather than behind them,
+      or above the title when larger text closes that gap. */
+  function placeTitleJet(root) {
+    const m = SL.game && SL.game.menuScene, R = SL.render;
+    if (!m || !m.player || !R || R.land || !R.toLogical) return;
+    const head = root.querySelector('.sl-ui-title__head'), tag = root.querySelector('.sl-ui-title__tag');
+    const btns = root.querySelector('.sl-ui-title__btns');
+    if (!head || !tag || !btns) return;
+    const need = 100 * (R.cssH || SL.H) / SL.H; // the jet and its plume, in CSS px
+    const a = tag.getBoundingClientRect().bottom, b = btns.getBoundingClientRect().top;
+    const top = R.top || 0, h0 = head.getBoundingClientRect().top;
+    const y = b - a >= need ? (a + b) / 2 : h0 - top >= need ? (top + h0) / 2 : null;
+    m.y = y != null ? R.toLogical(0, y).y : SL.H * 0.5;
+  }
 
   SL.screens.define('pause', {
     build(root, params) {
@@ -188,13 +218,15 @@
       score.append(scoreHead, el('div', 'sl-ui-results__score-val sl-num', U.fmtInt(r.score)));
 
       const grid = el('dl', 'sl-ui-results__grid');
-      const tile = (k, v) => {
+      const tile = (k, v, of) => {
         const d = el('div', 'sl-ui-results__tile');
-        d.append(el('dt', '', k), el('dd', 'sl-num', v));
+        const dd = el('dd', 'sl-num', v);
+        if (of) dd.appendChild(el('small', '', of)); // "/236" smaller, so big counts still fit the tile
+        d.append(el('dt', '', k), dd);
         grid.appendChild(d);
       };
       tile('Credits', U.fmtInt(r.creditsKept));
-      tile('Kills', r.kills + '/' + r.enemiesSpawned);
+      tile('Kills', String(r.kills), '/' + r.enemiesSpawned);
       tile('Rescued', String(r.rescued));
       tile('Hits', String(r.hitsTaken));
       tile('Time', U.fmtTime(r.time));
@@ -353,12 +385,25 @@
     ctx.globalAlpha = 1;
   }
 
+  /** The largest font size (up to `size`) at which str fits in maxW. */
+  function fitSize(ctx, str, weight, size, family, maxW) {
+    ctx.font = weight + ' ' + size + 'px ' + family;
+    const w = ctx.measureText(str).width;
+    return w > maxW ? Math.max(12, Math.floor(size * maxW / w)) : size;
+  }
+
   function drawBanner(ctx, dt) {
     if (!banner && banners.length) banner = banners.shift();
     if (!banner) return;
     banner.t += dt;
     const t = banner.t, d = banner.dur;
     if (t >= d) { banner = null; return; }
+    // long hazard names shrink to fit the screen (measured once per banner and screen width)
+    if (banner.fitW !== VW) {
+      banner.fitW = VW;
+      banner.size = fitSize(ctx, banner.text, 800, 46, 'Oxanium, sans-serif', VW - 72);
+      banner.subSize = fitSize(ctx, banner.sub, 600, 18, '"Barlow Semi Condensed", sans-serif', VW - 72);
+    }
     const a = Math.min(1, t / 0.18, (d - t) / 0.35);
     const sc = 1 + 0.08 * Math.max(0, 1 - t / 0.25);
     const y = Math.round(VH * 0.367);
@@ -371,9 +416,9 @@
     ctx.save();
     ctx.translate(VW / 2, y);
     ctx.scale(sc, sc);
-    text(ctx, banner.text, 0, 12, '800 46px Oxanium, sans-serif', '#ffffff', 'center');
+    text(ctx, banner.text, 0, 12 + (46 - banner.size) * 0.3, '800 ' + banner.size + 'px Oxanium, sans-serif', '#ffffff', 'center');
     ctx.restore();
-    if (banner.sub) text(ctx, banner.sub, VW / 2, y + 42, '600 18px "Barlow Semi Condensed", sans-serif', C.rgba(banner.color, 0.95), 'center');
+    if (banner.sub) text(ctx, banner.sub, VW / 2, y + 42, '600 ' + banner.subSize + 'px "Barlow Semi Condensed", sans-serif', C.rgba(banner.color, 0.95), 'center');
     ctx.globalAlpha = 1;
   }
 

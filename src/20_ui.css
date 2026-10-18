@@ -91,6 +91,7 @@
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 .sl-ui-results__tile dd { margin: 0; font: 700 calc(4 * var(--f))/1 var(--sl-display); color: var(--sl-text); white-space: nowrap; }
+.sl-ui-results__tile dd small { margin-left: 0.06em; font-size: 0.6em; color: var(--sl-text-dim); }
 .sl-ui-complete > .sl-row { margin-top: calc(0.6 * var(--u)); }
 
 .sl-toast {

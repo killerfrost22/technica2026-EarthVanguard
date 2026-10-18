@@ -29,8 +29,9 @@ No install, no server, no build step needed:
 2. Open **`dist/earthvanguard.html`** in a modern browser (Chrome, Edge, Firefox or Safari). Double-clicking
    it works.
 
-The whole game, including art, sound effects and fonts, lives in that one HTML file. All graphics are drawn in
-code and all audio is synthesized at runtime, so there are no image or sound assets.
+The whole game, including art, music, sound effects, voice lines and fonts, lives in that one HTML file. All
+graphics are drawn in code and all music and sound effects are synthesized at runtime, so there are no image assets
+and the only recordings are the narration clips built into the page.
 
 For Puff's voice controls, Chrome or Edge works best. If the mic is blocked when opening the file directly,
 serve the folder instead. From the repo root, run:
@@ -88,15 +89,19 @@ nothing is recorded or sent.
 
 **Playable now**
 
-- **Flight test mission:** the current Mission 1 ("First Light (stub)") is a test range that runs through
-  every system: enemy waves and formations, a black hole, escape-pod rescues, a radio choice, a checkpoint
-  and a boss fight.
+- **Mission 1, First Light:** a short first mission over the Vesta Shipyards: a catapult launch off the
+  *Halcyon*'s deck, gnat, dart, wasp and manta formations, escape-pod rescues, a black hole, a checkpoint, Puff's
+  trust choice and the assault carrier RAZORBACK.
 - **Weapons that change what you see:** twin pulse lasers, a widening spread fan, a piercing lance beam
   (each with five levels), plus homing missiles and screen-clearing bombs.
 - **Space hazards:** black holes that bend your lasers and the screen around them, asteroid storms, ion
   storms, solar flares, mine fields and wormholes.
 - **Rescue:** pull survivors out of escape pods drifting through the crossfire.
 - **Local co-op** for two players on one keyboard, two gamepads, or a mix.
+- **Music for every stage,** all synthesized, each written for its mood: the title theme, a theme for each part of
+  the story (the Overseers, the cell, the escape, Puff, his grief), Echo's stealth track (her heartbeat comes in as the
+  alarm rises), Puff's Ocean, Puff's memory, the black hole (it sings the song Puff knows), the bosses, victory and
+  defeat. Details in [`docs/api/audio.md`](docs/api/audio.md).
 - **Echo:** a stealth minigame about the escape of Blue Arrow, the main character. She grew up as a test subject
   inside a sealed facility, and the experiments left her able to see with sound. With the power out, every echo she sends lights
   up the walls for a moment, but security drones hear it too. Three floors to the surface, each behind a keycard
@@ -110,7 +115,7 @@ nothing is recorded or sent.
   from the menu, and chase the top 10 on the leaderboard (saved on your device).
 
 **Designed, not wired into missions yet:** the full five-mission campaign, four side stories, the hangar
-and skill tree, music and the full radio cast are written up in [`docs/GDD.md`](docs/GDD.md). Three of the
+and skill tree and the full radio cast are written up in [`docs/GDD.md`](docs/GDD.md). Three of the
 bosses (Suneater, Mantis and Crucible) are built and can be fought in their test sandboxes, for example
 `?sandbox=boss:boss_suneater`.
 
@@ -140,7 +145,8 @@ This inlines every `src/*.css` and `src/*.js` file, in name order, into `dist/ea
 button for touch screens). It jumps to any point in the story (Prologue, Echo, After Echo, Mission 1, After
 Mission 1), skips whatever is running (a cutscene, Echo, Puff's memory, to the boss, or wins the mission), and has
 a **Skip minigames** switch (remembered in your browser) so the story passes through Echo and Puff's memory without
-playing them. **Reset story** starts the story over.
+playing them. **Reset story** starts the story over, and the **Music** section plays any track (its Mood slider drives
+the layers some tracks add, like Echo's heartbeat).
 
 Handy URL parameters for testing (add them to the end of the file URL):
 

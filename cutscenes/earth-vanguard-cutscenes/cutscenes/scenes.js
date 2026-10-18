@@ -12,7 +12,10 @@
  *   cam    { from:[scale, x%, y%], to:[scale, x%, y%], dur:ms }  slow camera push/pan on the art
  *   title / sub   big title card
  *   flash / shake  one-shot effects       hold  ms to wait when a shot has no lines
- *   music / sfx    names passed to your onMusic / onSfx callbacks
+ *   music / sfx    names passed to your onMusic / onSfx callbacks. In the game (src/26_cutscenes.js) music
+ *                  is a mood that keeps playing until the next cue: theme_dark theme_fire theme_echo
+ *                  theme_free theme_hope theme_puff theme_grief; sfx: fire alarm_low power_down engine
+ *                  explosion distress
  *   when   (state) => bool   only play the shot if true
  *
  * LINE fields
@@ -55,13 +58,13 @@ window.CUTSCENES = {
         { who: '???', text: 'Leave her alone.' },
         { text: 'Nobody had ever said that out loud before.', style: 'quiet' },
       ]},
-    { bg: 'burn', art: 'taken', shake: true, sfx: 'fire', cam: { from: [1.18, -6, 2], to: [1.04, 3, 0], dur: 14000 },
+    { bg: 'burn', art: 'taken', shake: true, sfx: 'fire', music: 'theme_fire', cam: { from: [1.18, -6, 2], to: [1.04, 3, 0], dur: 14000 },
       lines: [
         { text: 'The regime answered that night.' },
         { text: 'They burned her home to the ground. They dragged her best friend away.' },
         { text: 'And they took her, too.' },
       ]},
-    { bg: 'black', art: 'facility', sfx: 'alarm_low', cam: { from: [1.0, 0, 0], to: [1.14, 0, 3], dur: 14000 }, lines: [
+    { bg: 'black', art: 'facility', sfx: 'alarm_low', music: 'theme_echo', cam: { from: [1.0, 0, 0], to: [1.14, 0, 3], dur: 14000 }, lines: [
       { style: 'terminal', text: `> ${N.SUBJECT} // EXPERIMENTAL WING C\n> STATUS: CONTAINED`, speed: 18 },
       { text: 'No windows. No names. Test after test, in the dark, for years.' },
       { text: 'She stopped counting the days. She never stopped listening.', style: 'quiet' },
@@ -77,7 +80,7 @@ window.CUTSCENES = {
 
   /* ===== after Echo is cleared ===== */
   echo_complete: [
-    { bg: 'stars', art: 'surface', cam: { from: [1.15, 0, 4], to: [1.0, 0, 0] }, lines: [
+    { bg: 'stars', art: 'surface', music: 'theme_free', cam: { from: [1.15, 0, 4], to: [1.0, 0, 0] }, lines: [
       { text: 'Like a lost fish finding its school, she followed the echoes all the way to the surface.' },
       { text: 'For the first time in years: open air.', style: 'quiet' },
     ]},
@@ -91,7 +94,7 @@ window.CUTSCENES = {
       { who: N.COMMANDER, text: `We protect the worlds ${N.ENEMY} play with. You already know what they do.` },
       { who: N.COMMANDER, text: 'Want to make it stop?' },
     ]},
-    { bg: 'black', art: 'training', cam: { from: [1.1, 3, 0], to: [1.0, -1, 0] },
+    { bg: 'black', art: 'training', music: 'theme_hope', cam: { from: [1.1, 3, 0], to: [1.0, -1, 0] },
       lines: [
         { text: 'In hiding, she trained. Every day. Every target.' },
         { text: `The escaped experiment became a pilot. Call sign: ${N.HERO}.` },
@@ -103,7 +106,7 @@ window.CUTSCENES = {
      His past is not told here: in Mission 1 a black hole pulls Puff in and the player relives his first trial
      (src/25_puffstory.js), then puff_complete reveals what happened to his planet. */
   puff_intro: [
-    { bg: 'stars', art: 'puffmeet', lines: [
+    { bg: 'stars', art: 'puffmeet', music: 'theme_puff', lines: [
       { who: N.COMMANDER, text: `${N.HERO}, meet your new wingmate.` },
       { who: 'Puff', text: '…Hi.' },
       { text: 'A pufferfish from an ocean world. He flies like he has nothing left to lose. He never talks about home.', style: 'quiet' },
@@ -119,7 +122,7 @@ window.CUTSCENES = {
 
   /* ===== after Mission 1 is cleared ===== */
   puff_complete: [
-    { bg: 'polluted', art: 'polluted', lines: [
+    { bg: 'polluted', art: 'polluted', music: 'theme_grief', lines: [
       { who: 'Puff', text: 'I passed every trial. I did everything they asked.' },
     ]},
     { bg: 'stars', art: 'destroyed', flash: true, shake: true, sfx: 'explosion', lines: [
@@ -137,7 +140,7 @@ window.CUTSCENES = {
 
   /* ===== LEVEL 2 intro — Vanguard (not played yet: the game has no Mission 2) ===== */
   vanguard_intro: [
-    { bg: 'stars', art: 'distress', sfx: 'distress', lines: [
+    { bg: 'stars', art: 'distress', sfx: 'distress', music: 'theme_dark', lines: [
       { style: 'terminal', text: '> DISTRESS SIGNAL RECEIVED\n> ORIGIN: [her home system]', speed: 18 },
       { text: 'Coordinates she would know anywhere.' },
     ]},

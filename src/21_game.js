@@ -885,7 +885,8 @@
     registerHot();
     SL.bus.on('orient', () => { if (G.menuScene && menuOpts.y == null) G.menuScene.y = menuY(); });
     G.state = 'menu';
-    G.setMenuScene({});
+    // GDD 18.1: the menus fly over Vesta (bg_vesta's slow 'menu' drift)
+    G.setMenuScene(SL.backgrounds.has('bg_vesta') ? { bg: 'bg_vesta', bgOpts: { phase: 'menu' } } : {});
     if (has(SL.ui, 'show') && SL.screens.has('title')) safe('ui.show title', () => SL.ui.show('title'));
     requestAnimationFrame(loop);
   });
