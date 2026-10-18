@@ -33,7 +33,14 @@ The whole game, including art, sound effects and fonts, lives in that one HTML f
 code and all audio is synthesized at runtime, so there are no image or sound assets.
 
 For Puff's voice controls, Chrome or Edge works best. If the mic is blocked when opening the file directly,
-serve the folder instead (`python3 -m http.server 8000`, then open <http://localhost:8000/dist/earthvanguard.html>).
+serve the folder instead. From the repo root, run:
+
+```bash
+python3 -m http.server 8000
+```
+
+Then open <http://localhost:8000/dist/earthvanguard.html> in your browser (the URL goes in the browser, not
+on the command line). Press `Ctrl+C` in the terminal to stop the server.
 
 ## Controls
 
