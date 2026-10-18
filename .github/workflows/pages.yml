@@ -1,0 +1,52 @@
+# Builds the game and deploys earthvanguard.us to GitHub Pages on every push to main.
+#   /       website/index.html (+ assets/)
+#   /play/  dist/earthvanguard.html
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Build the game
+        run: python3 tools/build.py --no-publish
+      - name: Assemble the site
+        run: |
+          mkdir -p _site/play
+          cp -R website/. _site/
+          cp dist/earthvanguard.html _site/play/index.html
+          cp CNAME _site/CNAME
+          # The landing page links to the game by its repo path; on the site it lives at /play/.
+          sed -i 's#\.\./dist/earthvanguard\.html#play/#g' _site/index.html
+          if grep -q '\.\./dist/' _site/index.html; then echo 'landing page still links into ../dist/'; exit 1; fi
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
