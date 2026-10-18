@@ -93,7 +93,9 @@ columns. Bot fairness in landscape: 30 of 30 runs of 150 s with no hits.
 
 The screen draws on its own canvas inside `#ui` with its own animation loop, started in `onShow` and stopped
 in `onHide`, which also releases the microphone. It uses its own AudioContext (the mic needs one); effects are
-short and quiet in voice mode so the mic doesn't hear them, and the surf ambience plays only in keys mode.
+short and quiet in voice mode so the mic doesn't hear them, and the surf ambience plays only in keys mode. Music
+(`mus_ocean`, see [audio.md](audio.md)) plays in free play through the main audio module; it is off whenever the mic is
+open and held down while the pause menu is up. A scenario starts its own track in `intro(api)`.
 
 ## Test hooks
 

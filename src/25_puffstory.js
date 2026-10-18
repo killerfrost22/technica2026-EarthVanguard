@@ -14,7 +14,10 @@
    After he is back and has said "Don't ask. Not yet." (PS.talkReady), m1 asks the pilot's first trust choice,
    puff_trust1: Ask what he saw (he shuts down) or Give him space (+1 trust). Later memories can build on it.
    Flags: save.flags.puff_memory1 (seen; Skip memory is offered on replays), unlock_puff (Puff's Ocean) and
-   puff_trust (how much Puff trusts the pilot, a count). */
+   puff_trust (how much Puff trusts the pilot, a count).
+   Music: the memory plays mus_memory (03_audio.js), the song the black hole was singing, built up by mood.progress
+   through the trial, double-time at "FASTER." (mood.urgency) and resolved when he survives (mood.done); it sinks under
+   the voices. Waking up hands the mission's track back. */
 (function (SL) {
   'use strict';
 
@@ -224,6 +227,7 @@
     if (skipMemory() || !(SL.puff && SL.puff.openScenario)) { endMemory(); return; }
     G.pause('story');
     if (SL.hud && SL.hud.touchButtons) SL.hud.touchButtons(false);
+    PS.musicBefore = (SL.audio && SL.audio.current) || null;
     SL.puff.openScenario(PS.memoryScenario(endMemory));
   }
 
@@ -236,6 +240,8 @@
 
   function endMemory() {
     stopVO();
+    if (PS.musicBefore && SL.audio && SL.audio.music) SL.audio.music(PS.musicBefore, { fade: 2 });
+    PS.musicBefore = null;
     // lines queued before the memory (the tether snapping) are stale now
     if (SL.story && SL.story.clear) SL.story.clear();
     const f = flags();
@@ -316,10 +322,19 @@
     return c && norm(c[2]) === norm(text) ? c : null;
   }
   const players = {};
+  function voiceHush() {
+    let on = false;
+    for (const k in players) if (!players[k].paused) on = true;
+    if (SL.audio && SL.audio.hush) SL.audio.hush('memory_voice', on ? 0.45 : 0);
+  }
   function player(ch) {
-    if (!players[ch] && typeof Audio === 'function') players[ch] = new Audio();
+    if (!players[ch] && typeof Audio === 'function') {
+      const a = players[ch] = new Audio();
+      for (const ev of ['playing', 'pause', 'ended']) a.addEventListener(ev, voiceHush);
+    }
     return players[ch] || null;
   }
+  function mood(name, v) { if (SL.audio && SL.audio.mood) SL.audio.mood(name, v); }
   let seqToken = 0;
   function stopVO() {
     seqToken++;
@@ -369,6 +384,7 @@
     return {
       id: 'memory1',
       intro(api) {
+        if (SL.audio && SL.audio.music) SL.audio.music('mus_memory', { fade: 2, mood: { progress: 0, urgency: 0, done: 0 } });
         const p0 = api.panel('sl-puff__overlay--intro sl-puff__overlay--memory');
         const [p, side] = api.cols(p0);
         p.append(api.el('div', 'sl-label', 'A memory'), api.el('h2', 'sl-title sl-title--md sl-puff__title', 'The First Trial'));
@@ -399,8 +415,11 @@
           }
         }
         if (R.over) stopVO();
+        mood('progress', R.t / TRIAL_LEN);
+        mood('urgency', R.t >= VOICE[3][0] ? 1 : 0);
         if (R.t < TRIAL_LEN || R.over) return true;
         api.stopRun();
+        mood('done', 1);
         playSeq(ENDING);
         const [p, side] = api.cols(api.panel('sl-puff__overlay--memory'));
         p.append(api.el('div', 'sl-label', 'A memory'), api.el('h2', 'sl-title sl-title--md sl-puff__title', 'Trial one: survived'));

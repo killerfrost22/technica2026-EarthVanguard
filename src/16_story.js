@@ -226,6 +226,7 @@
         pending = null;
         stopVoice();
         wrap.remove();
+        if (SL.audio && SL.audio.sfx) SL.audio.sfx('choice_pick');
         const s = SL.game.session;
         if (s) s.flags[id] = opt;
         const save = SL.save.data;
@@ -248,6 +249,7 @@
       pending = p;
       SL.game.pause('choice');
       if (ui) ui.appendChild(wrap);
+      if (SL.audio && SL.audio.sfx) SL.audio.sfx('choice_open');
       playVoice(q.textContent); // after the pause, which stops any radio voice
       const first = row.querySelector('button');
       if (first) first.focus({ preventScroll: true });

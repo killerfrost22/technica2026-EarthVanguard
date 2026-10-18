@@ -40,6 +40,16 @@
 .ev-dev__btn:focus-visible { outline: 2px solid #ffd27a; outline-offset: 2px; }
 .ev-dev__btn:disabled { opacity: 0.35; cursor: default; }
 .ev-dev__toggle { display: inline-flex; align-items: center; gap: 4px; margin-right: 10px; cursor: pointer; }
+.ev-dev__select {
+  flex: 1 1 100%;
+  padding: 5px 6px;
+  border-radius: 6px;
+  border: 1px solid rgba(127, 227, 255, 0.35);
+  background: #0d1220;
+  color: #e8eef7;
+  font: inherit;
+}
+.ev-dev__range { width: 150px; accent-color: #7fe3ff; }
 .ev-dev-fab {
   position: fixed;
   right: 12px;

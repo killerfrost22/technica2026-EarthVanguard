@@ -15,6 +15,8 @@
    onOver(R, api) (replaces the game-over panel; runs don't count toward best), skip(api) (offered in place of
    Quit), drawOver(ctx, R, api) and drawHud(ctx, R, api). api is scenarioApi() below.
    SL.puff.drawBuddy(ctx, x, y, r, t, mood, vy, level) draws Puff anywhere (radio portrait, the bubble in missions).
+   Music (03_audio.js): mus_ocean in free play; a scenario starts its own track in intro(). The music is off while the
+   mic is open (it would hear it as the player) and held down while the pause menu is up.
    URL test hooks (with ?screen=puff): puff=play (start in keys mode), puff=bot (start with the bot flying),
    t=<sec> (fast-forward), puffsim=<runs> (bot-play that many 90 s runs, report in window.__PUFF__ and the console). */
 (function (SL) {
@@ -230,6 +232,9 @@
     }
   }
 
+  function music(id, o) { if (SL.audio && SL.audio.music) SL.audio.music(id, o); }
+  function hush(key, amount) { if (SL.audio && SL.audio.hush) SL.audio.hush(key, amount); }
+
   // ------------------------------------------------------------------ mic
   const mic = { stream: null, src: null, an: null, buf: null, db: -100, floor: -60, peak: -20, ok: false };
   async function micStart() {
@@ -246,12 +251,14 @@
       mic.src.connect(mic.an);
     }
     mic.ok = true;
+    hush('puff_mic', 1);
   }
   function micStop() {
     if (mic.stream) mic.stream.getTracks().forEach((t) => { try { t.stop(); } catch (e) { /* gone */ } });
     if (mic.src) { try { mic.src.disconnect(); } catch (e) { /* gone */ } }
     mic.stream = mic.src = mic.an = mic.buf = null;
     mic.ok = false;
+    hush('puff_mic', 0);
   }
   function micRead() {
     if (!mic.an) return -100;
@@ -1939,6 +1946,7 @@
   }
 
   function clearPanel() {
+    hush('puff_pause', 0);
     if (ui && ui.panel) { ui.panel.remove(); ui.panel = null; ui.meter = null; ui.calibText = null; }
     if (document.activeElement && document.activeElement.blur) document.activeElement.blur();
   }
@@ -2109,6 +2117,7 @@
     G.state = 'paused';
     ambient(false);
     const p = panel();
+    hush('puff_pause', 0.6);
     p.append(el('div', 'sl-label', G.bot ? 'Puff\'s Ocean · bot' : 'Puff\'s Ocean'), el('h2', 'sl-title sl-title--md', 'Paused'));
     const b = el('div', 'sl-stack');
     b.append(btn(G.bot ? 'Keep watching' : 'Resume', 'sl-btn--primary', () => resume()));
@@ -2293,6 +2302,7 @@
       if (!d.flags.puff_seen) { d.flags.puff_seen = true; SL.save.commit(); }
       fitWorld();
       newRun();
+      if (!G.scenario) music('mus_ocean', { fade: 1.5 });
       showIntro();
       last = 0;
       cancelAnimationFrame(raf);
@@ -2306,6 +2316,7 @@
       window.removeEventListener('blur', onBlur);
       micStop();
       ambient(false);
+      hush('puff_pause', 0);
       calib = null;
       pointerHeld = false;
       G.bot = false;

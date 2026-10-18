@@ -419,6 +419,27 @@
   }
   function hushMemory() { try { if (memVoice) memVoice.pause(); } catch (e) { /* no audio */ } }
 
+  // Music (03_audio.js, the main context): mus_echo while she sneaks, its mood.tension following the alarm and how close
+  // a hunting drone is; the surface gets mus_free. The pause menu and her memory lines hold the music down.
+  function music(id, o) { if (SL.audio && SL.audio.music) SL.audio.music(id, o); }
+  function hush(key, amount) { if (SL.audio && SL.audio.hush) SL.audio.hush(key, amount); }
+  if (memVoice) {
+    memVoice.onplaying = () => hush('echo_voice', 0.5);
+    memVoice.onpause = memVoice.onended = () => hush('echo_voice', 0);
+  }
+  let tensionWas = -1;
+  function musicMood(R) {
+    let k = 0;
+    for (const s of R.sentries) {
+      if (s.mode !== 'watch' && s.mode !== 'search') continue;
+      k = Math.max(k, U.clamp(1 - Math.hypot(s.x - R.px, s.y - R.py) / 700, 0, 1));
+    }
+    const v = Math.max(R.alarm, k * 0.6);
+    if (Math.abs(v - tensionWas) < 0.02) return;
+    tensionWas = v;
+    if (SL.audio && SL.audio.mood) SL.audio.mood('tension', v);
+  }
+
   // drone whir follows the nearest drone; it revs up while one hunts her
   function robotSound(R) {
     const h = snd.hum;
@@ -682,6 +703,7 @@
     updLasers(R);
     robotCues(R);
     robotSound(R);
+    if (!G.simulating) musicMood(R);
 
     if (R.watch >= 0) {
       R.alarm += dt * (FILL + FILL_NEAR * R.watch);
@@ -954,6 +976,7 @@
     hum(false);
     hushMemory();
     sfx('caught');
+    if (SL.audio && SL.audio.stopMusic) SL.audio.stopMusic(0.3);
   }
 
   function sectorDone(R) {
@@ -966,6 +989,7 @@
     G.state = 'escaped';
     hum(false);
     sfx('free');
+    music('mus_free', { fade: 2.5 });
     const st = store();
     st.wins++;
     R.newBest = !st.best || R.t < st.best;
@@ -1621,6 +1645,8 @@
   function showIntro() {
     G.state = 'intro';
     hum(false);
+    hush('echo_pause', 0);
+    music('mus_echo', { mood: { tension: 0 } });
     const st = store();
     const p = panel('sl-echo__overlay--intro');
     p.append(el('div', 'sl-label', 'Minigame · Echo'), el('h2', 'sl-title sl-title--md sl-echo__title', 'Echo'));
@@ -1660,6 +1686,8 @@
     pingWas = true; // the key that pressed the button doesn't also send an echo
     sfx('sector');
     hum(true);
+    tensionWas = -1;
+    music('mus_echo', { mood: { tension: 0 } });
   }
   function retrySector() {
     const R = G.run;
@@ -1671,12 +1699,15 @@
     G.state = 'play';
     pingWas = true;
     hum(true);
+    tensionWas = -1;
+    music('mus_echo', { mood: { tension: 0 } });
   }
 
   function showPause() {
     if (G.state !== 'play') return;
     G.state = 'paused';
     hum(false);
+    hush('echo_pause', 0.6);
     if (memVoice && !memVoice.paused) { memVoice.pause(); G.memHeld = true; }
     const p = panel();
     p.append(el('div', 'sl-label', 'Echo · ' + SECTORS[G.run.sector].floor + ' ' + SECTORS[G.run.sector].name), el('h2', 'sl-title sl-title--md', 'Paused'));
@@ -1694,6 +1725,7 @@
     G.state = 'play';
     pingWas = true;
     hum(true);
+    hush('echo_pause', 0);
     if (G.memHeld && memVoice) { G.memHeld = false; const pr = memVoice.play(); if (pr && pr.catch) pr.catch(() => {}); }
   }
 
@@ -1808,6 +1840,9 @@
       window.removeEventListener('blur', onBlur);
       hum(false);
       hushMemory();
+      hush('echo_pause', 0);
+      hush('echo_voice', 0);
+      if (SL.audio && SL.audio.mood) SL.audio.mood('tension', null);
       G.memHeld = false;
       touch.id = -1;
       G.state = 'off';

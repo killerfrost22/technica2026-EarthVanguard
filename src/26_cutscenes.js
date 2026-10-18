@@ -13,6 +13,8 @@
    puff_trust1 radio choice adds to.
    Developer tools (27_devtools.js) use stages + jump(stageId) to go to any story point and resetStory() to forget
    it; with SL.debug.skipMinigames on, the story passes through Echo without playing it.
+   Sound: a shot's `music` cue (scenes.js) picks the track for its mood and its `sfx` cue a sound effect (CUE_MUSIC and
+   CUE_SFX below); the music sinks under each narration line while it plays.
    URL test hook: ?cutscene=<id> plays that cutscene over the title screen. */
 (function (SL) {
   'use strict';
@@ -36,6 +38,33 @@
   let playing = false;
   let current = null; // the playing cutscene's promise
 
+  // scenes.js mood cues -> [03_audio.js track, mood values it reads]
+  const CUE_MUSIC = {
+    theme_dark: ['mus_overseers', { intensity: 0 }], // the Overseers, the regime
+    theme_fire: ['mus_overseers', { intensity: 1 }], // the same, with war drums: the night her home burned
+    theme_echo: ['mus_echo', { tension: 0 }],        // the cell, the dark, the power failing: carries on into Echo
+    theme_free: ['mus_free'],                        // open air
+    theme_hope: ['mus_hope'],                        // resolve: Earth Vanguard, going home
+    theme_puff: ['mus_puff'],                        // Puff
+    theme_grief: ['mus_grief'],                      // what happened to Puff's world
+  };
+  // scenes.js sound cues -> 03_audio.js sfx ids ('flash' comes from the player on every white flash)
+  const CUE_SFX = {
+    fire: 'cs_fire', alarm_low: 'cs_alarm', power_down: 'cs_power_down', engine: 'cs_engine',
+    explosion: 'cs_explosion', distress: 'cs_distress', flash: 'cs_flash',
+  };
+  function onMusic(name) {
+    const cue = CUE_MUSIC[name];
+    if (!cue) { U.warnOnce('cs-music:' + name, 'cutscene music cue "' + name + '" has no track'); return; }
+    if (SL.audio && SL.audio.music) SL.audio.music(cue[0], { fade: 2, mood: cue[1] });
+  }
+  function onSfx(name) {
+    if (SL.audio && SL.audio.sfx) SL.audio.sfx(CUE_SFX[name] || name);
+  }
+  function onVoice(speaking) {
+    if (SL.audio && SL.audio.hush) SL.audio.hush('cutscene_voice', speaking ? 0.45 : 0);
+  }
+
   /** Plays one cutscene over the whole page and marks it seen. Resolves with the player's result (or null).
       The screen underneath is hidden while it plays and shown again after, unless opts.restore is false (the
       caller moves on to another screen or a mission). */
@@ -47,12 +76,13 @@
     const prevUi = SL.ui && SL.ui.current;
     if (SL.ui && SL.ui.hide) SL.ui.hide();
     if (SL.audio && SL.audio.unlock) SL.audio.unlock();
-    current = window.Cutscene.play(id, { state, voice: !(SL.audio && SL.audio.muted) }).catch((err) => {
+    current = window.Cutscene.play(id, { state, voice: !(SL.audio && SL.audio.muted), onMusic, onSfx, onVoice }).catch((err) => {
       console.error('[SL.cutscenes] cutscene "' + id + '" failed:', err);
       return null;
     }).then((result) => {
       playing = false;
       current = null;
+      onVoice(false);
       if (gen !== g0) return result; // a developer jump stopped it: leave the story flags as the jump set them
       flags()['cs_' + id] = true;
       SL.save.commit();

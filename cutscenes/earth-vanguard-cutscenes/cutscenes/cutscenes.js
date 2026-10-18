@@ -11,6 +11,9 @@
  *     // result = { id, skipped, choices: {...}, state }
  *   });
  *
+ * Optional hooks: onMusic(name) and onSfx(name) for the script's music / sfx cues, onVoice(speaking) while a
+ * narration clip is sounding (to lower the music under it).
+ *
  * Controls: click / Space / Enter / → = advance (first press finishes the
  * typing), Esc = skip the whole cutscene.
  */
@@ -299,6 +302,10 @@
 
     const state = opts.state || {};
     const result = { id, skipped: false, choices: {}, state };
+    if (opts.onVoice) {
+      voice.onplaying = () => opts.onVoice(true);
+      voice.onpause = voice.onended = () => opts.onVoice(false);
+    }
     const ui = buildDOM(opts.parent || document.body);
     const bd = Backdrop(ui.bg);
     let waiter = null, skipped = false, layerIdx = 0;
@@ -495,6 +502,7 @@
 
     function cleanup() {
       stopVoice();
+      voice.onplaying = voice.onpause = voice.onended = null;
       bd.stop();
       global.removeEventListener('keydown', onKey, true);
       ui.root.remove();
