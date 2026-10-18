@@ -81,5 +81,29 @@
     "style": 0.2,
     "use_speaker_boost": true,
     "speed": 0.95
+  },
+  "Patch": {
+    "voice": "XrExE9yKIg1WjnnlVkGX",
+    "stability": 0.55,
+    "similarity_boost": 0.75,
+    "style": 0.3,
+    "use_speaker_boost": true,
+    "speed": 1.0
+  },
+  "Rook": {
+    "voice": "pFZP5JQG7iQjIQuC4Bku",
+    "stability": 0.6,
+    "similarity_boost": 0.75,
+    "style": 0.25,
+    "use_speaker_boost": true,
+    "speed": 0.95
+  },
+  "Vael": {
+    "voice": "N2lVS1w4EtoT3dr4eOWO",
+    "stability": 0.8,
+    "similarity_boost": 0.8,
+    "style": 0.1,
+    "use_speaker_boost": true,
+    "speed": 0.85
   }
 }

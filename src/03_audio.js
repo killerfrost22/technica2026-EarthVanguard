@@ -11,8 +11,8 @@
    kick ducks the bass, pad and arp bus, so the synths breathe with the drums. 'm1' and 'boss' alias mus_m1 and
    mus_boss; mus_miniboss and mus_boss_heavy are the boss track at their own tempo and key.
    Every stage has a track for its mood (docs/api/audio.md has the list): the title theme, the cutscene themes
-   (src/26_cutscenes.js maps scenes.js cues onto them), Echo, Puff's Ocean, Puff's memory, the black hole in Mission 1,
-   victory and failure. Tracks can read live mood values (A.mood): Echo's alarm sets 'tension', Puff's memory sets
+   (src/26_cutscenes.js maps scenes.js cues onto them), Echo, Puff's Ocean, Puff's memory, the black hole in Mission 1
+   (and Mission 2), the storm of Mission 3 (mus_m3: distorted bass, stabs, toms, thunder), victory and failure. Tracks can read live mood values (A.mood): Echo's alarm sets 'tension', Puff's memory sets
    'progress' and 'urgency', the prologue's fire sets 'intensity'. A.hush(key, amount) holds the music down while
    something else needs the room: a voice line, a minigame pause, or Puff's Ocean's microphone (music off).
    Also reacts to bus events: the title screen (title theme), boss warning, checkpoint, low hull, shield break, player
@@ -720,6 +720,64 @@
   function air(m, t, len, g) {
     noise({ t, out: m.pad, v: g || 1, p: 1 }, len, 0.05, { type: 'bandpass', f0: 600, f1: 2600, q: 0.8, swell: 0.5, glide: len });
   }
+  // the storm kit (mus_m3)
+  const GRIT = (() => {
+    const n = 1024, c = new Float32Array(n);
+    for (let i = 0; i < n; i++) c[i] = Math.tanh(((i / (n - 1)) * 2 - 1) * 3.5);
+    return c;
+  })();
+  /** Distorted bass: two detuned saws through a tanh shaper and a closing lowpass, over a clean sine sub. */
+  function grit(m, t, midi, len, g, cut) {
+    const f = mtof(midi), end = t + len + 0.05, c0 = cut || 1600;
+    const env = ac.createGain(), pre = ac.createGain(), sh = ac.createWaveShaper(), lp = ac.createBiquadFilter();
+    shape(env.gain, t, 0.13 * (g || 1), len, { a: 0.004, r: Math.min(0.05, len * 0.4) });
+    pre.gain.value = 0.9;
+    sh.curve = GRIT;
+    sh.oversample = '2x';
+    lp.type = 'lowpass';
+    lp.frequency.setValueAtTime(c0, t);
+    lp.frequency.exponentialRampToValueAtTime(Math.max(180, c0 * 0.35), t + len);
+    lp.Q.value = 3;
+    pre.connect(sh);
+    sh.connect(lp);
+    lp.connect(env);
+    const oscs = [];
+    for (const d of [-7, 7]) {
+      const o = ac.createOscillator();
+      o.type = 'sawtooth';
+      o.frequency.value = f;
+      o.detune.value = d;
+      o.connect(pre);
+      oscs.push(o);
+    }
+    const sub = ac.createOscillator(), sg = ac.createGain();
+    sub.frequency.value = f / 2;
+    sg.gain.value = 0.9;
+    sub.connect(sg);
+    sg.connect(env);
+    oscs.push(sub);
+    env.connect(m.pumped);
+    for (const o of oscs) { o.start(t); o.stop(end); }
+  }
+  /** A short chord stab: detuned saws with a snapping filter. */
+  function stab(m, t, notes, g) {
+    for (const n of notes) {
+      for (const s of [-1, 1]) synth(m, m.pumped, t, n, m.sixteenth * 1.5, 0.045 * (g || 1), { type: 'sawtooth', exp: true, lp: 4200, lp1: 700, detune: s * 10, pan: s * 0.3 });
+    }
+  }
+  function tom(m, t, midi, g) {
+    const f = mtof(midi), c = { t, out: m.drums, v: g || 1, p: 1 };
+    tone(c, 'sine', f * 1.6, f, 0.32, 0.7, { a: 0.002, glide: 0.12 });
+    tone(c, 'triangle', f * 2.2, f * 1.3, 0.08, 0.2, { a: 0.002 });
+    noise(c, 0.05, 0.18, { f0: 2400, f1: 400 });
+  }
+  /** A thunder swell: a low rumble that opens up, then a crackle as it breaks. */
+  function thunder(m, t, len, g) {
+    const c = { t, out: m.drums, v: g || 1, p: 1 };
+    noise(c, len, 0.32, { type: 'lowpass', f0: 160, f1: 900, q: 0.5, swell: 0.4, glide: len * 0.45 });
+    noise(c, len * 0.5, 0.12, { at: len * 0.35, type: 'bandpass', f0: 1400, f1: 220, q: 0.6, swell: 0.15 });
+    tone(c, 'sine', 70, 38, len * 0.6, 0.25, { at: len * 0.35, a: 0.05 });
+  }
 
   // mus_m1: 140 BPM, E minor, Em C G D. intro4 | A8 B8 chorus16 bridge8 (loops from A)
   const M1 = {
@@ -907,6 +965,41 @@
     root: [36, 44, 41, 43],
     root2: [36, 44, 37, 43],
   };
+  // mus_m3: A minor in the storm. A is Am Am F G Am Am F E, B is Dm Dm Am Am F G E E over rolling toms, and C plays
+  // the hook twice over Am F G E.
+  const M3 = {
+    ch: { Am: [57, 60, 64], F: [57, 60, 65], G: [55, 59, 62], E: [56, 59, 64], Dm: [57, 62, 65] },
+    root: { Am: 45, F: 41, G: 43, E: 40, Dm: 38 },
+    A: ['Am', 'Am', 'F', 'G', 'Am', 'Am', 'F', 'E'],
+    B: ['Dm', 'Dm', 'Am', 'Am', 'F', 'G', 'E', 'E'],
+    C: ['Am', 'F', 'G', 'E'],
+    hook: [
+      [[0, 76, 3], [3, 74, 3], [6, 72, 2], [8, 69, 4], [12, 72, 4]],
+      [[0, 77, 6], [6, 76, 2], [8, 72, 4], [12, 69, 4]],
+      [[0, 74, 3], [3, 76, 3], [6, 79, 6], [12, 77, 2], [14, 76, 2]],
+      [[0, 76, 8], [8, 80, 4], [12, 83, 4]],
+      [[0, 81, 3], [3, 79, 3], [6, 76, 2], [8, 72, 4], [12, 76, 4]],
+      [[0, 77, 6], [6, 79, 2], [8, 81, 4], [12, 84, 4]],
+      [[0, 83, 6], [6, 81, 2], [8, 79, 4], [12, 74, 4]],
+      [[0, 80, 12, 83], [12, 76, 4]],
+    ],
+    // brass swells over B, one or two to a chord
+    horn: [
+      [[0, 69, 16]], [[0, 72, 8], [8, 74, 8]], [[0, 76, 16]], [[0, 72, 16]],
+      [[0, 72, 8], [8, 69, 8]], [[0, 71, 8], [8, 74, 8]], [[0, 71, 16]], [[0, 68, 12, 71], [12, 64, 4]],
+    ],
+    stabA: [3, 6, 11, 14],
+    stabC: [0, 3, 6, 10, 12, 14],
+    // C's bass gallops: the 16ths it plays, the octave on 14
+    gallop: [0, 2, 3, 4, 6, 7, 8, 10, 11, 12, 14, 15],
+  };
+  function m3Section(bar) {
+    if (bar < 2) return { name: 'intro', i: bar };
+    const b = (bar - 2) % 32;
+    if (b < 8) return { name: 'A', i: b };
+    if (b < 16) return { name: 'B', i: b - 8 };
+    return { name: 'C', i: b - 16 };
+  }
   // mus_fail: Am F Dm E, two bars each.
   const FAIL = {
     ch: [[57, 60, 64], [57, 60, 65], [57, 62, 65], [56, 59, 64]],
@@ -1237,6 +1330,65 @@
         }
         if (!B && s === 0 && b % 4 === 1) glass(m, t, [67, 72, 68, 67][Math.floor(b / 4) % 4], 0.8, 0.3);
         if (B) pluck(m, t, [ch[0] + 12, ch[1] + 12, ch[2] + 12, ch[1] + 12][s % 4], 0.45);
+      },
+    },
+    // mus_m3: 150 BPM, A minor, the storm (Mission 3). intro2 | A8 B8 C16 (loops from A). A drives a distorted 8th bass
+    // under syncopated stabs; B drops to half time with rolling toms and brass swells; C gallops under the hook, doubled
+    // by brass the second time. Thunder swells at the section starts.
+    mus_m3: {
+      bpm: 150, gain: 0.8, leadVerb: 0.45,
+      play(m, step, t) {
+        const bar = Math.floor(step / 16), s = step % 16, sec = m3Section(bar), n = sec.name, i = sec.i;
+        const name = n === 'intro' ? 'Am' : n === 'C' ? M3.C[i % 4] : M3[n][i];
+        const chord = M3.ch[name], root = M3.root[name];
+        if (n === 'intro') {
+          if (i === 0 && s === 0) { thunder(m, t, m.bar * 2, 1); boom(m, t, 0.8); }
+          if (i === 1) {
+            tom(m, t, 55 - Math.floor(s / 4) * 3, 0.35 + s * 0.035);
+            if (s >= 12) snare(m, t, 0.3 + (s - 12) * 0.12);
+          }
+          if (s === 0 || s === 8) grit(m, t, root, m.beat * 1.6, 0.7, 900);
+          return;
+        }
+        if (s === 0 && i === 0) crash(m, t);
+        if (s === 0 && i % 4 === 0) thunder(m, t, m.bar * 2, n === 'C' ? 0.6 : 0.85);
+        // drums
+        if (n === 'B') {
+          if (s === 0 || s === 10) kick(m, t, 0.9);
+          if (s === 8) snare(m, t, 0.9);
+          if (s % 2 === 0) hat(m, t, s % 8 === 4, 0.55);
+          // rolling toms: a run down the kit in the second half of odd bars, all of the last bar
+          if ((i % 2 === 1 && s >= 8) || i === 7) tom(m, t, 57 - (s % 8) * 2, 0.45 + (i === 7 ? s * 0.025 : 0.1));
+        } else {
+          if (s % 4 === 0) kick(m, t);
+          if (n === 'C' && s === 14) kick(m, t, 0.6);
+          if (s === 4 || s === 12) snare(m, t, n === 'A' ? 0.8 : 1);
+          if (n === 'C') hat(m, t, s % 4 === 2, s % 2 ? 0.35 : 0.6);
+          else if (s % 4 === 2) hat(m, t, false, 0.8);
+          else if (i >= 4 && s % 2) hat(m, t, false, 0.35);
+          if (n === 'A' && i % 2 === 1 && (s === 7 || s === 15)) tom(m, t, s === 7 ? 50 : 45, 0.5);
+          if (n === 'C' && i === 15 && s >= 8) tom(m, t, 57 - (s - 8) * 2, 0.5 + (s - 8) * 0.05);
+          if (n === 'C' && i === 14 && s === 0) riser(m, t, m.bar * 2);
+        }
+        // bass
+        if (n === 'A' && (s % 2 === 0 || s === 7 || s === 15)) grit(m, t, root + (s === 7 || s === 15 ? 12 : 0), m.sixteenth * 1.6, 1, 1400);
+        if (n === 'B' && (s === 0 || s === 10)) grit(m, t, root, m.sixteenth * (s ? 5.5 : 9.5), 0.9, 1000);
+        if (n === 'B' && s === 14) grit(m, t, root + 12, m.sixteenth * 1.6, 0.7, 1400);
+        if (n === 'C' && M3.gallop.includes(s)) grit(m, t, root + (s === 14 ? 12 : 0), m.sixteenth * 1.4, 1, 2000);
+        // chords
+        if (n === 'A' && M3.stabA.includes(s)) stab(m, t, chord, 1);
+        if (n === 'A' && i >= 4) pluck(m, t, [chord[0] + 12, chord[1] + 12, chord[2] + 12, chord[1] + 12][s % 4], 0.6);
+        if (n === 'B' && s === 0) strings(m, t, chord, m.bar * 0.98, 1.2);
+        if (n === 'C') {
+          if (s === 0) pad(m, t, chord, m.bar, 0.7);
+          if (M3.stabC.includes(s)) stab(m, t, chord.map((x) => x + 12), 0.6);
+        }
+        // tunes
+        if (n === 'B') playBars(m, M3.horn, i, s, (x, len, from) => horn(m, t, x, len * 0.97, 1, from));
+        if (n === 'C') {
+          playBars(m, M3.hook, i % 8, s, (x, len, from) => lead(m, t, x, len * 0.95, 1, from));
+          if (i >= 8) playBars(m, M3.hook, i % 8, s, (x, len) => horn(m, t, x - 12, len * 0.95, 0.8));
+        }
       },
     },
     // mus_fail: 70 BPM, A minor (the failed screen). After the fail sting, strings drift down Am F Dm E under a lonely

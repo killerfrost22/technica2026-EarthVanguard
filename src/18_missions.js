@@ -10,7 +10,8 @@
    (25_puffstory.js). While the black hole is near, the music turns to the song it sings ('blackhole', mus_m2), and it
    returns to mus_m1 once Puff has answered.
    'm2', Deep Pull, follows GDD 4.2 over Kerr Station (bg_kerr) with the LODESTAR boss; it unlocks when m1 is cleared
-   (unlock lists the missions that must be done first; 19_progress.js). */
+   (unlock lists the missions that must be done first; 19_progress.js). 'm3', Stormwall, follows GDD 4.3 through the
+   Tantalus Nebula's ion storm (bg_tantalus) to TEMPEST, with mus_m3 and mus_boss_heavy; it unlocks when m2 is cleared. */
 (function (SL) {
   'use strict';
 
@@ -209,6 +210,118 @@
       { id: 'boss', text: 'Destroy LODESTAR', check: (s) => (s.bossesDefeated || 0) > 0 },
       { id: 'rescue', text: 'Rescue 14 people', bonus: true, check: (s) => s.rescued >= 14 },
       { id: 'vip', text: "Find Dr. Osei's pod", bonus: true, check: (s) => !!s.flags.vip_s2 },
+    ],
+  }));
+
+  // m3, Stormwall (GDD 4.3): the Tantalus Nebula's permanent ion storm, where the Nyx fleet hides. Ion cells come three
+  // times; two prison barges (bastions with cargo) cross the storm and break open into pods when destroyed, the second
+  // one carrying Captain Holt. Calm in the storm's eye, then TEMPEST in the storm wall.
+  function m3Timeline() {
+    const coop = (s) => !!s.coop;
+    return [
+      { at: 0, banner: 'STORMWALL', sub: 'Tantalus Nebula', music: 'mus_m3', scroll: 100, bg: 'nebula' },
+      { at: 1.5, radio: 'm3_open' },
+      { at: 4.5, radio: 'm3_puff_open' },
+      { at: 3, formation: 'pincer', enemy: 'dart', count: 10 },
+      { at: 6, formation: 'vee', enemy: 'wasp', count: 5, x: 360 },
+      { at: 9, spawn: 'skimmer', opts: { side: 'left', y: 300 }, radio: 'm3_skimmer' },
+      { at: 12, spawn: 'skimmer', opts: { side: 'right', y: 300 } },
+      { at: 14, formation: 'arc_sweep', enemy: 'dart', count: 8, opts: { side: 'left' } },
+      { at: 16, formation: 'arc_sweep', enemy: 'dart', count: 8, opts: { side: 'right' } },
+      { at: 18, spawn: 'hornet', x: 360, radio: 'm3_hornet' },
+      { at: 21, formation: 'rain', enemy: 'gnat', count: 12 },
+      { at: 24, waitClear: true, timeout: 10 },
+
+      // the first ion cells
+      { at: 26, pickup: 'weapon_up', x: 360 },
+      { at: 27, bg: 'storm', hazard: 'ion_storm', opts: { cells: 2, duration: 26, strikeEvery: 2.4 }, radio: 'm3_ion' },
+      { at: 31, formation: 'snake', enemy: 'dart', count: 8, x: 160 },
+      { at: 34, formation: 'snake', enemy: 'dart', count: 8, x: 560 },
+      { at: 37, spawn: 'stormcaller', x: 260 },
+      { at: 37, spawn: 'stormcaller', x: 460, radio: 'm3_stormcaller' },
+      { at: 42, pod: { x: 360, y: -40, people: 3, kind: 'civilian' } },
+      { at: 44, formation: 'side_stream', enemy: 'gnat', count: 10, opts: { side: 'left' } },
+      { at: 46, spawn: 'hornet', x: 220 },
+      { at: 46, spawn: 'hornet', x: 500 },
+      { at: 49, formation: 'staircase', enemy: 'wasp', count: 5, opts: { side: 'right' } },
+      { at: 53, waitClear: true, timeout: 14 },
+
+      // BREATHER: the eye of the storm
+      { at: 55, bg: 'eye', scroll: 70, radio: 'm3_eye' },
+      { at: 57, pod: { x: 240, y: -40, people: 2, kind: 'crew' } },
+      { at: 57, pod: { x: 480, y: -40, people: 2, kind: 'civilian' } },
+      { at: 59, pickup: 'shield', x: 360 },
+      { at: 62, checkpoint: true, banner: 'CHECKPOINT', sub: 'Prison convoy ahead' },
+
+      // PEAK: the first prison barge, then a gunship push under three ion cells
+      { at: 63, bg: 'storm', scroll: 100 },
+      { at: 64, spawn: 'bastion', x: 360, opts: { cargo: [['captive', 3], ['captive', 2]] }, radio: 'm3_bastion' },
+      { at: 66, radio: 'm3_puff_barge' },
+      { at: 70, formation: 'pincer', enemy: 'dart', count: 12 },
+      { at: 74, spawn: 'skimmer', opts: { side: 'left', y: 260 } },
+      { at: 74, spawn: 'skimmer', opts: { side: 'right', y: 340 } },
+      { at: 78, spawn: 'needler', x: 180, opts: { hoverY: 220 } },
+      { at: 78, spawn: 'needler', x: 540, opts: { hoverY: 220 } },
+      { at: 82, hazard: 'ion_storm', opts: { cells: 3, duration: 24, strikeEvery: 2.2 } },
+      { at: 84, formation: 'vee', enemy: 'wasp', count: 5, x: 360 },
+      { at: 88, spawn: 'weaver', x: 360 },
+      { at: 92, formation: 'column', enemy: 'gnat', count: 6, x: 60, repeat: { every: 4, count: 3 } },
+      { at: 94, formation: 'column', enemy: 'gnat', count: 6, x: 660, repeat: { every: 4, count: 3 } },
+      { at: 100, pickup: 'weapon_up', x: 360 },
+      { at: 104, spawn: 'manta', x: 220 },
+      { at: 104, spawn: 'manta', x: 500 },
+      { at: 108, waitClear: true, timeout: 16 },
+
+      // the second barge carries Captain Holt (vip s3); the story module plays m3_vip when her pod breaks free
+      { at: 110, spawn: 'bastion', x: 360, opts: { cargo: [['vip', 1, 's3'], ['crew', 2]], hpMul: 1.2 }, radio: 'm3_convoy' },
+      { at: 112, spawn: 'stormcaller', x: 160 },
+      { at: 112, spawn: 'stormcaller', x: 560 },
+      { at: 116, formation: 'side_stream', enemy: 'dart', count: 10, opts: { side: 'left' } },
+      { at: 118, formation: 'side_stream', enemy: 'dart', count: 10, opts: { side: 'right' } },
+      { at: 122, spawn: 'hornet', x: 360 },
+      { at: 126, formation: 'rain', enemy: 'gnat', count: 14 },
+      { at: 126, pod: { x: 200, y: -40, people: 2, kind: 'civilian' } },
+      { at: 132, pickup: 'bomb', x: 360 },
+      { at: 134, formation: 'pincer', enemy: 'dart', count: 12 },
+      { at: 138, spawn: 'spear', x: 180 },
+      { at: 138, spawn: 'spear', x: 360 },
+      { at: 138, spawn: 'spear', x: 540 },
+      { at: 142, waitClear: true, timeout: 14 },
+
+      { at: 144, pickup: 'missile', x: 360 },
+      { at: 144, pod: { x: 260, y: -40, people: 3, kind: 'civilian' } },
+      { at: 145, if: coop, pod: { x: 460, y: -40, people: 3, kind: 'civilian' } },
+      { at: 146, radio: 'm3_regroup' },
+      { at: 148, formation: 'escort_box', x: 360, opts: { leader: 'weaver', escort: 'wasp', count: 4 } },
+      { at: 152, hazard: 'ion_storm', opts: { cells: 2, duration: 14, strikeEvery: 2.6 } },
+      { at: 154, formation: 'vee', enemy: 'dart', count: 9, x: 360 },
+      { at: 158, spawn: 'needler', x: 200, opts: { hoverY: 220 } },
+      { at: 158, spawn: 'needler', x: 520, opts: { hoverY: 220 } },
+      { at: 161, waitClear: true, timeout: 12 },
+
+      { at: 163, pickup: 'repair', x: 360, bg: 'boss', scroll: 50 },
+      { at: 164, radio: 'm3_boss_warn' },
+      { at: 166, banner: 'WARNING', sub: 'Storm dreadnought TEMPEST', color: '#ff5c8a' },
+      { at: 168, boss: 'boss_tempest' },
+      { at: 169, afterBoss: true, bg: 'clear', scroll: 60, radio: 'm3_win' },
+      { at: 169.1, afterBoss: true, radio: 'm3_puff_win' },
+      // nothing to fire: holds the 3 s outro back until both voiced lines (about 10 s together) have finished
+      { at: 178, afterBoss: true },
+    ];
+  }
+
+  SL.missions.define('m3', Object.assign({}, base, {
+    name: 'Stormwall', order: 3, location: 'Tantalus Nebula', bg: 'bg_tantalus', music: 'mus_m3', bossMusic: 'mus_boss_heavy',
+    boss: 'boss_tempest', unlock: ['m2'], tune: { bulletSpeed: 1, fireRate: 1 }, puffBuddy: true, timeline: m3Timeline,
+    rewards: { credits: 700, sp: 2 },
+    // Captain Holt's pod is a VIP: remember it in the session flags (they survive checkpoints)
+    onStart(s) {
+      SL.bus.onMission('podRescued', (e) => { if (e && e.vip === 's3') s.flags.vip_s3 = true; });
+    },
+    objectives: [
+      { id: 'boss', text: 'Destroy TEMPEST', check: (s) => (s.bossesDefeated || 0) > 0 },
+      { id: 'rescue', text: 'Rescue 16 people', bonus: true, check: (s) => s.rescued >= 16 },
+      { id: 'vip', text: 'Free Captain Holt', bonus: true, check: (s) => !!s.flags.vip_s3 },
     ],
   }));
 })(window.SL = window.SL || {});

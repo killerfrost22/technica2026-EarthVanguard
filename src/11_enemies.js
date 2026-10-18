@@ -2719,7 +2719,9 @@
       d.cargo = Array.isArray(o.cargo) && o.cargo.length ? o.cargo.slice() : null;
       if (d.cargo) { d.skin = skin(e, 'bastion_cargo'); e.sprite = d.skin.b; }
       d.ta = [HALF, HALF];
-      d.tf = [0.9, 1.8];
+      // turret timers for ready(e, 'tfL' / 'tfR'), staggered so the two guns alternate
+      d.tfL = 0.9;
+      d.tfR = 1.8;
       d.mz = [0, 0];
       d.wall = 3.2;
       d.chg = 0;

@@ -92,6 +92,17 @@ nothing is recorded or sent.
 - **Mission 1, First Light:** a short first mission over the Vesta Shipyards: a catapult launch off the
   *Halcyon*'s deck, gnat, dart, wasp and manta formations, escape-pod rescues, a black hole, a checkpoint, Puff's
   trust choice and the assault carrier RAZORBACK.
+- **Mission 2, Deep Pull:** Kerr Station breaking up beside Kerr's Eye, a captive black hole. Spears, snipers and
+  spiral-gun weavers, a first black hole that bends bullets and eats drones, tug ships towing black holes, Dr. Osei's
+  pod falling toward one of them, and the gravity siege engine LODESTAR.
+- **Mission 3, Stormwall:** into the Tantalus Nebula's ion storm after the Nyx fleet. Ion cells that jam your guns,
+  mine-laying skimmers, missile boats and lightning-chaining stormcallers, a calm in the storm's eye, two prison barges
+  to crack open (the second carries Captain Holt, "Rook"), and the storm dreadnought TEMPEST, all to its own storm
+  track.
+- **Missions unlock in order.** Start takes you to the next mission you haven't cleared, and the **Missions** button on
+  the title screen replays any mission you've opened.
+- **Voiced radio:** Anvil, Sparrow, Puff, Patch the hangar chief, Rook, and Hierarch Vael, who hijacks the channel at
+  each boss's entrance.
 - **Weapons that change what you see:** twin pulse lasers, a widening spread fan, a piercing lance beam
   (each with five levels), plus homing missiles and screen-clearing bombs.
 - **Space hazards:** black holes that bend your lasers and the screen around them, asteroid storms, ion
@@ -100,8 +111,8 @@ nothing is recorded or sent.
 - **Local co-op** for two players on one keyboard, two gamepads, or a mix.
 - **Music for every stage,** all synthesized, each written for its mood: the title theme, a theme for each part of
   the story (the Overseers, the cell, the escape, Puff, his grief), Echo's stealth track (her heartbeat comes in as the
-  alarm rises), Puff's Ocean, Puff's memory, the black hole (it sings the song Puff knows), the bosses, victory and
-  defeat. Details in [`docs/api/audio.md`](docs/api/audio.md).
+  alarm rises), Puff's Ocean, Puff's memory, the black hole (it sings the song Puff knows, and Mission 2 flies to it),
+  Mission 3's storm, the bosses, victory and defeat. Details in [`docs/api/audio.md`](docs/api/audio.md).
 - **Echo:** a stealth minigame about the escape of Blue Arrow, the main character. She grew up as a test subject
   inside a sealed facility, and the experiments left her able to see with sound. With the power out, every echo she sends lights
   up the walls for a moment, but security drones hear it too. Three floors to the surface, each behind a keycard
@@ -114,8 +125,8 @@ nothing is recorded or sent.
   lightning, rain, snow, fog, sunsets, moonlit nights and the northern lights. Watch the bot swim
   from the menu, and chase the top 10 on the leaderboard (saved on your device).
 
-**Designed, not wired into missions yet:** the full five-mission campaign, four side stories, the hangar
-and skill tree and the full radio cast are written up in [`docs/GDD.md`](docs/GDD.md). Three of the
+**Designed, not wired into missions yet:** Missions 4 and 5, four side stories, the hangar and skill tree and the
+rest of the radio cast are written up in [`docs/GDD.md`](docs/GDD.md). Three of the
 bosses (Suneater, Mantis and Crucible) are built and can be fought in their test sandboxes, for example
 `?sandbox=boss:boss_suneater`.
 
