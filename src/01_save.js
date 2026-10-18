@@ -50,7 +50,7 @@
 
   function defaults() {
     return {
-      v: 1, callsign: 'LANCE', p2callsign: '', credits: 0, sp: 0, difficulty: 'pilot',
+      v: 1, callsign: 'Blue Arrow', p2callsign: '', credits: 0, sp: 0, difficulty: 'pilot',
       missions: {}, choices: {}, flags: {}, upgrades: {},
       skills: { owned: [], equipped: [null, null] },
       rescuedTotal: 0, stats: { kills: 0, deaths: 0, playSeconds: 0, bombs: 0 }, updatedAt: 0,
@@ -73,7 +73,8 @@
   function normalizeData(d) {
     d = U.deepMerge(defaults(), obj(d));
     d.v = 1;
-    d.callsign = String(d.callsign || 'LANCE').slice(0, 16);
+    // the pilot is Blue Arrow: saves still on an old default callsign (LANCE, BLUE ARROW) move to hers
+    d.callsign = String(d.callsign && d.callsign !== 'LANCE' && d.callsign !== 'BLUE ARROW' ? d.callsign : 'Blue Arrow').slice(0, 16);
     d.p2callsign = String(d.p2callsign || '').slice(0, 16);
     d.credits = Math.floor(num(d.credits, 0, 0, 1e9));
     d.sp = Math.floor(num(d.sp, 0, 0, 1e6));

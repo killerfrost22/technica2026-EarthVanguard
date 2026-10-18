@@ -103,7 +103,7 @@
     if (PLAYTEST_UNLOCK) return true;
     return !!((d.flags && d.flags.unlock_puff) || (SL.save.mission && SL.save.mission(UNLOCK_MISSION).done));
   }
-  function callsign() { return (SL.save.data && SL.save.data.callsign) || 'LANCE'; }
+  function callsign() { return (SL.save.data && SL.save.data.callsign) || 'Blue Arrow'; }
 
   // ------------------------------------------------------------------ audio (own context: it also hosts the mic)
   const snd = { ac: null, out: null, noise: null, amb: null, lastBubble: 0 };
@@ -2002,9 +2002,10 @@
     const [p, side] = cols(p0);
     p.append(el('div', 'sl-label', 'Minigame · Puff\'s Ocean'), el('h2', 'sl-title sl-title--md sl-puff__title', 'Puff\'s Ocean'));
     const story = el('p', 'sl-puff__story');
-    story.textContent = 'Puff flies with ' + callsign() + ' in a water bubble, but he is not from Earth. His home was an ocean world, ' +
+    // matches the recorded narration (narration/SCRIPT.md, puff_intro) word for word
+    story.textContent = 'Puff flies beside the jet in a water bubble, but he is not from Earth. His home was an ocean world, ' +
       'coral and light, until the corporations bled it dark. Then the Directorate chose it for one of their games: survive the ' +
-      'trials and win the power to heal your world. These are the trials, the way Puff remembers them.';
+      'trials, and win the power to heal your world. These are the trials, the way Puff remembers them.';
     p.appendChild(story);
     const how = el('ul', 'sl-puff__how');
     [['Loud', 'Puff puffs up and floats'], ['Quiet', 'Puff shrinks and sinks: squeeze under the garbage patch'], ['Keys', 'hold Space (or the screen) to puff up, let go to sink'], ['Avoid', 'ghost nets, oil spills, bags, six-pack rings, leaking drums'], ['Grab', 'pearls for points, starfish for hearts, bubbles for a shield']]

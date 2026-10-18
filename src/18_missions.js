@@ -192,8 +192,8 @@
       { at: 159, boss: 'boss_lodestar' },
       { at: 160, afterBoss: true, bg: 'calm', scroll: 60, radio: 'm2_win' },
       { at: 160.1, afterBoss: true, radio: 'm2_puff_win' },
-      // nothing to fire: holds the 3 s outro back until both voiced lines (about 8 s together) have finished
-      { at: 166, afterBoss: true },
+      // nothing to fire: holds the 3 s outro back until both voiced lines (about 9 s together) have finished
+      { at: 167, afterBoss: true },
     ];
   }
 

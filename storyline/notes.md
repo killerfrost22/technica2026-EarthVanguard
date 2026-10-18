@@ -9,12 +9,11 @@ Decisions so far, and places where this storyline and the current game still dis
 - **Echo is Blue Arrow's own story**: a girl escaping the facility by sound. There is no fish in Echo.
 - **Puff is Blue Arrow's best friend and fighting buddy.**
 - **Puff is "he".**
+- **The pilot's callsign is Blue Arrow** (written in normal case). The radio calls her by it (default callsign in the
+  save, formerly LANCE; old saves on LANCE move to it). She still flies the XF-9 Starlance from the carrier Halcyon.
 
 ## Open
 
-- **The pilot's callsign.** The shooter calls the player by a callsign (default LANCE) flying the XF-9 Starlance
-  from the carrier Halcyon, and radio lines use it ("Try not to fly into anything this time, {callsign}"). Since the
-  pilot is Blue Arrow, should the default callsign become BLUE ARROW, or is LANCE her callsign?
 - **Names still to pick.** Echo and Puff's memory call the subordinate organization **the Directorate**; the story
   doesn't name it. The advanced civilization has no name yet. **Earth Vanguard** is marked as a temporary name.
 - **Wingmates.** `docs/GDD.md` and the website list Sparrow (Lt. Juno Park) as "your wingmate". With Puff as her
