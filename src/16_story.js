@@ -62,6 +62,27 @@
       test_boss: { who: 'anvil', text: 'Big contact inbound. Hit the core between its volleys.' },
       test_victory: { who: 'anvil', text: 'Target down. Good flying, {callsign}. Bring it home.' },
       rescue_thanks: { who: 'sparrow', text: 'Pod secured. They say thanks, {callsign}!' },
+      // m2, Deep Pull (GDD 16.2; Patch's and Osei's lines go to Anvil and Sparrow until those characters exist)
+      m2_open: { who: 'anvil', text: 'Kerr Station is breaking up. Clear a path for the lifeboats.' },
+      m2_puff_open: { who: 'puff', text: 'Another black hole. Keep the tether short, {callsign}.' },
+      m2_spears: { who: 'sparrow', text: 'Spears lock on, then ram. When the nose glows red, sidestep!' },
+      m2_needlers: { who: 'sparrow', text: 'Snipers. See the red line? That\'s where the shot goes. Don\'t be there.' },
+      m2_weaver: { who: 'sparrow', text: 'Weaver! Spiral guns. Circle with the spiral, not against it.' },
+      m2_eye: { who: 'anvil', text: 'That\'s Kerr\'s Eye ahead. A black hole on a leash. Stay sharp.' },
+      m2_puff_eye: { who: 'puff', text: 'It isn\'t singing. Good. Keep it that way.' },
+      m2_lance: { who: 'anvil', text: 'Lance cell! A beam that cuts through everything in a line. Try it.' },
+      m2_bh_warn: { who: 'anvil', text: 'Gravity well! It pulls you in. Don\'t use focus near it, you\'ll lose speed.' },
+      m2_bh_eat: { who: 'sparrow', text: 'Ha! It ate their drones. Your shots bend around it too. Use that.' },
+      m2_tug: { who: 'anvil', text: 'Tug ship towing a black hole. Kill it and the hole drifts loose.' },
+      m2_puff_tug: { who: 'puff', text: 'They tow them around like cargo. Like it\'s nothing.' },
+      m2_vip: { who: 'anvil', text: 'VIP pod falling toward that hole. Grab it before the horizon does!' },
+      m2_vip_saved: { who: 'sparrow', text: 'Got her! Dr. Osei, Lagrange Deep. She says you\'re crazy, {callsign}. In a good way.' },
+      m2_station: { who: 'sparrow', text: 'Lifeboats are clear of the station. Nice flying, {callsign}!' },
+      m2_boss_warn: { who: 'anvil', text: 'Big signature on the end of the leash. The siege engine. Cut it loose.' },
+      m2_boss_p2: { who: 'anvil', text: 'Its pull is climbing! Stay fast. It can\'t hold a ship at full speed.' },
+      m2_boss_p3: { who: 'sparrow', text: 'Containment\'s failing and the hole is growing. Finish it fast!' },
+      m2_win: { who: 'anvil', text: 'The leash is cut and the Eye is fading. Outstanding work, {callsign}.' },
+      m2_puff_win: { who: 'puff', text: '...Still here. Thanks for keeping the tether short.' },
     },
     choices: {
       test_choice: {
@@ -266,7 +287,20 @@
       S.clear();
       if (pending) { const p = pending; pending = null; p.wrap.remove(); }
     });
-    SL.bus.on('bossWarning', () => { if (S.lines.test_boss) S.radio('test_boss'); });
+    // Mission cues played on game events when the mission has them (GDD 16.1): <mission>_vip, _vip_saved, _boss_intro,
+    // _boss_p<N>. A mission with its own _boss_warn schedules it, so the generic boss line stays out of the way.
+    const cue = (suffix) => {
+      const s = SL.game.session;
+      const id = s && s.missionId + '_' + suffix;
+      if (id && S.lines[id]) S.radio(id, { priority: true, force: true });
+      return !!(id && S.lines[id]);
+    };
+    const own = (suffix) => { const s = SL.game.session; return !!(s && S.lines[s.missionId + '_' + suffix]); };
+    SL.bus.on('bossWarning', () => { if (S.lines.test_boss && !own('boss_warn')) S.radio('test_boss'); });
+    SL.bus.on('bossIntroDone', () => cue('boss_intro'));
+    SL.bus.on('bossPhase', (e) => { if (e && e.phase > 0) cue('boss_p' + (e.phase + 1)); });
+    SL.bus.on('podSpawn', (e) => { if (e && e.pod && e.pod.data.vip) cue('vip'); });
+    SL.bus.on('podRescued', (e) => { if (e && e.vip) cue('vip_saved'); });
   });
 
   SL.debug.sandbox('portraits', () => {

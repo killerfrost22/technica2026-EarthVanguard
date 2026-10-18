@@ -8,7 +8,9 @@
    storm around the black hole, RAZORBACK's shadow and the sunrise after it), adds Puff's bubble (puffBuddy), swaps the
    stub hazard for a real black_hole that pulls Puff in, and replaces the beacon choice with Puff's first trust choice
    (25_puffstory.js). While the black hole is near, the music turns to the song it sings ('blackhole', mus_m2), and it
-   returns to mus_m1 once Puff has answered. */
+   returns to mus_m1 once Puff has answered.
+   'm2', Deep Pull, follows GDD 4.2 over Kerr Station (bg_kerr) with the LODESTAR boss; it unlocks when m1 is cleared
+   (unlock lists the missions that must be done first; 19_progress.js). */
 (function (SL) {
   'use strict';
 
@@ -97,6 +99,116 @@
     objectives: [
       { id: 'boss', text: 'Destroy RAZORBACK', check: (s) => (s.bossesDefeated || 0) > 0 },
       { id: 'rescue', text: 'Rescue 5 survivors', check: (s) => s.rescued >= 5 },
+    ],
+  }));
+
+  // m2, Deep Pull (GDD 4.2): Kerr Station breaking up beside Kerr's Eye, the captive black hole. The first free black
+  // hole arrives alone at 62 s so the player sees its pull; two tugs tow medium holes through the station peak, and
+  // Dr. Osei's pod falls toward the second one. Puff rides along and does not like black holes any more.
+  function m2Timeline() {
+    const coop = (s) => !!s.coop;
+    return [
+      { at: 0, banner: 'DEEP PULL', sub: 'Kerr Station', music: 'mus_m2', scroll: 90, bg: 'approach' },
+      { at: 1.5, radio: 'm2_open' },
+      { at: 4.5, radio: 'm2_puff_open' },
+      { at: 3, formation: 'vee', enemy: 'dart', count: 7, x: 360 },
+      { at: 6, formation: 'pincer', enemy: 'gnat', count: 10 },
+      { at: 9, formation: 'snake', enemy: 'dart', count: 7, x: 160 },
+      { at: 11, formation: 'snake', enemy: 'dart', count: 7, x: 560 },
+      { at: 13, spawn: 'spear', x: 200 },
+      { at: 13, spawn: 'spear', x: 520, radio: 'm2_spears' },
+      { at: 17, spawn: 'wasp', x: 360 },
+      { at: 19, formation: 'staircase', enemy: 'gnat', count: 6, opts: { side: 'left' } },
+      { at: 22, waitClear: true, timeout: 10 },
+
+      { at: 24, pickup: 'weapon_up', x: 360 },
+      { at: 26, spawn: 'needler', x: 140, opts: { hoverY: 220 } },
+      { at: 26, spawn: 'needler', x: 580, opts: { hoverY: 220 }, radio: 'm2_needlers' },
+      { at: 30, formation: 'arc_sweep', enemy: 'dart', count: 8, opts: { side: 'left' } },
+      { at: 33, formation: 'arc_sweep', enemy: 'dart', count: 8, opts: { side: 'right' } },
+      { at: 36, pod: { x: 360, y: -40, people: 3, kind: 'civilian' } },
+      { at: 38, spawn: 'spear', x: 180 },
+      { at: 38, spawn: 'spear', x: 360 },
+      { at: 38, spawn: 'spear', x: 540 },
+      { at: 41, spawn: 'weaver', x: 360, radio: 'm2_weaver' },
+      { at: 46, formation: 'side_stream', enemy: 'gnat', count: 8, opts: { side: 'left' } },
+      { at: 48, formation: 'side_stream', enemy: 'gnat', count: 8, opts: { side: 'right' } },
+      { at: 51, waitClear: true, timeout: 12 },
+
+      // BREATHER: Kerr's Eye comes into view
+      { at: 53, bg: 'lensing', scroll: 70, radio: 'm2_eye' },
+      { at: 55, pod: { x: 220, y: -40, people: 2, kind: 'civilian' } },
+      { at: 55, pod: { x: 500, y: -40, people: 2, kind: 'crew' } },
+      { at: 56, radio: 'm2_puff_eye' },
+      { at: 57, pickup: 'weapon_lance', x: 360, radio: 'm2_lance' },
+      { at: 61, checkpoint: true, banner: 'CHECKPOINT', sub: 'Gravity anomaly ahead' },
+
+      // the first black hole, alone with weak popcorn so the pull reads
+      { at: 62, hazard: 'black_hole', x: 360, y: -120, opts: { size: 'small', vy: 55, life: 26 }, radio: 'm2_bh_warn' },
+      { at: 66, formation: 'ring_in', enemy: 'gnat', count: 10, x: 360 },
+      { at: 67.5, radio: 'm2_bh_eat' },
+      { at: 70, formation: 'snake', enemy: 'dart', count: 7, x: 140 },
+      { at: 72, formation: 'snake', enemy: 'dart', count: 7, x: 580 },
+      { at: 75, spawn: 'needler', x: 360, opts: { hoverY: 160 } },
+      { at: 78, formation: 'rain', enemy: 'gnat', count: 12 },
+      { at: 82, spawn: 'weaver', x: 200 },
+      { at: 82, spawn: 'weaver', x: 520 },
+      { at: 88, pod: { x: 300, y: -40, people: 3, kind: 'civilian' } },
+      { at: 92, waitClear: true, timeout: 12 },
+
+      // PEAK: the station, and tugs towing holes through it
+      { at: 95, bg: 'station', scroll: 100 },
+      { at: 96, spawn: 'tug', x: 240, opts: { hole: 'medium' }, radio: 'm2_tug' },
+      { at: 98, radio: 'm2_puff_tug' },
+      { at: 100, formation: 'pincer', enemy: 'dart', count: 10 },
+      { at: 104, spawn: 'manta', x: 520 },
+      { at: 107, formation: 'vee', enemy: 'spear', count: 5, x: 360 },
+      { at: 110, spawn: 'tug', x: 480, opts: { hole: 'medium' } },
+      { at: 113, formation: 'side_stream', enemy: 'gnat', count: 10, opts: { side: 'left' } },
+      { at: 115, formation: 'side_stream', enemy: 'gnat', count: 10, opts: { side: 'right' } },
+      { at: 118, pickup: 'bomb', x: 240 },
+      { at: 120, pod: { x: 420, y: -40, people: 1, kind: 'vip', vip: 's2', vy: 70 } },
+      { at: 124, spawn: 'wasp', x: 200 },
+      { at: 124, spawn: 'wasp', x: 520 },
+      { at: 126, formation: 'staircase', enemy: 'dart', count: 7, opts: { side: 'right' } },
+      { at: 130, waitClear: true, timeout: 16 },
+
+      { at: 132, pickup: 'weapon_up', x: 360 },
+      { at: 132, pod: { x: 260, y: -40, people: 4, kind: 'civilian' } },
+      { at: 132, pod: { x: 460, y: -40, people: 2, kind: 'civilian' } },
+      { at: 133, spawn: 'snatcher', opts: { side: 'left', y: 260 } },
+      { at: 134, radio: 'm2_station' },
+      { at: 137, formation: 'escort_box', x: 360, opts: { leader: 'manta', escort: 'wasp', count: 4 } },
+      { at: 143, formation: 'column', enemy: 'dart', count: 6, x: 160 },
+      { at: 143, formation: 'column', enemy: 'dart', count: 6, x: 560 },
+      { at: 147, spawn: 'needler', x: 200, opts: { hoverY: 220 } },
+      { at: 147, spawn: 'needler', x: 520, opts: { hoverY: 220 } },
+      { at: 148, if: coop, pod: { x: 360, y: -40, people: 3, kind: 'civilian' } },
+      { at: 152, waitClear: true, timeout: 12 },
+
+      { at: 154, pickup: 'repair', x: 360, bg: 'boss', scroll: 40 },
+      { at: 155, radio: 'm2_boss_warn' },
+      { at: 157, banner: 'WARNING', sub: 'Gravity siege engine LODESTAR', color: '#ff5c8a' },
+      { at: 159, boss: 'boss_lodestar' },
+      { at: 160, afterBoss: true, bg: 'calm', scroll: 60, radio: 'm2_win' },
+      { at: 160.1, afterBoss: true, radio: 'm2_puff_win' },
+      // nothing to fire: holds the 3 s outro back until both voiced lines (about 9 s together) have finished
+      { at: 167, afterBoss: true },
+    ];
+  }
+
+  SL.missions.define('m2', Object.assign({}, base, {
+    name: 'Deep Pull', order: 2, location: 'Kerr Station', bg: 'bg_kerr', music: 'mus_m2', boss: 'boss_lodestar', unlock: ['m1'],
+    tune: { bulletSpeed: 0.92, fireRate: 0.9 }, puffBuddy: true, timeline: m2Timeline,
+    rewards: { credits: 550, sp: 1 },
+    // Dr. Osei's pod is a VIP: remember it in the session flags (they survive checkpoints)
+    onStart(s) {
+      SL.bus.onMission('podRescued', (e) => { if (e && e.vip === 's2') s.flags.vip_s2 = true; });
+    },
+    objectives: [
+      { id: 'boss', text: 'Destroy LODESTAR', check: (s) => (s.bossesDefeated || 0) > 0 },
+      { id: 'rescue', text: 'Rescue 14 people', bonus: true, check: (s) => s.rescued >= 14 },
+      { id: 'vip', text: "Find Dr. Osei's pod", bonus: true, check: (s) => !!s.flags.vip_s2 },
     ],
   }));
 })(window.SL = window.SL || {});
