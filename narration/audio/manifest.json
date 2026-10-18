@@ -606,5 +606,77 @@
     "seconds": 2.49,
     "chars": 28,
     "text": "Got him! Reel him in, LANCE."
+  },
+  "radio_puff_bubble_sealed_tether_locked": {
+    "role": "Puff",
+    "voice": "9yzdeviXkFddZ4Oz8Mok",
+    "model": "eleven_multilingual_v2",
+    "seconds": 5.07,
+    "chars": 76,
+    "text": "Bubble sealed, tether locked. Try not to fly into anything this time, LANCE."
+  },
+  "radio_puff_that_thing_is_singing": {
+    "role": "Puff",
+    "voice": "9yzdeviXkFddZ4Oz8Mok",
+    "model": "eleven_multilingual_v2",
+    "seconds": 2.25,
+    "chars": 40,
+    "text": "That thing is singing. I know that song."
+  },
+  "radio_puff_no_no_not_again": {
+    "role": "Puff",
+    "voice": "9yzdeviXkFddZ4Oz8Mok",
+    "model": "eleven_multilingual_v2",
+    "seconds": 2.72,
+    "chars": 25,
+    "text": "No. No, not again! LANCE!"
+  },
+  "radio_puff_i_m_okay_don": {
+    "role": "Puff",
+    "voice": "9yzdeviXkFddZ4Oz8Mok",
+    "model": "eleven_multilingual_v2",
+    "seconds": 3.45,
+    "chars": 32,
+    "text": "...I'm okay. Don't ask. Not yet."
+  },
+  "radio_puff_thanks_i_owe_you": {
+    "role": "Puff",
+    "voice": "9yzdeviXkFddZ4Oz8Mok",
+    "model": "eleven_multilingual_v2",
+    "seconds": 2.85,
+    "chars": 32,
+    "text": "...Thanks, LANCE. I owe you one."
+  },
+  "radio_puff_not_now_please": {
+    "role": "Puff",
+    "voice": "9yzdeviXkFddZ4Oz8Mok",
+    "model": "eleven_multilingual_v2",
+    "seconds": 1.42,
+    "chars": 16,
+    "text": "Not now. Please."
+  },
+  "cs_intro_sys1": {
+    "role": "Robot",
+    "voice": "nPijfmaNgvm5OSN4xM8H",
+    "model": "eleven_multilingual_v2",
+    "seconds": 8.05,
+    "chars": 54,
+    "text": "> SUBJECT 7 // EXPERIMENTAL WING C\n> STATUS: CONTAINED"
+  },
+  "cs_intro_sys2": {
+    "role": "Robot",
+    "voice": "nPijfmaNgvm5OSN4xM8H",
+    "model": "eleven_multilingual_v2",
+    "seconds": 4.45,
+    "chars": 37,
+    "text": "> POWER FAILURE \u2014 CONTAINMENT OFFLINE"
+  },
+  "cs_vanguard_intro_sys1": {
+    "role": "Robot",
+    "voice": "nPijfmaNgvm5OSN4xM8H",
+    "model": "eleven_multilingual_v2",
+    "seconds": 7.79,
+    "chars": 54,
+    "text": "> DISTRESS SIGNAL RECEIVED\n> ORIGIN: [her home system]"
   }
 }

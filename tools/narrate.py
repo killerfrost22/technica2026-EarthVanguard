@@ -43,8 +43,8 @@ SCRIPT = ROOT / 'narration' / 'SCRIPT.md'
 VOICES = ROOT / 'narration' / 'voices.json'
 OUT = ROOT / 'narration' / 'audio'
 API = 'https://api.elevenlabs.io/v1'
-ROLES = ['Narrator', 'Blue Arrow', 'Puff', 'The Directorate', 'Commander Kade', 'Anvil']
-RADIO_ROLES = {'anvil': 'Anvil'}        # radio speaker id in the game -> voice role in voices.json
+ROLES = ['Narrator', 'Blue Arrow', 'Puff', 'The Directorate', 'Commander Kade', 'Anvil', 'Robot']
+RADIO_ROLES = {'anvil': 'Anvil', 'puff': 'Puff'}        # radio speaker id in the game -> voice role in voices.json
 RADIO_SKIP = {'22_debug.js'}            # test-only lines
 DEFAULT_CALLSIGN = 'LANCE'              # src/01_save.js
 OUTPUT_FORMAT = 'mp3_44100_128'     # constant 128 kbps, so duration = bytes * 8 / 128000
@@ -89,8 +89,8 @@ def cutscene_clips():
         sys.exit('Node is needed to read the cutscene script (tools/cutscene_lines.js).')
     except subprocess.CalledProcessError as e:
         sys.exit('tools/cutscene_lines.js failed:\n' + e.stderr)
-    return [{'id': c['id'], 'text': c['text'], 'role': c['role'], 'limit': None, 'format': CUTSCENE_FORMAT}
-            for c in json.loads(out)]
+    return [{'id': c['id'], 'text': c['text'], 'role': c['role'], 'limit': None, 'format': CUTSCENE_FORMAT,
+             'speak': c.get('speak', c['text'])} for c in json.loads(out)]
 
 
 def parse_script(text):

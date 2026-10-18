@@ -205,7 +205,7 @@
       SL.fx.sparks(b.x, b.y, { count: 14, color: '#9fe8ff', speed: 260 });
       SL.fx.shake(6, 0.4);
     }
-    say('puff', 'No. No, not again! ' + '{callsign}!', { priority: true });
+    say('puff', 'No. No, not again! {callsign}!', { priority: true });
     SL.after(1.2, () => say('anvil', 'Puff\'s tether is gone! Hold your course, {callsign}. You can\'t follow him in.', { priority: true }));
   }
 

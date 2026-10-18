@@ -15,6 +15,7 @@ the same words.
 | **Puff** | His thoughts in the memory (section 5) and his cutscene lines | Small, tired, brave. Half to himself. |
 | **The Directorate** | The voice over Puff's trial (section 5) | Cold, slow, polite, from everywhere at once. Never raises its voice. |
 | **Commander Kade** | His lines in the cutscenes | British, male. Calm, clipped, decisive. Never shouts. |
+| **Robot** | The red computer printouts in the cutscenes (`SUBJECT 7 // ...`) | Flat, mechanical, a facility system reading a status. |
 
 One person can read every part; different voices for Blue Arrow, Puff and the Directorate just make it better.
 
