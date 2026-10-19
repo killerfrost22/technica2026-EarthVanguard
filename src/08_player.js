@@ -141,7 +141,8 @@
       }
       if (!p.outro) {
         p.x = U.clamp(p.x, MARGIN, W - MARGIN);
-        p.y = U.clamp(p.y, MARGIN, H - MARGIN);
+        // a respawning jet starts below the screen and flies in: only clamp the bottom once it is inside
+        p.y = U.clamp(p.y, MARGIN, p.entering > 0 ? Math.max(H - MARGIN, p.y) : H - MARGIN);
       }
       const targetBank = U.clamp((vx / Math.max(1, st.speed)) * 0.35, -0.35, 0.35);
       p.bank = U.lerp(p.bank, targetBank, Math.min(1, dt * 10));

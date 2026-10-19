@@ -1,10 +1,11 @@
 /* 13b_bosses.js (bossesB): GDD sections 8.4, 8.5, 8.8 and 8.9.
-   Provides the bosses boss_suneater (SUNEATER, m4) and boss_ouroboros (OUROBOROS, m5), the mini-bosses mb_mantis
+   Provides the boss boss_suneater (SUNEATER, m4), the mini-bosses mb_mantis
    (MANTIS, s3) and mb_crucible (CRUCIBLE, s4), and the flyby enemy mantis_pass (MANTIS art crossing on a diagonal).
    Every boss is drawn from pre-rendered SL.art layers (hulls, emissive overlays, damage overlays, moving parts) plus
    live glows and plumes; destructible parts are hidden enemies (core recipe) that the boss draws itself.
    Public helpers: SL.bossesB (fire, target, parts, jump(phase)); see docs/api/bossesB.md.
-   Sandboxes: 'boss:boss_suneater', 'boss:boss_ouroboros', 'boss:mb_mantis', 'boss:mb_crucible', 'enemy:mantis_pass'. */
+   OUROBOROS (m5) has its art defined below, but the boss itself is not built yet.
+   Sandboxes: 'boss:boss_suneater', 'boss:mb_mantis', 'boss:mb_crucible', 'enemy:mantis_pass'. */
 (function (SL) {
   'use strict';
 
@@ -18,7 +19,7 @@
   const fr = () => diffOf().fireRate || 1;
   const bspd = () => diffOf().bulletSpeed || 1;
   const rnd = (a, b) => (SL.rng ? SL.rng.range(a, b) : a + Math.random() * (b - a));
-  const B13 = SL.bossesB = { ids: ['boss_suneater', 'boss_ouroboros', 'mb_mantis', 'mb_crucible'], enemies: ['mantis_pass'] };
+  const B13 = SL.bossesB = { ids: ['boss_suneater', 'mb_mantis', 'mb_crucible'], enemies: ['mantis_pass'] };
 
   // ------------------------------------------------------------------ targeting and bullets
   const FALLBACK_TARGET = { x: W / 2, y: H - 180, ref: null };
@@ -343,7 +344,8 @@
       e.vy = 0;
       if (c.place) c.place(e, b, dt);
       e.invuln = !!(b.invuln || c.shut);
-      e.intangible = !!c.intangible;
+      // a dying boss is a harmless wreck: its parts stop dealing contact damage
+      e.intangible = !!(c.intangible || b.dying);
       e.armor = c.mult || 1;
       if (e.data.mark > 0) e.data.mark -= dt;
       if (c.infinite) e.hp = e.maxHp;
@@ -3779,20 +3781,6 @@
     }, { pad: 8 });
   }
   defineOuroArt();
-  const OU_HEAVY = ['b13:ou:coil', 'b13:ou:coil_emis', 'b13:ou:coil_shade', 'b13:ou:coil_spec', 'b13:ou:coil_dmg1', 'b13:ou:coil_dmg2', 'b13:ou:hood',
-    'b13:ou:hood_emis', 'b13:ou:head', 'b13:ou:head_emis', 'b13:ou:crown', 'b13:ou:crown_emis', 'b13:ou:shield', 'b13:ou:disk', 'b13:ou:iris'];
-  // the big generators run in idle time after boot so the final boss never hitches when it spawns
-  if (typeof SL.onBoot === 'function') {
-    SL.onBoot(() => {
-      let i = 0;
-      const step = () => {
-        if (i >= OU_HEAVY.length) return;
-        try { A.get(OU_HEAVY[i++]); } catch (err) { U.warnOnce('b13:ou:prewarm', err); }
-        setTimeout(step, 30);
-      };
-      setTimeout(step, 2500);
-    });
-  }
 
   /* @@BOSSES@@ */
 

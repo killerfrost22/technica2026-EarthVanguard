@@ -474,31 +474,35 @@
     }
 
     const run = async () => {
-      bd.start();
-      requestAnimationFrame(() => ui.root.classList.add('cs-in'));
-      for (let i = 0; i < shots.length && !skipped; i++) {
-        const shot = shots[i];
-        if (shot.when && !shot.when(state)) continue;
-        [...ui.dots.children].forEach((d, k) => d.classList.toggle('cs-on', k <= i));
-        ui.box.classList.remove('cs-show');
-        ui.title.classList.remove('cs-show');
-        if (shot.music && opts.onMusic) opts.onMusic(shot.music);
-        if (shot.sfx && opts.onSfx) opts.onSfx(shot.sfx);
-        await bd.set(shot.bg);
-        showArt(shot);
-        showPanel(shot);
-        showTitle(shot);
-        if (shot.flash) flash();
-        if (shot.shake) shake();
-        await sleep(shot.img || shot.title || shot.art ? 650 : 250);
-        if (shot.lines && shot.lines.length) await runLines(shot.lines);
-        else await Promise.race([sleep(shot.hold || 3200), waitInput()]);
-        waiter = null;
+      // cleanup always runs: a throw mid-cutscene must not leave the overlay and its key capture over the page
+      try {
+        bd.start();
+        requestAnimationFrame(() => ui.root.classList.add('cs-in'));
+        for (let i = 0; i < shots.length && !skipped; i++) {
+          const shot = shots[i];
+          if (shot.when && !shot.when(state)) continue;
+          [...ui.dots.children].forEach((d, k) => d.classList.toggle('cs-on', k <= i));
+          ui.box.classList.remove('cs-show');
+          ui.title.classList.remove('cs-show');
+          if (shot.music && opts.onMusic) opts.onMusic(shot.music);
+          if (shot.sfx && opts.onSfx) opts.onSfx(shot.sfx);
+          await bd.set(shot.bg);
+          showArt(shot);
+          showPanel(shot);
+          showTitle(shot);
+          if (shot.flash) flash();
+          if (shot.shake) shake();
+          await sleep(shot.img || shot.title || shot.art ? 650 : 250);
+          if (shot.lines && shot.lines.length) await runLines(shot.lines);
+          else await Promise.race([sleep(shot.hold || 3200), waitInput()]);
+          waiter = null;
+        }
+        ui.root.classList.remove('cs-in');
+        await sleep(500);
+        return result;
+      } finally {
+        cleanup();
       }
-      ui.root.classList.remove('cs-in');
-      await sleep(500);
-      cleanup();
-      return result;
     };
 
     function cleanup() {

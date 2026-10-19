@@ -187,6 +187,7 @@
     if (ambientEl && ambCtx) {
       ambientEl.width = land ? 64 : 36;
       ambientEl.height = land ? 36 : 64;
+      ambCtx.imageSmoothingQuality = 'high'; // resizing the canvas resets its context state
       ambCtx.fillStyle = '#04050b';
       ambCtx.fillRect(0, 0, ambientEl.width, ambientEl.height);
     }

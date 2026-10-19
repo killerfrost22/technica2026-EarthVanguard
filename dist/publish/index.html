@@ -2297,7 +2297,8 @@ body {
     musicVerb = makeMusicVerb(musicBus);
     noiseB = noiseBuffer();
     // a context that starts (or comes back) suspended plays the waiting track once it runs
-    ac.onstatechange = () => startPending();
+    // ready tracks the real state, so input keeps calling unlock() on each gesture until the context runs
+    ac.onstatechange = () => { A.ready = live(); startPending(); };
     applyVolume();
     applyDuck(0.01);
     return true;
@@ -3798,12 +3799,14 @@ body {
     current: null,
     get muted() { return muted; },
     set muted(v) { muted = !!v; applyVolume(); },
+    /** Volume for narration <audio> clips, which bypass the Web Audio graph: master, or 0 when muted. */
+    voiceVolume() { return muted ? 0 : Math.max(0, Math.min(1, vol.master)); },
     unlock() {
       try {
         if (!ac && !build()) return;
         // resume() settles later on some browsers: the waiting track starts then (and on onstatechange)
         if (ac.state !== 'running') ac.resume().then(startPending, () => {});
-        A.ready = true;
+        A.ready = live();
         startPending();
       } catch (e) {
         A.ready = false;
@@ -3893,7 +3896,8 @@ body {
       if (o.mood) for (const k in o.mood) A.mood(k, o.mood[k]);
       if (A.current === id && mus.cur && !o.restart) return;
       A.current = id;
-      if (!live()) return; // starts on unlock()
+      // not running: drop the old track so the new one starts when the context resumes (startPending)
+      if (!live()) { if (mus.cur) { fadeOut(mus.cur, 0.05); mus.cur = null; } return; }
       fadeOut(mus.cur, fade);
       mus.cur = startTrack(id, fade);
       if (o.bar) mus.cur.step = (o.bar | 0) * (TRACKS[id].steps || 16); // start partway in (testing a section)
@@ -4204,6 +4208,7 @@ body {
     if (ambientEl && ambCtx) {
       ambientEl.width = land ? 64 : 36;
       ambientEl.height = land ? 36 : 64;
+      ambCtx.imageSmoothingQuality = 'high'; // resizing the canvas resets its context state
       ambCtx.fillStyle = '#04050b';
       ambCtx.fillRect(0, 0, ambientEl.width, ambientEl.height);
     }
@@ -7420,18 +7425,20 @@ body {
       }
       if (def.magnet !== false) {
         const mul = typeof def.magnet === 'number' ? def.magnet : 1;
+        // pull toward the nearest jet in range (co-op: the jet beside the pickup gets it, not always P1)
+        let best = null, bd = Infinity, bmr = 0;
         for (const p of world.players) {
           if (!p.alive || p.down || p.display) continue;
           const mr = ((p.stats && p.stats.magnet) || 90) * mul;
           const dx = p.x - pk.x, dy = p.y - pk.y, d2 = dx * dx + dy * dy;
-          if (d2 < mr * mr && d2 > 1) {
-            const d = Math.sqrt(d2);
-            const sp = 380 + 900 * (1 - d / mr);
-            pk.vx = U.lerp(pk.vx, (dx / d) * sp, Math.min(1, 9 * dt));
-            pk.vy = U.lerp(pk.vy, (dy / d) * sp, Math.min(1, 9 * dt));
-            pk.magnetized = true;
-            break;
-          }
+          if (d2 < mr * mr && d2 > 1 && d2 < bd) { best = p; bd = d2; bmr = mr; }
+        }
+        if (best) {
+          const d = Math.sqrt(bd), dx = best.x - pk.x, dy = best.y - pk.y;
+          const sp = 380 + 900 * (1 - d / bmr);
+          pk.vx = U.lerp(pk.vx, (dx / d) * sp, Math.min(1, 9 * dt));
+          pk.vy = U.lerp(pk.vy, (dy / d) * sp, Math.min(1, 9 * dt));
+          pk.magnetized = true;
         }
       }
       if (!def.manualMove) { pk.x += pk.vx * dt; pk.y += pk.vy * dt; }
@@ -8219,7 +8226,8 @@ body {
       }
       if (!p.outro) {
         p.x = U.clamp(p.x, MARGIN, W - MARGIN);
-        p.y = U.clamp(p.y, MARGIN, H - MARGIN);
+        // a respawning jet starts below the screen and flies in: only clamp the bottom once it is inside
+        p.y = U.clamp(p.y, MARGIN, p.entering > 0 ? Math.max(H - MARGIN, p.y) : H - MARGIN);
       }
       const targetBank = U.clamp((vx / Math.max(1, st.speed)) * 0.35, -0.35, 0.35);
       p.bank = U.lerp(p.bank, targetBank, Math.min(1, dt * 10));
@@ -9383,14 +9391,6 @@ body {
     return MODS;
   }
 
-  // shared, immutable bullet data objects (per skin x thickness): no allocation per shot
-  const DATA = new Map();
-  function dataFor(skin, sy) {
-    const k = skin * 100 + Math.round(sy * 20);
-    let d = DATA.get(k);
-    if (!d) { d = Object.freeze({ skin, sy }); DATA.set(k, d); }
-    return d;
-  }
   const FIRE_OPTS = { color: '#7fe3ff', data: null, r: 0 };
 
   function firePulse(p, lv, M, adv) {
@@ -9398,7 +9398,7 @@ body {
     FIRE_OPTS.color = SKINS[sk].spark;
     for (let i = 0; i < L.length; i++) {
       const row = L[i], a = UP + row[2];
-      FIRE_OPTS.data = dataFor(sk, row[3]);
+      FIRE_OPTS.data = { skin: sk, sy: row[3] }; // each bolt owns its data: content may write into b.data
       FIRE_OPTS.r = row[3] > 1.3 ? 9 : 7;
       const x = p.x + row[0] + Math.cos(a) * adv, y = p.y + row[1] - 16 + Math.sin(a) * adv;
       SL.firePlayer(p, x, y, a, PULSE.speed, 'pulse', dmg, FIRE_OPTS);
@@ -9407,10 +9407,10 @@ body {
   function fireSpread(p, lv, M, adv) {
     const n = SPREAD.rays[lv], arc = SPREAD.arc[lv], dmg = SPREAD.dmg[lv] * M.dmg, sk = skinOf(p);
     FIRE_OPTS.color = SKINS[sk].spark;
-    FIRE_OPTS.data = dataFor(sk, 1);
     FIRE_OPTS.r = 6;
     for (let i = 0; i < n; i++) {
       const k = n === 1 ? 0 : i / (n - 1) - 0.5, a = UP + k * arc;
+      FIRE_OPTS.data = { skin: sk, sy: 1 };
       SL.firePlayer(p, p.x + k * 20 + Math.cos(a) * adv, p.y - 50 + Math.abs(k) * 10 + Math.sin(a) * adv, a, SPREAD.speed, 'spread', dmg, FIRE_OPTS);
     }
   }
@@ -16900,7 +16900,9 @@ body {
     const d = e.data, b = d.boss;
     if (!b || b.dying || b.dead) return;
     const mult = typeof d.spec.mult === 'function' ? d.spec.mult(b, e) : (d.spec.mult || 1);
-    let fwd = dmg * mult;
+    // bombs already hit the boss itself (2% of max HP, capped): a hidden part must not pass the blast on as well.
+    // The rest still runs, so a weak point that the bomb hurt is topped back up below.
+    let fwd = o && o.type === 'bomb' ? 0 : dmg * mult;
     if (o && o.type === 'beam') {
       const r = beamLog(b, o.by);
       const add = Math.max(0, fwd - r.v);
@@ -21481,12 +21483,13 @@ body {
 </script>
 <script>
 /* 13b_bosses.js (bossesB): GDD sections 8.4, 8.5, 8.8 and 8.9.
-   Provides the bosses boss_suneater (SUNEATER, m4) and boss_ouroboros (OUROBOROS, m5), the mini-bosses mb_mantis
+   Provides the boss boss_suneater (SUNEATER, m4), the mini-bosses mb_mantis
    (MANTIS, s3) and mb_crucible (CRUCIBLE, s4), and the flyby enemy mantis_pass (MANTIS art crossing on a diagonal).
    Every boss is drawn from pre-rendered SL.art layers (hulls, emissive overlays, damage overlays, moving parts) plus
    live glows and plumes; destructible parts are hidden enemies (core recipe) that the boss draws itself.
    Public helpers: SL.bossesB (fire, target, parts, jump(phase)); see docs/api/bossesB.md.
-   Sandboxes: 'boss:boss_suneater', 'boss:boss_ouroboros', 'boss:mb_mantis', 'boss:mb_crucible', 'enemy:mantis_pass'. */
+   OUROBOROS (m5) has its art defined below, but the boss itself is not built yet.
+   Sandboxes: 'boss:boss_suneater', 'boss:mb_mantis', 'boss:mb_crucible', 'enemy:mantis_pass'. */
 (function (SL) {
   'use strict';
 
@@ -21500,7 +21503,7 @@ body {
   const fr = () => diffOf().fireRate || 1;
   const bspd = () => diffOf().bulletSpeed || 1;
   const rnd = (a, b) => (SL.rng ? SL.rng.range(a, b) : a + Math.random() * (b - a));
-  const B13 = SL.bossesB = { ids: ['boss_suneater', 'boss_ouroboros', 'mb_mantis', 'mb_crucible'], enemies: ['mantis_pass'] };
+  const B13 = SL.bossesB = { ids: ['boss_suneater', 'mb_mantis', 'mb_crucible'], enemies: ['mantis_pass'] };
 
   // ------------------------------------------------------------------ targeting and bullets
   const FALLBACK_TARGET = { x: W / 2, y: H - 180, ref: null };
@@ -21825,7 +21828,8 @@ body {
       e.vy = 0;
       if (c.place) c.place(e, b, dt);
       e.invuln = !!(b.invuln || c.shut);
-      e.intangible = !!c.intangible;
+      // a dying boss is a harmless wreck: its parts stop dealing contact damage
+      e.intangible = !!(c.intangible || b.dying);
       e.armor = c.mult || 1;
       if (e.data.mark > 0) e.data.mark -= dt;
       if (c.infinite) e.hp = e.maxHp;
@@ -25261,20 +25265,6 @@ body {
     }, { pad: 8 });
   }
   defineOuroArt();
-  const OU_HEAVY = ['b13:ou:coil', 'b13:ou:coil_emis', 'b13:ou:coil_shade', 'b13:ou:coil_spec', 'b13:ou:coil_dmg1', 'b13:ou:coil_dmg2', 'b13:ou:hood',
-    'b13:ou:hood_emis', 'b13:ou:head', 'b13:ou:head_emis', 'b13:ou:crown', 'b13:ou:crown_emis', 'b13:ou:shield', 'b13:ou:disk', 'b13:ou:iris'];
-  // the big generators run in idle time after boot so the final boss never hitches when it spawns
-  if (typeof SL.onBoot === 'function') {
-    SL.onBoot(() => {
-      let i = 0;
-      const step = () => {
-        if (i >= OU_HEAVY.length) return;
-        try { A.get(OU_HEAVY[i++]); } catch (err) { U.warnOnce('b13:ou:prewarm', err); }
-        setTimeout(step, 30);
-      };
-      setTimeout(step, 2500);
-    });
-  }
 
   /* @@BOSSES@@ */
 
@@ -32802,6 +32792,7 @@ body {
     if (!vo || !voice || (SL.audio && SL.audio.muted)) return 0;
     voice.src = vo[0];
     voice.currentTime = 0;
+    voice.volume = SL.audio && SL.audio.voiceVolume ? SL.audio.voiceVolume() : 1;
     const p = voice.play();
     if (p && p.catch) p.catch(() => { /* autoplay blocked: stay silent */ });
     return +vo[1] || 0;
@@ -32992,7 +32983,7 @@ body {
 //# sourceURL=src/16_story.js
 </script>
 <script>
-/* STUB: replaced by story
+/* 17_rescue.js (story)
    17_rescue.js provides: SL.rescue = { spawnPod(x, y, {people, vip, kind, vx, vy, drift, maxHits}), spawnPilotPod(p) }.
    Escape pods drift and bob with a blinking beacon and an SOS ring. Touch rescues them (25 credits x people,
    500 x multiplier score, session.rescued / podsRescued, save.rescuedTotal, bus 'podRescued', sometimes a
@@ -33058,7 +33049,9 @@ body {
   function sfx(id, x) { if (SL.audio && SL.audio.sfx) SL.audio.sfx(id, { x }); }
 
   function lose(pod, reason) {
-    if (pod.dead) return;
+    // the world marks an escaping pod dead before it calls onExit, so the guard uses the pod's own outcome flags
+    if (pod.lost || pod.rescued) return;
+    pod.lost = true;
     pod.dead = true;
     const s = session();
     if (s) s.podsLost++;
@@ -33068,7 +33061,7 @@ body {
   }
 
   function rescue(pod, p) {
-    if (pod.dead) return;
+    if (pod.lost || pod.rescued) return;
     pod.dead = true;
     pod.rescued = true;
     const s = session(), people = pod.data.people;
@@ -33096,7 +33089,6 @@ body {
       pod.vx *= 1 / (1 + 1.5 * dt);
       pod.x = U.clamp(pod.x, 24, SL.W - 24);
       pod.rot = Math.sin(d.bob * 1.3) * 0.25;
-      if (pod.flash > 0) pod.flash -= dt;
     },
     draw(pod, ctx) { drawPod(pod, ctx, 'rs:pod', SL.pal.rescue); },
     onTouch(pod, p) { rescue(pod, p); },
@@ -33637,7 +33629,8 @@ body {
   }
 
   SL.missions.define('m4', Object.assign({}, base, {
-    name: 'Sunbreak', order: 4, location: 'Blue giant Tarsis', bg: 'bg_tarsis', music: 'mus_m4', boss: 'boss_suneater', unlock: ['m3'],
+    name: 'Sunbreak', order: 4, location: 'Blue giant Tarsis', bg: 'bg_tarsis', music: 'mus_m4', bossMusic: 'mus_boss_heavy',
+    boss: 'boss_suneater', unlock: ['m3'],
     tune: { bulletSpeed: 1.05, fireRate: 1.1 }, puffBuddy: true, timeline: m4Timeline,
     rewards: { credits: 850, sp: 2 },
     onStart(s) {
@@ -36177,23 +36170,33 @@ body {
 
   // ------------------------------------------------------------------ mic
   const mic = { stream: null, src: null, an: null, buf: null, db: -100, floor: -60, peak: -20, ok: false };
+  let micGen = 0; // bumped by micStop(): a mic request that resolves after the player moved on is released at once
   async function micStart() {
     const md = navigator.mediaDevices;
     if (!md || !md.getUserMedia) throw new Error('nomic');
     const ac = audioOn();
     if (!ac) throw new Error('noaudio');
     if (!mic.stream) {
-      mic.stream = await md.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: false, autoGainControl: false } });
-      mic.src = ac.createMediaStreamSource(mic.stream);
-      mic.an = ac.createAnalyser();
-      mic.an.fftSize = 1024;
-      mic.buf = new Float32Array(mic.an.fftSize);
-      mic.src.connect(mic.an);
+      const gen = micGen;
+      const stream = await md.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: false, autoGainControl: false } });
+      if (gen !== micGen || mic.stream) {
+        // stopped while the browser asked, or another request won: never leave a second live track behind
+        stream.getTracks().forEach((t) => { try { t.stop(); } catch (e) { /* gone */ } });
+        if (gen !== micGen) throw new Error('cancelled');
+      } else {
+        mic.stream = stream;
+        mic.src = ac.createMediaStreamSource(stream);
+        mic.an = ac.createAnalyser();
+        mic.an.fftSize = 1024;
+        mic.buf = new Float32Array(mic.an.fftSize);
+        mic.src.connect(mic.an);
+      }
     }
     mic.ok = true;
     hush('puff_mic', 1);
   }
   function micStop() {
+    micGen++;
     if (mic.stream) mic.stream.getTracks().forEach((t) => { try { t.stop(); } catch (e) { /* gone */ } });
     if (mic.src) { try { mic.src.disconnect(); } catch (e) { /* gone */ } }
     mic.stream = mic.src = mic.an = mic.buf = null;
@@ -36776,13 +36779,16 @@ body {
     // light rays
     ctx.save();
     ctx.globalCompositeOperation = 'lighter';
+    // one vertical gradient for every ray; each ray's strength goes through globalAlpha (restored below)
+    ctx.fillStyle = fixedGrad(ctx, 'ray', (c) => {
+      const g = c.createLinearGradient(0, SURFACE, 0, BED - 200);
+      g.addColorStop(0, 'rgba(190,240,255,1)');
+      g.addColorStop(1, 'rgba(190,240,255,0)');
+      return g;
+    });
     for (let i = 0; i < (wx.rays > 0.02 ? Math.ceil((W + 300) / 170) : 0); i++) {
       const x = ((i * 170 - R.dist * 0.08) % (W + 300) + W + 300) % (W + 300) - 150;
-      const a = (0.05 + 0.035 * Math.sin(t * 0.7 + i * 1.7)) * wx.rays;
-      const gr = ctx.createLinearGradient(0, SURFACE, 0, BED - 200);
-      gr.addColorStop(0, 'rgba(190,240,255,' + a.toFixed(3) + ')');
-      gr.addColorStop(1, 'rgba(190,240,255,0)');
-      ctx.fillStyle = gr;
+      ctx.globalAlpha = (0.05 + 0.035 * Math.sin(t * 0.7 + i * 1.7)) * wx.rays;
       ctx.beginPath();
       ctx.moveTo(x, SURFACE);
       ctx.lineTo(x + 70, SURFACE);
@@ -36886,6 +36892,13 @@ body {
   }
   function rgb(c, a) { return 'rgba(' + (c[0] | 0) + ',' + (c[1] | 0) + ',' + (c[2] | 0) + ',' + (a == null ? 1 : a.toFixed(3)) + ')'; }
   function wrapX(x, span) { return ((x % span) + span) % span; }
+  // gradients that never change, made once per canvas context (the screen builds a new canvas on every show)
+  const gradCache = new WeakMap();
+  function fixedGrad(ctx, key, make) {
+    let m = gradCache.get(ctx);
+    if (!m) gradCache.set(ctx, (m = {}));
+    return m[key] || (m[key] = make(ctx));
+  }
 
   function drawSky(ctx, R, w, t) {
     const gr = ctx.createLinearGradient(0, 0, 0, SURFACE);
@@ -37417,18 +37430,23 @@ body {
   function drawItem(ctx, it) {
     if (it.type === 'pearl') {
       const y = it.y + Math.sin(it.ph * 3) * 3;
-      const g = ctx.createRadialGradient(it.x - 4, y - 4, 1, it.x, y, 13);
-      g.addColorStop(0, '#ffffff');
-      g.addColorStop(0.5, '#f1ecf7');
-      g.addColorStop(1, '#bcb4d0');
       ctx.fillStyle = 'rgba(220,240,255,0.25)';
       ctx.beginPath();
       ctx.arc(it.x, y, 19, 0, TAU);
       ctx.fill();
-      ctx.fillStyle = g;
+      // the shading gradient is built once around the origin and moved to the pearl
+      ctx.translate(it.x, y);
+      ctx.fillStyle = fixedGrad(ctx, 'pearl', (c) => {
+        const g = c.createRadialGradient(-4, -4, 1, 0, 0, 13);
+        g.addColorStop(0, '#ffffff');
+        g.addColorStop(0.5, '#f1ecf7');
+        g.addColorStop(1, '#bcb4d0');
+        return g;
+      });
       ctx.beginPath();
-      ctx.arc(it.x, y, 11, 0, TAU);
+      ctx.arc(0, 0, 11, 0, TAU);
       ctx.fill();
+      ctx.translate(-it.x, -y);
     } else if (it.type === 'star') {
       const s = 1 + Math.sin(it.ph * 4) * 0.08;
       ctx.save();
@@ -37856,7 +37874,8 @@ body {
       if (readyHold > (G.mode === 'voice' ? 0.25 : 0.01)) beginPlay();
       return;
     }
-    if (G.state === 'over' && G.mode === 'voice' && mic.ok) {
+    const typing = document.activeElement && document.activeElement.tagName === 'INPUT'; // the leaderboard name field
+    if (G.state === 'over' && G.mode === 'voice' && mic.ok && !typing) {
       // hands-free: a steady hum restarts
       smoothLevel(micLevel(micRead()), dt);
       overHold = G.level > 0.55 ? overHold + dt : Math.max(0, overHold - dt);
@@ -37934,6 +37953,7 @@ body {
   }
 
   function showIntro() {
+    micStop(); // the intro never listens; Play with your voice asks again (permission is remembered)
     G.state = 'intro';
     ambient(false);
     if (G.scenario && G.scenario.intro) { G.scenario.intro(scenarioApi()); return; }
@@ -37974,7 +37994,7 @@ body {
     try {
       await micStart();
     } catch (e) {
-      if (G.state !== 'micwait') return;
+      if (G.state !== 'micwait' || (e && e.message === 'cancelled')) return;
       const denied = e && (e.name === 'NotAllowedError' || e.name === 'SecurityError');
       showError(denied
         ? 'The microphone is blocked here. You can allow it in the browser\'s site settings, or play with keys or touch.'
@@ -38250,12 +38270,14 @@ body {
       cancelAnimationFrame(raf);
       raf = requestAnimationFrame(frame);
       window.addEventListener('blur', onBlur);
+      document.addEventListener('visibilitychange', onVis);
       debugHooks();
     },
     onHide() {
       cancelAnimationFrame(raf);
       raf = 0;
       window.removeEventListener('blur', onBlur);
+      document.removeEventListener('visibilitychange', onVis);
       micStop();
       ambient(false);
       hush('puff_pause', 0);
@@ -38286,6 +38308,8 @@ body {
     },
   });
   function onBlur() { if (G.state === 'play' && !G.bot) showPause(); }
+  // phones can switch apps without a window blur; a hidden tab pauses too (as 02_input does for missions)
+  function onVis() { if (document.visibilityState === 'hidden') onBlur(); }
 
   // ------------------------------------------------------------------ title button, unlock note
   G.titleButton = function () {
@@ -38841,10 +38865,9 @@ body {
     if (!memVoice || !clip || G.simulating) return;
     const src = clip[0];
     try {
-      const s = SL.save.settings || {};
       memVoice.src = src;
       memVoice.currentTime = 0;
-      memVoice.volume = SL.audio && SL.audio.muted ? 0 : U.clamp(s.master != null ? s.master : 0.9, 0, 1);
+      memVoice.volume = SL.audio && SL.audio.voiceVolume ? SL.audio.voiceVolume() : 1;
       const pr = memVoice.play();
       if (pr && pr.catch) pr.catch(() => { /* autoplay blocked: text only */ });
     } catch (e) { /* no audio */ }
@@ -40264,12 +40287,14 @@ body {
       cancelAnimationFrame(raf);
       raf = requestAnimationFrame(frame);
       window.addEventListener('blur', onBlur);
+      document.addEventListener('visibilitychange', onVis);
       debugHooks();
     },
     onHide() {
       cancelAnimationFrame(raf);
       raf = 0;
       window.removeEventListener('blur', onBlur);
+      document.removeEventListener('visibilitychange', onVis);
       hum(false);
       hushMemory();
       hush('echo_pause', 0);
@@ -40294,6 +40319,7 @@ body {
     },
   });
   function onBlur() { if (G.state === 'play') showPause(); }
+  function onVis() { if (document.visibilityState === 'hidden') onBlur(); }
 
   // ------------------------------------------------------------------ title button
   G.titleButton = function () {
@@ -40732,7 +40758,11 @@ body {
   let seqToken = 0;
   function stopVO() {
     seqToken++;
-    for (const k in players) { try { players[k].pause(); } catch (e) { /* no audio */ } players[k].onended = null; }
+    for (const k in players) {
+      try { players[k].pause(); } catch (e) { /* no audio */ }
+      players[k].onended = null;
+      players[k].heldByPause = false; // a stopped clip must not resume when a later run reaches play
+    }
   }
   /** Plays [text, id] pairs one after another on one channel. Moves on when a clip ends, or after its length if
       the browser never says so; a newer sequence or stopVO() cancels this one. */
@@ -40751,6 +40781,7 @@ body {
         const me = step;
         a.src = c[0];
         a.currentTime = 0;
+        a.volume = SL.audio && SL.audio.voiceVolume ? SL.audio.voiceVolume() : 1;
         a.onended = () => next(me);
         setTimeout(() => { if (!a.heldByPause) next(me); }, (+c[1] + 0.4) * 1000);
         const p = a.play();
@@ -40861,8 +40892,11 @@ body {
         // the trial's voices hold while the minigame is paused
         for (const k in players) {
           const a = players[k];
-          if (s === 'paused' && !a.paused) { a.pause(); a.heldByPause = true; }
-          else if (s === 'play' && a.heldByPause) { a.heldByPause = false; const p = a.play(); if (p && p.catch) p.catch(() => {}); }
+          if (s === 'paused') { if (!a.paused) { a.pause(); a.heldByPause = true; } }
+          else if (a.heldByPause) {
+            a.heldByPause = false; // left the pause some other way (restart, retune, skip): drop the held clip
+            if (s === 'play') { const p = a.play(); if (p && p.catch) p.catch(() => {}); }
+          }
         }
         if (s !== 'play' && s !== 'paused') return;
         const W = api.W(), k = api.hudK();
@@ -40989,7 +41023,8 @@ body {
     const prevUi = SL.ui && SL.ui.current;
     if (SL.ui && SL.ui.hide) SL.ui.hide();
     if (SL.audio && SL.audio.unlock) SL.audio.unlock();
-    current = window.Cutscene.play(id, { state, voice: !(SL.audio && SL.audio.muted), onMusic, onSfx, onVoice }).catch((err) => {
+    const voiceVolume = SL.audio && SL.audio.voiceVolume ? SL.audio.voiceVolume() : 1;
+    current = window.Cutscene.play(id, { state, voice: !(SL.audio && SL.audio.muted), voiceVolume, onMusic, onSfx, onVoice }).catch((err) => {
       console.error('[SL.cutscenes] cutscene "' + id + '" failed:', err);
       return null;
     }).then((result) => {
@@ -41059,14 +41094,25 @@ body {
 
   // ------------------------------------------------------------------ developer jumps (27_devtools.js)
   const STORY_FLAGS = ['echo_escaped', 'puff_memory1', 'puff_trust'];
-  /** Story points to jump to, in order: each one sets the save as if everything before it had been played. */
+  /** Story points to jump to, in order: each one sets the save as if everything before it had been played.
+      cleared: missions marked done (later missions unlock only after the one before is cleared); mission: start it. */
+  const AFTER_M1 = ['cs_intro', 'echo_escaped', 'cs_echo_complete', 'cs_puff_intro', 'puff_memory1', 'cs_puff_complete'];
   const STAGES = [
     { id: 'prologue', label: 'Prologue', done: [] },
     { id: 'echo', label: 'Echo', done: ['cs_intro'] },
     { id: 'after_echo', label: 'After Echo', done: ['cs_intro', 'echo_escaped'] },
-    { id: 'mission1', label: 'Mission 1', done: ['cs_intro', 'echo_escaped', 'cs_echo_complete', 'cs_puff_intro'] },
-    { id: 'after_mission1', label: 'After Mission 1', done: ['cs_intro', 'echo_escaped', 'cs_echo_complete', 'cs_puff_intro', 'puff_memory1'] },
+    { id: 'mission1', label: 'Mission 1', done: ['cs_intro', 'echo_escaped', 'cs_echo_complete', 'cs_puff_intro'], mission: STORY_MISSION },
+    { id: 'after_mission1', label: 'After Mission 1', done: ['cs_intro', 'echo_escaped', 'cs_echo_complete', 'cs_puff_intro', 'puff_memory1'], cleared: ['m1'] },
+    { id: 'mission2', label: 'Mission 2', done: AFTER_M1, cleared: ['m1'], mission: 'm2' },
+    { id: 'mission3', label: 'Mission 3', done: AFTER_M1, cleared: ['m1', 'm2'], mission: 'm3' },
+    { id: 'mission4', label: 'Mission 4', done: AFTER_M1, cleared: ['m1', 'm2', 'm3'], mission: 'm4' },
   ];
+
+  /** Marks missions cleared, keeping any best score or rank already saved. */
+  function markCleared(ids) {
+    const all = SL.save.data.missions;
+    for (const id of ids || []) all[id] = Object.assign(SL.save.mission(id), all[id] || {}, { done: true });
+  }
 
   /** Forgets the story: every cutscene unseen, Echo not escaped, Puff's memory and trust cleared. */
   function resetStory() {
@@ -41084,6 +41130,7 @@ body {
     const g = gen;
     const f = flags();
     for (const k of stage.done) f[k] = true;
+    markCleared(stage.cleared);
     SL.save.commit();
     const wait = current || Promise.resolve();
     if (playing && window.Cutscene) window.Cutscene.skip();
@@ -41094,7 +41141,7 @@ body {
       if (stage.id === 'prologue') start();
       else if (stage.id === 'echo') toEcho();
       else if (stage.id === 'after_echo') afterEcho();
-      else if (stage.id === 'mission1') SL.game.startMission(STORY_MISSION, { coop: false });
+      else if (stage.mission) SL.game.startMission(stage.mission, { coop: false });
       else if (stage.id === 'after_mission1') play('puff_complete');
     });
   }
@@ -41126,8 +41173,9 @@ body {
    Provides: SL.devtools = { open(), close(), toggle() } and the developer panel: a small floating panel for testing
    the story without playing all of it.
    Open it with the ` (backquote) key, or add ?dev=1 to the URL (that also shows a DEV button, for touch screens).
-   - Jump to: Prologue, Echo, After Echo, Mission 1, After Mission 1 (SL.cutscenes.jump: rewrites the story flags as if
-     everything before that point had been played, then goes there).
+   - Jump to: Prologue, Echo, After Echo, Mission 1, After Mission 1, Mission 2, Mission 3, Mission 4
+     (SL.cutscenes.jump: rewrites the story flags as if everything before that point had been played, marks the
+     missions before it cleared, then goes there).
    - Skip now: the cutscene, Echo, Puff's memory, to the boss, or win the mission. Each button is enabled only when
      that thing is running.
    - Skip minigames (remembered in this browser): the story passes through Echo and Puff's memory without playing them.
@@ -41804,31 +41852,35 @@ window.PUFF_VO = {"memory1_intro_1":["data:audio/mpeg;base64,SUQzBAAAAAAAIlRTU0U
     }
 
     const run = async () => {
-      bd.start();
-      requestAnimationFrame(() => ui.root.classList.add('cs-in'));
-      for (let i = 0; i < shots.length && !skipped; i++) {
-        const shot = shots[i];
-        if (shot.when && !shot.when(state)) continue;
-        [...ui.dots.children].forEach((d, k) => d.classList.toggle('cs-on', k <= i));
-        ui.box.classList.remove('cs-show');
-        ui.title.classList.remove('cs-show');
-        if (shot.music && opts.onMusic) opts.onMusic(shot.music);
-        if (shot.sfx && opts.onSfx) opts.onSfx(shot.sfx);
-        await bd.set(shot.bg);
-        showArt(shot);
-        showPanel(shot);
-        showTitle(shot);
-        if (shot.flash) flash();
-        if (shot.shake) shake();
-        await sleep(shot.img || shot.title || shot.art ? 650 : 250);
-        if (shot.lines && shot.lines.length) await runLines(shot.lines);
-        else await Promise.race([sleep(shot.hold || 3200), waitInput()]);
-        waiter = null;
+      // cleanup always runs: a throw mid-cutscene must not leave the overlay and its key capture over the page
+      try {
+        bd.start();
+        requestAnimationFrame(() => ui.root.classList.add('cs-in'));
+        for (let i = 0; i < shots.length && !skipped; i++) {
+          const shot = shots[i];
+          if (shot.when && !shot.when(state)) continue;
+          [...ui.dots.children].forEach((d, k) => d.classList.toggle('cs-on', k <= i));
+          ui.box.classList.remove('cs-show');
+          ui.title.classList.remove('cs-show');
+          if (shot.music && opts.onMusic) opts.onMusic(shot.music);
+          if (shot.sfx && opts.onSfx) opts.onSfx(shot.sfx);
+          await bd.set(shot.bg);
+          showArt(shot);
+          showPanel(shot);
+          showTitle(shot);
+          if (shot.flash) flash();
+          if (shot.shake) shake();
+          await sleep(shot.img || shot.title || shot.art ? 650 : 250);
+          if (shot.lines && shot.lines.length) await runLines(shot.lines);
+          else await Promise.race([sleep(shot.hold || 3200), waitInput()]);
+          waiter = null;
+        }
+        ui.root.classList.remove('cs-in');
+        await sleep(500);
+        return result;
+      } finally {
+        cleanup();
       }
-      ui.root.classList.remove('cs-in');
-      await sleep(500);
-      cleanup();
-      return result;
     };
 
     function cleanup() {

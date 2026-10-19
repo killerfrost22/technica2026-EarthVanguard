@@ -450,7 +450,8 @@
   }
 
   SL.missions.define('m4', Object.assign({}, base, {
-    name: 'Sunbreak', order: 4, location: 'Blue giant Tarsis', bg: 'bg_tarsis', music: 'mus_m4', boss: 'boss_suneater', unlock: ['m3'],
+    name: 'Sunbreak', order: 4, location: 'Blue giant Tarsis', bg: 'bg_tarsis', music: 'mus_m4', bossMusic: 'mus_boss_heavy',
+    boss: 'boss_suneater', unlock: ['m3'],
     tune: { bulletSpeed: 1.05, fireRate: 1.1 }, puffBuddy: true, timeline: m4Timeline,
     rewards: { credits: 850, sp: 2 },
     onStart(s) {

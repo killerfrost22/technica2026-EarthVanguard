@@ -834,14 +834,6 @@
     return MODS;
   }
 
-  // shared, immutable bullet data objects (per skin x thickness): no allocation per shot
-  const DATA = new Map();
-  function dataFor(skin, sy) {
-    const k = skin * 100 + Math.round(sy * 20);
-    let d = DATA.get(k);
-    if (!d) { d = Object.freeze({ skin, sy }); DATA.set(k, d); }
-    return d;
-  }
   const FIRE_OPTS = { color: '#7fe3ff', data: null, r: 0 };
 
   function firePulse(p, lv, M, adv) {
@@ -849,7 +841,7 @@
     FIRE_OPTS.color = SKINS[sk].spark;
     for (let i = 0; i < L.length; i++) {
       const row = L[i], a = UP + row[2];
-      FIRE_OPTS.data = dataFor(sk, row[3]);
+      FIRE_OPTS.data = { skin: sk, sy: row[3] }; // each bolt owns its data: content may write into b.data
       FIRE_OPTS.r = row[3] > 1.3 ? 9 : 7;
       const x = p.x + row[0] + Math.cos(a) * adv, y = p.y + row[1] - 16 + Math.sin(a) * adv;
       SL.firePlayer(p, x, y, a, PULSE.speed, 'pulse', dmg, FIRE_OPTS);
@@ -858,10 +850,10 @@
   function fireSpread(p, lv, M, adv) {
     const n = SPREAD.rays[lv], arc = SPREAD.arc[lv], dmg = SPREAD.dmg[lv] * M.dmg, sk = skinOf(p);
     FIRE_OPTS.color = SKINS[sk].spark;
-    FIRE_OPTS.data = dataFor(sk, 1);
     FIRE_OPTS.r = 6;
     for (let i = 0; i < n; i++) {
       const k = n === 1 ? 0 : i / (n - 1) - 0.5, a = UP + k * arc;
+      FIRE_OPTS.data = { skin: sk, sy: 1 };
       SL.firePlayer(p, p.x + k * 20 + Math.cos(a) * adv, p.y - 50 + Math.abs(k) * 10 + Math.sin(a) * adv, a, SPREAD.speed, 'spread', dmg, FIRE_OPTS);
     }
   }

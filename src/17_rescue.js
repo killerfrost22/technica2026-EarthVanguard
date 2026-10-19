@@ -1,4 +1,4 @@
-/* STUB: replaced by story
+/* 17_rescue.js (story)
    17_rescue.js provides: SL.rescue = { spawnPod(x, y, {people, vip, kind, vx, vy, drift, maxHits}), spawnPilotPod(p) }.
    Escape pods drift and bob with a blinking beacon and an SOS ring. Touch rescues them (25 credits x people,
    500 x multiplier score, session.rescued / podsRescued, save.rescuedTotal, bus 'podRescued', sometimes a
@@ -64,7 +64,9 @@
   function sfx(id, x) { if (SL.audio && SL.audio.sfx) SL.audio.sfx(id, { x }); }
 
   function lose(pod, reason) {
-    if (pod.dead) return;
+    // the world marks an escaping pod dead before it calls onExit, so the guard uses the pod's own outcome flags
+    if (pod.lost || pod.rescued) return;
+    pod.lost = true;
     pod.dead = true;
     const s = session();
     if (s) s.podsLost++;
@@ -74,7 +76,7 @@
   }
 
   function rescue(pod, p) {
-    if (pod.dead) return;
+    if (pod.lost || pod.rescued) return;
     pod.dead = true;
     pod.rescued = true;
     const s = session(), people = pod.data.people;
@@ -102,7 +104,6 @@
       pod.vx *= 1 / (1 + 1.5 * dt);
       pod.x = U.clamp(pod.x, 24, SL.W - 24);
       pod.rot = Math.sin(d.bob * 1.3) * 0.25;
-      if (pod.flash > 0) pod.flash -= dt;
     },
     draw(pod, ctx) { drawPod(pod, ctx, 'rs:pod', SL.pal.rescue); },
     onTouch(pod, p) { rescue(pod, p); },

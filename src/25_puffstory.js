@@ -355,7 +355,11 @@
   let seqToken = 0;
   function stopVO() {
     seqToken++;
-    for (const k in players) { try { players[k].pause(); } catch (e) { /* no audio */ } players[k].onended = null; }
+    for (const k in players) {
+      try { players[k].pause(); } catch (e) { /* no audio */ }
+      players[k].onended = null;
+      players[k].heldByPause = false; // a stopped clip must not resume when a later run reaches play
+    }
   }
   /** Plays [text, id] pairs one after another on one channel. Moves on when a clip ends, or after its length if
       the browser never says so; a newer sequence or stopVO() cancels this one. */
@@ -374,6 +378,7 @@
         const me = step;
         a.src = c[0];
         a.currentTime = 0;
+        a.volume = SL.audio && SL.audio.voiceVolume ? SL.audio.voiceVolume() : 1;
         a.onended = () => next(me);
         setTimeout(() => { if (!a.heldByPause) next(me); }, (+c[1] + 0.4) * 1000);
         const p = a.play();
@@ -484,8 +489,11 @@
         // the trial's voices hold while the minigame is paused
         for (const k in players) {
           const a = players[k];
-          if (s === 'paused' && !a.paused) { a.pause(); a.heldByPause = true; }
-          else if (s === 'play' && a.heldByPause) { a.heldByPause = false; const p = a.play(); if (p && p.catch) p.catch(() => {}); }
+          if (s === 'paused') { if (!a.paused) { a.pause(); a.heldByPause = true; } }
+          else if (a.heldByPause) {
+            a.heldByPause = false; // left the pause some other way (restart, retune, skip): drop the held clip
+            if (s === 'play') { const p = a.play(); if (p && p.catch) p.catch(() => {}); }
+          }
         }
         if (s !== 'play' && s !== 'paused') return;
         const W = api.W(), k = api.hudK();

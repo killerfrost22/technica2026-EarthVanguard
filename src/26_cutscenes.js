@@ -76,7 +76,8 @@
     const prevUi = SL.ui && SL.ui.current;
     if (SL.ui && SL.ui.hide) SL.ui.hide();
     if (SL.audio && SL.audio.unlock) SL.audio.unlock();
-    current = window.Cutscene.play(id, { state, voice: !(SL.audio && SL.audio.muted), onMusic, onSfx, onVoice }).catch((err) => {
+    const voiceVolume = SL.audio && SL.audio.voiceVolume ? SL.audio.voiceVolume() : 1;
+    current = window.Cutscene.play(id, { state, voice: !(SL.audio && SL.audio.muted), voiceVolume, onMusic, onSfx, onVoice }).catch((err) => {
       console.error('[SL.cutscenes] cutscene "' + id + '" failed:', err);
       return null;
     }).then((result) => {

@@ -378,7 +378,9 @@
     const d = e.data, b = d.boss;
     if (!b || b.dying || b.dead) return;
     const mult = typeof d.spec.mult === 'function' ? d.spec.mult(b, e) : (d.spec.mult || 1);
-    let fwd = dmg * mult;
+    // bombs already hit the boss itself (2% of max HP, capped): a hidden part must not pass the blast on as well.
+    // The rest still runs, so a weak point that the bomb hurt is topped back up below.
+    let fwd = o && o.type === 'bomb' ? 0 : dmg * mult;
     if (o && o.type === 'beam') {
       const r = beamLog(b, o.by);
       const add = Math.max(0, fwd - r.v);

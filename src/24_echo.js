@@ -409,10 +409,9 @@
     if (!memVoice || !clip || G.simulating) return;
     const src = clip[0];
     try {
-      const s = SL.save.settings || {};
       memVoice.src = src;
       memVoice.currentTime = 0;
-      memVoice.volume = SL.audio && SL.audio.muted ? 0 : U.clamp(s.master != null ? s.master : 0.9, 0, 1);
+      memVoice.volume = SL.audio && SL.audio.voiceVolume ? SL.audio.voiceVolume() : 1;
       const pr = memVoice.play();
       if (pr && pr.catch) pr.catch(() => { /* autoplay blocked: text only */ });
     } catch (e) { /* no audio */ }
@@ -1832,12 +1831,14 @@
       cancelAnimationFrame(raf);
       raf = requestAnimationFrame(frame);
       window.addEventListener('blur', onBlur);
+      document.addEventListener('visibilitychange', onVis);
       debugHooks();
     },
     onHide() {
       cancelAnimationFrame(raf);
       raf = 0;
       window.removeEventListener('blur', onBlur);
+      document.removeEventListener('visibilitychange', onVis);
       hum(false);
       hushMemory();
       hush('echo_pause', 0);
@@ -1862,6 +1863,7 @@
     },
   });
   function onBlur() { if (G.state === 'play') showPause(); }
+  function onVis() { if (document.visibilityState === 'hidden') onBlur(); }
 
   // ------------------------------------------------------------------ title button
   G.titleButton = function () {

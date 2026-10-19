@@ -1279,18 +1279,20 @@
       }
       if (def.magnet !== false) {
         const mul = typeof def.magnet === 'number' ? def.magnet : 1;
+        // pull toward the nearest jet in range (co-op: the jet beside the pickup gets it, not always P1)
+        let best = null, bd = Infinity, bmr = 0;
         for (const p of world.players) {
           if (!p.alive || p.down || p.display) continue;
           const mr = ((p.stats && p.stats.magnet) || 90) * mul;
           const dx = p.x - pk.x, dy = p.y - pk.y, d2 = dx * dx + dy * dy;
-          if (d2 < mr * mr && d2 > 1) {
-            const d = Math.sqrt(d2);
-            const sp = 380 + 900 * (1 - d / mr);
-            pk.vx = U.lerp(pk.vx, (dx / d) * sp, Math.min(1, 9 * dt));
-            pk.vy = U.lerp(pk.vy, (dy / d) * sp, Math.min(1, 9 * dt));
-            pk.magnetized = true;
-            break;
-          }
+          if (d2 < mr * mr && d2 > 1 && d2 < bd) { best = p; bd = d2; bmr = mr; }
+        }
+        if (best) {
+          const d = Math.sqrt(bd), dx = best.x - pk.x, dy = best.y - pk.y;
+          const sp = 380 + 900 * (1 - d / bmr);
+          pk.vx = U.lerp(pk.vx, (dx / d) * sp, Math.min(1, 9 * dt));
+          pk.vy = U.lerp(pk.vy, (dy / d) * sp, Math.min(1, 9 * dt));
+          pk.magnetized = true;
         }
       }
       if (!def.manualMove) { pk.x += pk.vx * dt; pk.y += pk.vy * dt; }

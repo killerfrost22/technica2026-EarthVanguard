@@ -237,23 +237,33 @@
 
   // ------------------------------------------------------------------ mic
   const mic = { stream: null, src: null, an: null, buf: null, db: -100, floor: -60, peak: -20, ok: false };
+  let micGen = 0; // bumped by micStop(): a mic request that resolves after the player moved on is released at once
   async function micStart() {
     const md = navigator.mediaDevices;
     if (!md || !md.getUserMedia) throw new Error('nomic');
     const ac = audioOn();
     if (!ac) throw new Error('noaudio');
     if (!mic.stream) {
-      mic.stream = await md.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: false, autoGainControl: false } });
-      mic.src = ac.createMediaStreamSource(mic.stream);
-      mic.an = ac.createAnalyser();
-      mic.an.fftSize = 1024;
-      mic.buf = new Float32Array(mic.an.fftSize);
-      mic.src.connect(mic.an);
+      const gen = micGen;
+      const stream = await md.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: false, autoGainControl: false } });
+      if (gen !== micGen || mic.stream) {
+        // stopped while the browser asked, or another request won: never leave a second live track behind
+        stream.getTracks().forEach((t) => { try { t.stop(); } catch (e) { /* gone */ } });
+        if (gen !== micGen) throw new Error('cancelled');
+      } else {
+        mic.stream = stream;
+        mic.src = ac.createMediaStreamSource(stream);
+        mic.an = ac.createAnalyser();
+        mic.an.fftSize = 1024;
+        mic.buf = new Float32Array(mic.an.fftSize);
+        mic.src.connect(mic.an);
+      }
     }
     mic.ok = true;
     hush('puff_mic', 1);
   }
   function micStop() {
+    micGen++;
     if (mic.stream) mic.stream.getTracks().forEach((t) => { try { t.stop(); } catch (e) { /* gone */ } });
     if (mic.src) { try { mic.src.disconnect(); } catch (e) { /* gone */ } }
     mic.stream = mic.src = mic.an = mic.buf = null;
@@ -836,13 +846,16 @@
     // light rays
     ctx.save();
     ctx.globalCompositeOperation = 'lighter';
+    // one vertical gradient for every ray; each ray's strength goes through globalAlpha (restored below)
+    ctx.fillStyle = fixedGrad(ctx, 'ray', (c) => {
+      const g = c.createLinearGradient(0, SURFACE, 0, BED - 200);
+      g.addColorStop(0, 'rgba(190,240,255,1)');
+      g.addColorStop(1, 'rgba(190,240,255,0)');
+      return g;
+    });
     for (let i = 0; i < (wx.rays > 0.02 ? Math.ceil((W + 300) / 170) : 0); i++) {
       const x = ((i * 170 - R.dist * 0.08) % (W + 300) + W + 300) % (W + 300) - 150;
-      const a = (0.05 + 0.035 * Math.sin(t * 0.7 + i * 1.7)) * wx.rays;
-      const gr = ctx.createLinearGradient(0, SURFACE, 0, BED - 200);
-      gr.addColorStop(0, 'rgba(190,240,255,' + a.toFixed(3) + ')');
-      gr.addColorStop(1, 'rgba(190,240,255,0)');
-      ctx.fillStyle = gr;
+      ctx.globalAlpha = (0.05 + 0.035 * Math.sin(t * 0.7 + i * 1.7)) * wx.rays;
       ctx.beginPath();
       ctx.moveTo(x, SURFACE);
       ctx.lineTo(x + 70, SURFACE);
@@ -946,6 +959,13 @@
   }
   function rgb(c, a) { return 'rgba(' + (c[0] | 0) + ',' + (c[1] | 0) + ',' + (c[2] | 0) + ',' + (a == null ? 1 : a.toFixed(3)) + ')'; }
   function wrapX(x, span) { return ((x % span) + span) % span; }
+  // gradients that never change, made once per canvas context (the screen builds a new canvas on every show)
+  const gradCache = new WeakMap();
+  function fixedGrad(ctx, key, make) {
+    let m = gradCache.get(ctx);
+    if (!m) gradCache.set(ctx, (m = {}));
+    return m[key] || (m[key] = make(ctx));
+  }
 
   function drawSky(ctx, R, w, t) {
     const gr = ctx.createLinearGradient(0, 0, 0, SURFACE);
@@ -1477,18 +1497,23 @@
   function drawItem(ctx, it) {
     if (it.type === 'pearl') {
       const y = it.y + Math.sin(it.ph * 3) * 3;
-      const g = ctx.createRadialGradient(it.x - 4, y - 4, 1, it.x, y, 13);
-      g.addColorStop(0, '#ffffff');
-      g.addColorStop(0.5, '#f1ecf7');
-      g.addColorStop(1, '#bcb4d0');
       ctx.fillStyle = 'rgba(220,240,255,0.25)';
       ctx.beginPath();
       ctx.arc(it.x, y, 19, 0, TAU);
       ctx.fill();
-      ctx.fillStyle = g;
+      // the shading gradient is built once around the origin and moved to the pearl
+      ctx.translate(it.x, y);
+      ctx.fillStyle = fixedGrad(ctx, 'pearl', (c) => {
+        const g = c.createRadialGradient(-4, -4, 1, 0, 0, 13);
+        g.addColorStop(0, '#ffffff');
+        g.addColorStop(0.5, '#f1ecf7');
+        g.addColorStop(1, '#bcb4d0');
+        return g;
+      });
       ctx.beginPath();
-      ctx.arc(it.x, y, 11, 0, TAU);
+      ctx.arc(0, 0, 11, 0, TAU);
       ctx.fill();
+      ctx.translate(-it.x, -y);
     } else if (it.type === 'star') {
       const s = 1 + Math.sin(it.ph * 4) * 0.08;
       ctx.save();
@@ -1916,7 +1941,8 @@
       if (readyHold > (G.mode === 'voice' ? 0.25 : 0.01)) beginPlay();
       return;
     }
-    if (G.state === 'over' && G.mode === 'voice' && mic.ok) {
+    const typing = document.activeElement && document.activeElement.tagName === 'INPUT'; // the leaderboard name field
+    if (G.state === 'over' && G.mode === 'voice' && mic.ok && !typing) {
       // hands-free: a steady hum restarts
       smoothLevel(micLevel(micRead()), dt);
       overHold = G.level > 0.55 ? overHold + dt : Math.max(0, overHold - dt);
@@ -1994,6 +2020,7 @@
   }
 
   function showIntro() {
+    micStop(); // the intro never listens; Play with your voice asks again (permission is remembered)
     G.state = 'intro';
     ambient(false);
     if (G.scenario && G.scenario.intro) { G.scenario.intro(scenarioApi()); return; }
@@ -2034,7 +2061,7 @@
     try {
       await micStart();
     } catch (e) {
-      if (G.state !== 'micwait') return;
+      if (G.state !== 'micwait' || (e && e.message === 'cancelled')) return;
       const denied = e && (e.name === 'NotAllowedError' || e.name === 'SecurityError');
       showError(denied
         ? 'The microphone is blocked here. You can allow it in the browser\'s site settings, or play with keys or touch.'
@@ -2310,12 +2337,14 @@
       cancelAnimationFrame(raf);
       raf = requestAnimationFrame(frame);
       window.addEventListener('blur', onBlur);
+      document.addEventListener('visibilitychange', onVis);
       debugHooks();
     },
     onHide() {
       cancelAnimationFrame(raf);
       raf = 0;
       window.removeEventListener('blur', onBlur);
+      document.removeEventListener('visibilitychange', onVis);
       micStop();
       ambient(false);
       hush('puff_pause', 0);
@@ -2346,6 +2375,8 @@
     },
   });
   function onBlur() { if (G.state === 'play' && !G.bot) showPause(); }
+  // phones can switch apps without a window blur; a hidden tab pauses too (as 02_input does for missions)
+  function onVis() { if (document.visibilityState === 'hidden') onBlur(); }
 
   // ------------------------------------------------------------------ title button, unlock note
   G.titleButton = function () {

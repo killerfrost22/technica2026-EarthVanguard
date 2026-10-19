@@ -118,7 +118,8 @@
     musicVerb = makeMusicVerb(musicBus);
     noiseB = noiseBuffer();
     // a context that starts (or comes back) suspended plays the waiting track once it runs
-    ac.onstatechange = () => startPending();
+    // ready tracks the real state, so input keeps calling unlock() on each gesture until the context runs
+    ac.onstatechange = () => { A.ready = live(); startPending(); };
     applyVolume();
     applyDuck(0.01);
     return true;
@@ -1619,12 +1620,14 @@
     current: null,
     get muted() { return muted; },
     set muted(v) { muted = !!v; applyVolume(); },
+    /** Volume for narration <audio> clips, which bypass the Web Audio graph: master, or 0 when muted. */
+    voiceVolume() { return muted ? 0 : Math.max(0, Math.min(1, vol.master)); },
     unlock() {
       try {
         if (!ac && !build()) return;
         // resume() settles later on some browsers: the waiting track starts then (and on onstatechange)
         if (ac.state !== 'running') ac.resume().then(startPending, () => {});
-        A.ready = true;
+        A.ready = live();
         startPending();
       } catch (e) {
         A.ready = false;
@@ -1714,7 +1717,8 @@
       if (o.mood) for (const k in o.mood) A.mood(k, o.mood[k]);
       if (A.current === id && mus.cur && !o.restart) return;
       A.current = id;
-      if (!live()) return; // starts on unlock()
+      // not running: drop the old track so the new one starts when the context resumes (startPending)
+      if (!live()) { if (mus.cur) { fadeOut(mus.cur, 0.05); mus.cur = null; } return; }
       fadeOut(mus.cur, fade);
       mus.cur = startTrack(id, fade);
       if (o.bar) mus.cur.step = (o.bar | 0) * (TRACKS[id].steps || 16); // start partway in (testing a section)

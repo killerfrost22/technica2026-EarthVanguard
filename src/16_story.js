@@ -414,6 +414,7 @@
     if (!vo || !voice || (SL.audio && SL.audio.muted)) return 0;
     voice.src = vo[0];
     voice.currentTime = 0;
+    voice.volume = SL.audio && SL.audio.voiceVolume ? SL.audio.voiceVolume() : 1;
     const p = voice.play();
     if (p && p.catch) p.catch(() => { /* autoplay blocked: stay silent */ });
     return +vo[1] || 0;
