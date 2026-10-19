@@ -1,1 +1,12 @@
 .DS_Store
+# Screenshots written by tools/run.mjs and tools/smoke.mjs (local test output)
+shots/
+# Per-developer builds created for isolated testing; keep the release build tracked.
+dist/dev-*.html
+# Local credentials and private keys; keep an example config trackable.
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+secrets/
