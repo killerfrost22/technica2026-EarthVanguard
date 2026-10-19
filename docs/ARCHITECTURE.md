@@ -42,7 +42,9 @@ flies the XF-9 Starlance jet fighter through space, shooting lasers at enemy jet
      canvases, gradients for every bullet, or large arrays in hot paths. (Cached gradients are fine.)
    - Bound every list (particle cap, bullet cap). No DOM layout work per frame except the radio box.
 6. Every JS file is an IIFE: `(function (SL) { 'use strict'; ... })(window.SL = window.SL || {});`.
-   Define things only under `SL.*`; create no other globals. Files load in name order (`00_` … `22_`), so
+   Define things only under `SL.*`; create no other globals (exceptions: the build's voice-clip maps
+   `window.CUTSCENE_VO`, `RADIO_VO`, `ECHO_VO`, `PUFF_VO`, and the cutscene player's `window.Cutscene` /
+   `window.CUTSCENES`). Files load in name order (`00_` … `27_`, then the three cutscene files), so
    a file may use earlier files at load time and any file at runtime (after boot).
 7. Missing content never crashes the game. Unknown enemy, boss, hazard, background, bullet, sfx, music,
    or radio-line ids log `console.warn` once and fall back to a placeholder or a no-op.
@@ -81,7 +83,12 @@ flies the XF-9 Starlance jet fighter through space, shooting lasers at enemy jet
 | `src/21_game.js` | core | boot, state machine, main loop, mission lifecycle, director, scoring, results |
 | `src/22_debug.js` | core | URL params, autopilot, sandboxes, in-page tests, perf overlay |
 | `src/23_puff.js`, `src/23_puff.css` | puff | Puff's Ocean minigame screen (voice/keys), title button, unlock after m1 |
-| `src/24_echo.js`, `src/24_echo.css` | echo | Echo stealth minigame screen (the protagonist's escape), title button; no unlock trigger yet |
+| `src/24_echo.js`, `src/24_echo.css` | echo | Echo stealth minigame screen (the protagonist's escape), title button; the story opens it after the prologue |
+| `src/25_puffstory.js` | puff | Puff's memory inside the Mission 1 black hole (a Puff's Ocean scenario) |
+| `src/26_cutscenes.js` | story | wires the cutscene player into the game: story order, Start flow, voice and music hooks |
+| `src/27_devtools.js`, `src/27_devtools.css` | core | developer panel (backquote key or `?dev=1`) |
+| `cutscenes/earth-vanguard-cutscenes/cutscenes/*.js` | story | cutscene player, art and script (inlined after `src/`; standalone preview `demo.html`) |
+| `narration/audio/*.mp3` + `manifest.json` | story | generated voice clips (`tools/narrate.py`), inlined by the build; the only audio files |
 | `tools/*` | core | build, harness, smoke tests, font fetch |
 
 Rules:
@@ -97,16 +104,19 @@ Rules:
   people work at once, build to your own file: `python3 tools/build.py --out dist/dev-<you>.html --no-publish`.
   Each JS file is inlined in its own `<script>` ending in `//# sourceURL=src/<file>`, so errors name the
   real file and line.
-- Run headless: `bash tools/run.sh --page "dist/earthvanguard.html?<params>" --steps '<json array>'`.
+- Run headless: `node tools/run.mjs --page "dist/earthvanguard.html?<params>" --steps '<json array>'`
+  (`bash tools/run.sh` is the same thing under WSL).
   Steps: `{"wait":ms}`, `{"eval":"js expression"}` (prints the value; may return a Promise),
   `{"shot":"shots/name.png"}`, `{"key":"KeyX"}` (press+release), `{"down":"KeyW"}`, `{"up":"KeyW"}`,
   `{"click":[x,y]}`, `{"touch":["touchStart",x,y]}`. Flags: `--size 720x1280` (viewport, CSS px),
   `--gpu default|swiftshader` (default uses the real GPU). It prints every console warning and error with
   `src/<file>:<line>` and exits 1 on any console error or exception (`--allow-errors` to continue).
   Screenshots are PNG files: open them with the Read tool and look at them.
-- Smoke: `bash tools/smoke.sh` (core) builds, then runs every mission with autopilot + god mode +
-  fast-forward and checks errors, entity-count sanity, boss defeat, and mission completion. Screenshots go
-  to `shots/smoke/`.
+- Smoke: `python3 tools/build.py --no-publish && node tools/smoke.mjs` (or `bash tools/smoke.sh` under WSL,
+  which builds first) runs every mission with autopilot + god mode + fast-forward and checks errors,
+  entity-count sanity, boss defeat, and mission completion. Screenshots go to `shots/smoke/` (git-ignored;
+  `--no-shots` skips them). Pull requests run it in CI (`.github/workflows/smoke.yml`). Outside Windows set
+  `CHROME=/path/to/chrome`.
 - The bar is zero console errors and zero exceptions in every test.
 
 ## 4. Coordinates, time, loop

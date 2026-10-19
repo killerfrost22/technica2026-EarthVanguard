@@ -418,19 +418,20 @@ running with only the failing hook disabled.
 - `python3 tools/build.py [--out dist/dev-me.html --no-publish] [--exclude a.js,b.js]`. The output is pure ASCII
   (non-ASCII becomes `\uXXXX` in JS, `\XXXXXX` in CSS, `&#x..;` in HTML), so text renders correctly even when the
   artifact host serves the page without a charset. Write source files in UTF-8 as usual.
-- `bash tools/run.sh --page "dist/earthvanguard.html?..." --steps '[...]' [--size WxH] [--gpu default|swiftshader]
+- `node tools/run.mjs --page "dist/earthvanguard.html?..." --steps '[...]' [--size WxH] [--gpu default|swiftshader]
   [--allow-errors]`. Steps: `wait, eval, shot (+ "clip": [x, y, w, h, scale] for zoomed crops), key, down, up, click,
   touch ["touchStart"|"touchMove"|"touchEnd", x, y], mouse ["down"|"move"|"up"|"right", x, y], viewport [w, h, dpr=1,
   mobile=false]` (coordinates in CSS px of the page; `viewport` resizes the page mid-run for resize / DPR / orientation
-  checks). Shot paths are resolved by Windows node: keep them relative to the project (`shots/...`), never `/tmp/...`.
-  Extra Chrome switches: `CHROME_ARGS="..." bash tools/run.sh ...`. `--uncapped` turns off display frame
+  checks). Shot paths are resolved relative to the working directory; `shots/` is git-ignored. Under WSL,
+  `bash tools/run.sh` calls Windows node with the same arguments. Chrome comes from `CHROME` (default: the Windows
+  install path); extra Chrome switches from `CHROME_ARGS="..."`. `--uncapped` turns off display frame
   pacing for perf checks. Reading fps here: the default headless clock ticks every 17.5 ms (about 57 fps) even for an
   empty page, so 57 means "never missed a frame"; use `?debug=1` plus `--uncapped` (or `updateMs + renderMs` from
   `SL.debug.perf()`) to see real headroom. The stress sandbox runs at 170 to 250 fps uncapped on this machine.
-- `bash tools/smoke.sh [--only m1,s2] [--modes solo,coop] [--page dist/dev-me.html] [--no-build] [--no-suite]
+- `node tools/smoke.mjs [--only m1,s2] [--modes solo,coop] [--page dist/dev-me.html] [--no-suite]
   [--no-shots] [--chunk 2] [--max 900] [--boss-time 240] [--limits enemies=150,ebullets=1000]`: in-page suite (up to
-  180 s), then
-  every mission solo and co-op; table + `shots/smoke/<id>_<mode>_{10s,60s,boss,results}.png`; exit 1 on failure.
+  180 s), then every mission solo and co-op; table + `shots/smoke/<id>_<mode>_{10s,60s,boss,results}.png`; exit 1 on
+  failure. Build first (`python3 tools/build.py --no-publish`); under WSL `bash tools/smoke.sh [--no-build]` does both.
   Entity limits: enemies 150, ebullets 1000, pbullets 500, particles 2500, pickups 250, pods 30, hazards 8.
 - `python3 tools/fetch_fonts.py` regenerates `src/00_fonts.css`.
 

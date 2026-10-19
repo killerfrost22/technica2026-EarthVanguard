@@ -50,7 +50,7 @@ Firing is automatic. Hold Fire to keep shooting when auto-fire is off.
 | Action | Solo (keyboard) | Co-op Player 1 | Co-op Player 2 | Gamepad |
 |---|---|---|---|---|
 | Move | WASD or arrow keys | WASD | Arrow keys | Left stick / D-pad |
-| Fire | Space, Z or J | Space | `/` or Numpad Enter | (auto) |
+| Fire | Space, Z or J | Space | `/` or Numpad Enter | RT (or auto-fire) |
 | Bomb | X, Q or K | Q | Enter or Numpad 0 | A |
 | Skill | C, E or L | E | Right Shift or Numpad 1 | X or B |
 | Focus (slow, precise movement) | Shift | Left Shift | Right Ctrl or Numpad 2 | LB / RB |
@@ -121,7 +121,7 @@ nothing is recorded or sent.
 - **Echo:** a stealth minigame about the escape of Blue Arrow, the main character. She grew up as a test subject
   inside a sealed facility, and the experiments left her able to see with sound. With the power out, every echo she sends lights
   up the walls for a moment, but security drones hear it too. Three floors to the surface, each behind a keycard
-  door. Open from the title screen for now (no story trigger yet).
+  door. On a new save, Start plays the prologue and then Echo; it is also open from the title screen.
 - **The black hole (Mission 1):** Puff's tether snaps and he's pulled in. Inside, his memory of the first
   trial plays as a 45-second Puff's Ocean run with the Directorate watching; then the jet hauls him back out.
 - **Puff's Ocean** (unlocked by the memory or by clearing Mission 1): dodge ghost nets, oil spills, plastic bags, six-pack
@@ -131,8 +131,8 @@ nothing is recorded or sent.
   from the menu, and chase the top 10 on the leaderboard (saved on your device).
 
 **Designed, not wired into missions yet:** Mission 5, four side stories, the hangar and skill tree and the rest of
-the radio cast are written up in [`docs/GDD.md`](docs/GDD.md). Two side-story bosses (Mantis and Crucible) are built
-and can be fought in their test sandboxes, for example `?sandbox=boss:mb_mantis`.
+the radio cast are written up in [`docs/GDD.md`](docs/GDD.md). The four side-story bosses (HAILSTORM, TETHER, MANTIS
+and CRUCIBLE) are built and can be fought in their test sandboxes, for example `?sandbox=boss:mb_mantis`.
 
 ## How it's built
 
@@ -140,11 +140,15 @@ Plain JavaScript, HTML canvas and the Web Audio API, with no frameworks or libra
 uses WebGL when it's available and falls back to a 2D canvas when it isn't.
 
 ```
-src/      game source: numbered JS/CSS modules plus shell.html (the page skeleton)
-tools/    build script and headless test tools
-dist/     built game (earthvanguard.html)
-docs/     game design doc, architecture contract, API notes, screenshots
-shots/    screenshots captured by the automated tests
+src/         game source: numbered JS/CSS modules plus shell.html (the page skeleton)
+cutscenes/   story cutscene player, art and script (inlined by the build)
+narration/   voice clips (narration/audio, inlined by the build), voice cast and script
+storyline/   story reference notes
+tools/       build script and headless test tools
+dist/        built game (earthvanguard.html)
+docs/        game design doc, architecture contract, API notes, screenshots
+website/     project website (deployed to earthvanguard.us)
+shots/       screenshots written by the test tools (local output, git-ignored)
 ```
 
 To rebuild after editing anything in `src/`:
@@ -154,7 +158,19 @@ python3 tools/build.py
 ```
 
 This inlines every `src/*.css` and `src/*.js` file, in name order, into `dist/earthvanguard.html` (and into
-`dist/publish/index.html` for web hosting).
+`dist/publish/index.html`, the same page without the html/head/body wrapper). GitHub Pages serves the website at `/`
+and the game at `/play/`.
+
+To run the headless campaign checks (Node.js 22+ and Chrome required):
+
+```sh
+python3 tools/build.py --no-publish
+node tools/smoke.mjs --no-shots
+```
+
+The same smoke suite runs automatically for pull requests. It covers each mission in solo and co-op and checks
+mission completion, bounded entity counts, and browser errors. Its flags are listed at the top of `tools/smoke.mjs`.
+The tools look for Chrome at its default Windows path; elsewhere set `CHROME=/path/to/chrome`.
 
 **Developer panel:** press the `` ` `` (backquote) key in the game, or add `?dev=1` to the URL (that also adds a DEV
 button for touch screens). It jumps to any point in the story (Prologue, Echo, After Echo, Mission 1, After
@@ -166,13 +182,12 @@ tracks add, like Echo's heartbeat).
 
 Handy URL parameters for testing (add them to the end of the file URL):
 
-- `?mission=m1`: jump straight into a mission
+- `?mission=m1` (or `m2` to `m4`): jump straight into a mission. In m1 the black hole and Puff's memory arrive about
+  35 s in (autopilot and `t=` fast-forward skip the memory)
 - `?sandbox=<id>`: open a test sandbox (for example `boss:boss_suneater`, `hazard:black_hole`, `weapons`)
 - `?save=mid&screen=puff`: open Puff's Ocean with a save that has Mission 1 cleared
 - `?cutscene=intro`: play a story cutscene over the title screen (ids in `cutscenes/earth-vanguard-cutscenes/README.md`)
 - `?save=mid&screen=puff&puff=bot`: watch a bot play Puff's Ocean
-- `?mission=m1`: the black hole and Puff's memory arrive about 35 s in (autopilot and `t=` fast-forward skip the
-  memory)
 - `?mission=m4`: Sunbreak (the eclipse and Puff's trust choice come about a minute in; `&boss=1` skips to SUNEATER)
 - `?screen=echo`: open Echo (`&echo=play&sector=1` starts on a floor, `&echo=reveal` keeps every wall lit)
 - `&coop=1`: start in two-player mode

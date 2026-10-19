@@ -6,8 +6,8 @@ mix, and the music: which track plays where, and the mood values tracks react to
 
 ## API
 
-- `SL.audio.unlock()`: creates or resumes the AudioContext. Core calls it on the first pointer or key gesture; the
-  track that was asked for before then starts as soon as the context runs.
+- `SL.audio.unlock()`: creates or resumes the AudioContext. Core calls it on pointer and key gestures until the
+  context really runs (`ready` mirrors that state); the track that was asked for before then starts as soon as it does.
 - `SL.audio.sfx(id, {vol, pitch, pan, x})`: a one-shot effect; `x` (0..720) pans it. Unknown ids warn once.
 - `SL.audio.loop(id, {vol, x, pan}) -> {set({vol, pitch, x, pan}), stop(fade)}`: a continuous sound (hazard hums,
   the lance beam).
@@ -24,6 +24,8 @@ mix, and the music: which track plays where, and the mood values tracks react to
   music off, so the mic never hears it as the player).
 - `SL.audio.setVolumes({master, music, sfx})`; `ready`, `muted` (`?mute=1`), `current` (the track id), `ids()` (sfx
   and loops), `tracks()` (music).
+- `SL.audio.voiceVolume() -> 0..1`: the volume for narration `<audio>` clips (radio, cutscenes, Puff's and Echo's
+  memories), which bypass the Web Audio graph: Master, or 0 when muted.
 - `SL.audio.render(trackId, seconds, mood) -> Promise<{id, peak, rms, windows}>` (debug): renders a track offline,
   never to the speakers, for level checks. `mood` is an object or a function of the time in seconds;
   `SL.audio.lastRender` keeps the AudioBuffer.

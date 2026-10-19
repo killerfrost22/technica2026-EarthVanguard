@@ -1,4 +1,5 @@
-// Smoke suite (ARCHITECTURE 6.12). Run it through tools/smoke.sh, which builds first.
+// Smoke suite (ARCHITECTURE 6.12). Build first (python3 tools/build.py --no-publish), then run node tools/smoke.mjs
+// (tools/smoke.sh does both under WSL).
 // Every mission in SL.missions.ids(), solo and co-op, with autopilot=2&god=1&mute=1&seed=7, fast-forwarded in
 // chunks of SL.debug.sim while the real-time loop is held (SL.debug.hold). Asserts per run: no console errors or
 // exceptions, bounded entity counts, finite player positions, the director reaching the boss, the boss defeated
